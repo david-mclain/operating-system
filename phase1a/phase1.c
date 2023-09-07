@@ -96,14 +96,15 @@ void TEMP_switchTo(int pid) {
 
 void initMain() {
 
-    phase2_start_service_processes()
-    phase3_start_service_processes()
-    phase4_start_service_processes()
-    phase5_start_service_processes()
+    phase2_start_service_processes();
+    phase3_start_service_processes();
+    phase4_start_service_processes();
+    phase5_start_service_processes();
 
     // create sentinel and testcase_main, switch to testcase_main
-    
+    /*
     while (1) {
         join();
     }
+    */
 }
