@@ -33,16 +33,19 @@ int currentPID = 1;
 
 void phase1_init(void) {
     memset(processes, 0, MAXPROC * sizeof(PCB));
-    PCB init;
-
-    init.pid = currentPID;
-    init.priority = 6;
-
-    strcpy(init.processName, "init");
-    processes[currentPID++] = init;
 }
 
 void startProcesses(void) {
+
+    // Create init PCB and populate fields
+    PCB init;
+    init.pid = currentPID;
+    init.priority = 6;
+    strcpy(init.processName, "init");
+
+    USLOSS_ContextInit(&init.context, /*stack ptr*/, /*stack size*/, NULL, /*main func*/);
+
+    processes[currentPID++] = init;
 
 }
 
@@ -85,4 +88,16 @@ void TEMP_switchTo(int pid) {
 
 /* ---------- Process Functions ---------- */
 
+void init_main() {
 
+    phase2_start_service_processes()
+    phase3_start_service_processes()
+    phase4_start_service_processes()
+    phase5_start_service_processes()
+
+    // create sentinel and testcase_main, switch to testcase_main
+    
+    while (1) {
+        join();
+    }
+}
