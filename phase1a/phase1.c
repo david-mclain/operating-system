@@ -10,6 +10,10 @@ typedef struct PCB {
     int runState;  // WHY DID I PUT RUN STATE???
     int priority;
 
+    PCB* parent;
+    PCB* child;
+    PCB* sibling;
+
     char processName[MAXNAME];
 
     USLOSS_Context context;
@@ -25,8 +29,14 @@ int currentPID = 1;
 
 void phase1_init(void) {
     PCB init;
+
     init.pid = currentPID;
     init.priority = 6;
+
+    init->parent = NULL;
+    init->child = NULL;
+    init->sibling = NULL;
+
     strcpy(init.processName, "init");
     processes[currentPID++] = init;
 }
