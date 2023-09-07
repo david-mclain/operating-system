@@ -1,10 +1,11 @@
-#include "phase1.h"
-#include <stdio.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-// NEED A USLOSSSCONTEXT STRUCT, STORES STATE OF PROCESS
+#include "phase1.h"
 
+// NEED A USLOSSSCONTEXT STRUCT, STORES STATE OF PROCESS
 typedef struct PCB {
     int pid;
     int runState;  // WHY DID I PUT RUN STATE???
@@ -27,26 +28,31 @@ PCB processes[MAXPROC];
 
 int currentPID = 1;
 
-// ContextSwitch(old, new);
-// old is what it was, new is what it currently is
-// WHEN SWITCHING CONTEXTS MAKE SURE TO SAVE STATE
+/* ---------- Prototypes ---------- */
+
+void initMain();
+
+
+
+/* ---------- Phase 1a Functions ---------- */
 
 void phase1_init(void) {
     memset(processes, 0, MAXPROC * sizeof(PCB));
 }
 
 void startProcesses(void) {
-
     // Create init PCB and populate fields
     PCB init;
+    processes[currentPID++] = init;
+
     init.pid = currentPID;
     init.priority = 6;
     strcpy(init.processName, "init");
 
-    USLOSS_ContextInit(&init.context, /*stack ptr*/, /*stack size*/, NULL, /*main func*/);
-
-    processes[currentPID++] = init;
-
+    // allocate stack, initialize context, and context switch to init
+    void* stackMem = malloc(USLOSS_MIN_STACK);
+    USLOSS_ContextInit(&init.context, stackMem, USLOSS_MIN_STACK, NULL, &initMain);
+    USLOSS_ContextSwitch(NULL, &init.context);
 }
 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
@@ -88,7 +94,7 @@ void TEMP_switchTo(int pid) {
 
 /* ---------- Process Functions ---------- */
 
-void init_main() {
+void initMain() {
 
     phase2_start_service_processes()
     phase3_start_service_processes()
