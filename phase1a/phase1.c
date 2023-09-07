@@ -42,11 +42,10 @@ void phase1_init(void) {
 void startProcesses(void) {
     // Create init PCB and populate fields
     PCB init;
-    processes[currentPID++] = init;
-
     init.pid = currentPID;
     init.priority = 6;
     strcpy(init.processName, "init");
+    processes[currentPID++] = init;
 
     // allocate stack, initialize context, and context switch to init
     void* stackMem = malloc(USLOSS_MIN_STACK);
