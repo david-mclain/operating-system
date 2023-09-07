@@ -1,8 +1,8 @@
 #include "phase1.h"
+#include <stdio.h>
 #include <stddef.h>
 #include <string.h>
 
-// GOOGLE MEMSET FOR WIPING BIG DATA STRUCTURE
 // NEED A USLOSSSCONTEXT STRUCT, STORES STATE OF PROCESS
 
 typedef struct PCB {
@@ -10,9 +10,13 @@ typedef struct PCB {
     int runState;  // WHY DID I PUT RUN STATE???
     int priority;
 
-    PCB* parent;
-    PCB* child;
-    PCB* sibling;
+    char isDead;
+    char isForked;
+
+    struct PCB* parent;
+    struct PCB* child;
+    struct PCB* prevSibling;
+    struct PCB* nextSibling;
 
     char processName[MAXNAME];
 
@@ -28,17 +32,18 @@ int currentPID = 1;
 // WHEN SWITCHING CONTEXTS MAKE SURE TO SAVE STATE
 
 void phase1_init(void) {
+    memset(processes, 0, MAXPROC * sizeof(PCB));
     PCB init;
 
     init.pid = currentPID;
     init.priority = 6;
 
-    init->parent = NULL;
-    init->child = NULL;
-    init->sibling = NULL;
-
     strcpy(init.processName, "init");
     processes[currentPID++] = init;
+}
+
+void startProcesses(void) {
+
 }
 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
@@ -70,10 +75,6 @@ int getpid(void) {
 }
 
 void dumpProcesses(void) {
-
-}
-
-void startProcesses(void) {
 
 }
 
