@@ -13,13 +13,12 @@ typedef struct PCB {
 
     char isDead;
     char isForked;
+    char processName[MAXNAME];
 
     struct PCB* parent;
     struct PCB* child;
     struct PCB* prevSibling;
     struct PCB* nextSibling;
-
-    char processName[MAXNAME];
 
     USLOSS_Context context;
 } PCB;
