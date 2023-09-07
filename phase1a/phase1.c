@@ -80,3 +80,8 @@ void startProcesses(void) {
 void TEMP_switchTo(int pid) {
 
 }
+
+
+/* ---------- Process Functions ---------- */
+
+
