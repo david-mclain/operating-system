@@ -12,7 +12,7 @@ typedef struct PCB {
     int priority;
 
     char isDead;
-    char isForked;
+    char isAllocated;
     char processName[MAXNAME];
 
     struct PCB* parent;
@@ -24,6 +24,7 @@ typedef struct PCB {
 } PCB;
 
 PCB processes[MAXPROC];
+PCB* currentProc;
 
 int currentPID = 1;
 
@@ -44,6 +45,7 @@ void startProcesses(void) {
     PCB init;
     init.pid = currentPID;
     init.priority = 6;
+    init.isAllocated = 1;
     strcpy(init.processName, "init");
     processes[currentPID++] = init;
 
@@ -66,6 +68,25 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     if (strlen(arg) > MAXNAME) {
         return -1;
     }
+    PCB new;
+    int i = 0;
+    for (; i < MAXPROC && processes[currentPID % MAXPROC].isAllocated; i++) {
+        currentPID++;
+    }
+    if (i == MAXPROC) {/*DO SOMETHING*/}
+    new.pid = currentPID;
+    new.priority = priority;
+    new.isAllocated = 1;
+    strcpy(new.processName, name);
+
+    void trampoline() {
+        (*func)(arg);
+    }
+
+    // allocate stack, initialize context, and context switch to init
+    void* stackMem = malloc(stacksize);
+    USLOSS_ContextInit(&new.context, stackMem, stacksize, NULL, &trampoline);
+    
     return 0;
 }
 
@@ -88,7 +109,6 @@ void dumpProcesses(void) {
 void TEMP_switchTo(int pid) {
 
 }
-
 
 /* ---------- Process Functions ---------- */
 
