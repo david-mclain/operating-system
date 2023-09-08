@@ -49,10 +49,13 @@ void startProcesses(void) {
     strcpy(init.processName, "init");
     processes[currentPID++] = init;
 
+    // Set init as the current running process
+    currentProc = &init;    // maybe move later
+
     // allocate stack, initialize context, and context switch to init
     void* stackMem = malloc(USLOSS_MIN_STACK);
     USLOSS_ContextInit(&init.context, stackMem, USLOSS_MIN_STACK, NULL, &initMain);
-    USLOSS_ContextSwitch(NULL, &init.context);
+    USLOSS_ContextSwitch(NULL, &init.context); // call dispatcher here for 1b
 }
 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
@@ -124,7 +127,7 @@ void initMain() {
     char test[] = "testcase_main";
     int sentinelPid = fork1(sen, &sentinelMain, NULL, USLOSS_MIN_STACK, 7);           // stack size?? how to choose
     int testcaseMainPid = fork1(test, &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
-    USLOSS_ContextSwitch()
+    TEMP_switchTo(testcaseMainPid);     // call dispatcher here in 1b
 
     /*
     while (1) {
