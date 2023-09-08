@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "phase1.h"
 
 // NEED A USLOSSSCONTEXT STRUCT, STORES STATE OF PROCESS
@@ -25,12 +24,13 @@ typedef struct PCB {
 
 PCB processes[MAXPROC];
 PCB* currentProc;
-
 int currentPID = 1;
 
 /* ---------- Prototypes ---------- */
 
 void initMain();
+int sentinelMain();
+int testcaseMainMain();
 
 
 
@@ -122,9 +122,30 @@ void initMain() {
     phase5_start_service_processes();
 
     // create sentinel and testcase_main, switch to testcase_main
+    char sen[] = "sentinel";            // maybe change l8r, enforce length or smth
+    char test[] = "testcase_main";
+    int sentinelPid = fork1(sen, &sentinelMain, NULL, USLOSS_MIN_STACK, 7);           // stack size?? how to choose
+    int testcaseMainPid = fork1(test, &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
+    USLOSS_ContextSwitch()
+
     /*
     while (1) {
         join();
     }
     */
 }
+
+int sentinelMain(char* arg) {
+    return 0;
+}
+
+int testcaseMainMain(char* arg) {
+    int test_return = testcase_main();
+    if (test_return != 0) { 
+        printf("testcase_main returned with a nonzero error code: %d\n", test_return);
+    }
+    USLOSS_Halt(test_return); // pass zero? ask about this
+    return 0;
+}
+
+
