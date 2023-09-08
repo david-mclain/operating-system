@@ -76,7 +76,9 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     for (; i < MAXPROC && processes[currentPID % MAXPROC].isAllocated; i++) {
         currentPID++;
     }
-    if (i == MAXPROC) {/*DO SOMETHING*/}
+    if (i == MAXPROC) {
+        return -1;
+    }
     new.pid = currentPID;
     new.priority = priority;
     new.isAllocated = 1;
