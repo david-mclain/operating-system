@@ -95,23 +95,23 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     return 0;
 }
 
-int join(int *status) {
+int join(int *status) {     //miles
     return 0;
 }
 
-void quit(int status, int switchToPid) {
+void quit(int status, int switchToPid) {    // david
     while(1){}
 }
 
-int getpid(void) {
+int getpid(void) {      // miles
     return 0;
 }
 
-void dumpProcesses(void) {
+void dumpProcesses(void) {         // david
 
 }
 
-void TEMP_switchTo(int pid) {
+void TEMP_switchTo(int pid) {       // miles
 
 }
 
@@ -138,7 +138,7 @@ void initMain() {
     */
 }
 
-int sentinelMain(char* arg) {
+int sentinelMain(char* arg) {           // david
     return 0;
 }
 
