@@ -7,8 +7,8 @@
 // NEED A USLOSSSCONTEXT STRUCT, STORES STATE OF PROCESS
 typedef struct PCB {
     int pid;
-    int runState;  // WHY DID I PUT RUN STATE???
     int priority;
+    int status;
 
     char isDead;
     char isAllocated;
@@ -107,8 +107,19 @@ int getpid(void) {      // miles
     return 0;
 }
 
-void dumpProcesses(void) {         // david
-
+void dumpProcesses(void) {
+    for (int i = 0; i < MAXPROC; i++) {
+        if (processes[i].isAllocated) {
+            PCB cur = processes[i];
+            printf("Process Name: %s", cur.processName);
+            printf("Process ID:   %d", cur.pid);
+            if (cur.parent != NULL) {
+                printf("Parent PID:   %d", cur.parent->pid);
+            }
+            printf("Priority:     %d", cur.priority);
+            printf("Runnable:     %d", cur.status);
+        }
+    }
 }
 
 void TEMP_switchTo(int pid) {       // miles
@@ -150,5 +161,3 @@ int testcaseMainMain(char* arg) {
     USLOSS_Halt(test_return); // pass zero? ask about this
     return 0;
 }
-
-
