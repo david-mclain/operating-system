@@ -41,7 +41,24 @@ int testcaseMainMain();
 /* ---------- Phase 1a Functions ---------- */
 // MEMSET NOT WORKING PROPERLY, NEED TO FIX
 void phase1_init(void) {
-    memset(processes, 0, MAXPROC * sizeof(PCB));
+    // TEMPORARY UNTIL FIGURE OUT MEMSET????
+    for (int i = 0; i < MAXPROC; i++) {
+        processes[i].pid = 0;
+        processes[i].priority = 0;
+        processes[i].status = 0;
+        processes[i].isAllocated = 0;
+        processes[i].isDead = 0;
+        memset(processes[i].args, 0, sizeof(char) * MAXARG);
+        memset(processes[i].processName, 0, sizeof(char) * MAXNAME);
+        processes[i].parent = NULL;
+        processes[i].child = NULL;
+        processes[i].prevSibling = NULL;
+        processes[i].nextSibling = NULL;
+        processes[i].context = (USLOSS_Context){NULL, 0, 0}; 
+        processes[i].processMain = NULL;
+        processes[i].stackMem = NULL;
+    }
+    //memset(processes, 0, sizeof(processes));
 }
 
 void startProcesses(void) {
@@ -55,7 +72,6 @@ void startProcesses(void) {
 
     // Set init as the current running process
     currentProc = &init;    // maybe move later
-    printf("current proc: %p\n", currentProc);
     // allocate stack, initialize context, and context switch to init
     void* stackMem = malloc(USLOSS_MIN_STACK);
     USLOSS_ContextInit(&init.context, stackMem, USLOSS_MIN_STACK, NULL, &initMain);
@@ -70,7 +86,6 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     if (priority < 1 || priority > 7 || func == NULL || name == NULL || strlen(name) > MAXNAME) {
         return -1;
     }
-    printf("here1\n");
     PCB new;
     int i = 0;
     for (; i < MAXPROC && processes[currentPID % MAXPROC].isAllocated; i++) {
@@ -83,22 +98,17 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     new.priority = priority;
     new.isAllocated = 1;
     strcpy(new.processName, name);
-    printf("here2\n");
     new.parent = currentProc;
-    printf("parent: %p\n", new.parent);
-    /*if (currentProc->child != NULL) {
-        printf("in if\n");
+    if (currentProc->child != NULL) {
         new.nextSibling = currentProc->child;
-        printf("sibling: %p\n", new.nextSibling);
         currentProc->child->prevSibling = &new;
-    }*/
-    printf("here3\n");
+    }
     // allocate stack, initialize context, and context switch to init
     void* stackMem = malloc(stacksize);
     new.stackMem = stackMem;
     USLOSS_ContextInit(&new.context, stackMem, stacksize, NULL, &trampoline);
     processes[new.pid % MAXPROC] = new;    
-    printf("returning new pid: %d\n", new.pid);
+    printf("status of new process: %d\n", new.status);
     return new.pid;
 }
 
@@ -118,13 +128,13 @@ void dumpProcesses(void) {
     for (int i = 0; i < MAXPROC; i++) {
         if (processes[i].isAllocated) {
             PCB cur = processes[i];
-            printf("Process Name: %s", cur.processName);
-            printf("Process ID:   %d", cur.pid);
+            printf("Process Name: %s\n", cur.processName);
+            printf("Process ID:   %d\n", cur.pid);
             if (cur.parent != NULL) {
-                printf("Parent PID:   %d", cur.parent->pid);
+                printf("Parent PID:   %d\n", cur.parent->pid);
             }
-            printf("Priority:     %d", cur.priority);
-            printf("Runnable:     %d", cur.status);
+            printf("Priority:     %d\n", cur.priority);
+            printf("Runnable:     %d\n", cur.status);
         }
     }
 }
@@ -151,7 +161,7 @@ void initMain() {
     int sentinelPid = fork1(sen, &sentinelMain, NULL, USLOSS_MIN_STACK, 7);           // stack size?? how to choose
     int testcaseMainPid = fork1(test, &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
     TEMP_switchTo(testcaseMainPid);     // call dispatcher here in 1b
-
+    dumpProcesses();
     /*
     while (1) {
         join();
