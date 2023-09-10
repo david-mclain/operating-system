@@ -39,7 +39,7 @@ int testcaseMainMain();
 
 
 /* ---------- Phase 1a Functions ---------- */
-
+// MEMSET NOT WORKING PROPERLY, NEED TO FIX
 void phase1_init(void) {
     memset(processes, 0, MAXPROC * sizeof(PCB));
 }
@@ -55,7 +55,7 @@ void startProcesses(void) {
 
     // Set init as the current running process
     currentProc = &init;    // maybe move later
-
+    printf("current proc: %p\n", currentProc);
     // allocate stack, initialize context, and context switch to init
     void* stackMem = malloc(USLOSS_MIN_STACK);
     USLOSS_ContextInit(&init.context, stackMem, USLOSS_MIN_STACK, NULL, &initMain);
@@ -63,13 +63,14 @@ void startProcesses(void) {
 }
 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
+    printf("forking process %s\n", name);
     if (stacksize < USLOSS_MIN_STACK) {
         return -2;
     }
     if (priority < 1 || priority > 7 || func == NULL || name == NULL || strlen(name) > MAXNAME) {
         return -1;
     }
-
+    printf("here1\n");
     PCB new;
     int i = 0;
     for (; i < MAXPROC && processes[currentPID % MAXPROC].isAllocated; i++) {
@@ -82,18 +83,22 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     new.priority = priority;
     new.isAllocated = 1;
     strcpy(new.processName, name);
-    
+    printf("here2\n");
     new.parent = currentProc;
-    if (currentProc->child != NULL) {
+    printf("parent: %p\n", new.parent);
+    /*if (currentProc->child != NULL) {
+        printf("in if\n");
         new.nextSibling = currentProc->child;
+        printf("sibling: %p\n", new.nextSibling);
         currentProc->child->prevSibling = &new;
-    }
-    
+    }*/
+    printf("here3\n");
     // allocate stack, initialize context, and context switch to init
     void* stackMem = malloc(stacksize);
     new.stackMem = stackMem;
     USLOSS_ContextInit(&new.context, stackMem, stacksize, NULL, &trampoline);
     processes[new.pid % MAXPROC] = new;    
+    printf("returning new pid: %d\n", new.pid);
     return new.pid;
 }
 
@@ -130,13 +135,11 @@ void TEMP_switchTo(int pid) {       // miles
 
 void trampoline() {
     (*currentProc->processMain)(currentProc->args);
-    if ()
 }
 
 /* ---------- Process Functions ---------- */
 
 void initMain() {
-
     phase2_start_service_processes();
     phase3_start_service_processes();
     phase4_start_service_processes();
