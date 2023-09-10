@@ -4,14 +4,14 @@
 #include <string.h>
 #include "phase1.h"
 
-// NEED A USLOSSSCONTEXT STRUCT, STORES STATE OF PROCESS
 typedef struct PCB {
     int pid;
     int priority;
     int status;
 
-    char isDead;
     char isAllocated;
+    char isDead;
+    char args[MAXARG];
     char processName[MAXNAME];
 
     struct PCB* parent;
@@ -20,6 +20,10 @@ typedef struct PCB {
     struct PCB* nextSibling;
 
     USLOSS_Context context;
+
+    int (*processMain)(char*);
+
+    void* stackMem;
 } PCB;
 
 PCB processes[MAXPROC];
@@ -28,10 +32,10 @@ int currentPID = 1;
 
 /* ---------- Prototypes ---------- */
 
+void trampoline();
 void initMain();
 int sentinelMain();
 int testcaseMainMain();
-
 
 
 /* ---------- Phase 1a Functions ---------- */
@@ -62,15 +66,10 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     if (stacksize < USLOSS_MIN_STACK) {
         return -2;
     }
-    if (priority < 1 || priority > 7) {
+    if (priority < 1 || priority > 7 || func == NULL || name == NULL || strlen(name) > MAXNAME) {
         return -1;
     }
-    if (func == NULL || arg == NULL) {
-        return -1;
-    }
-    if (strlen(arg) > MAXNAME) {
-        return -1;
-    }
+
     PCB new;
     int i = 0;
     for (; i < MAXPROC && processes[currentPID % MAXPROC].isAllocated; i++) {
@@ -83,16 +82,19 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     new.priority = priority;
     new.isAllocated = 1;
     strcpy(new.processName, name);
-
-    void trampoline() {
-        (*func)(arg);
+    
+    new.parent = currentProc;
+    if (currentProc->child != NULL) {
+        new.nextSibling = currentProc->child;
+        currentProc->child->prevSibling = &new;
     }
-
+    
     // allocate stack, initialize context, and context switch to init
     void* stackMem = malloc(stacksize);
+    new.stackMem = stackMem;
     USLOSS_ContextInit(&new.context, stackMem, stacksize, NULL, &trampoline);
-    
-    return 0;
+    processes[new.pid % MAXPROC] = new;    
+    return new.pid;
 }
 
 int join(int *status) {     //miles
@@ -123,7 +125,12 @@ void dumpProcesses(void) {
 }
 
 void TEMP_switchTo(int pid) {       // miles
+    
+}
 
+void trampoline() {
+    (*currentProc->processMain)(currentProc->args);
+    if ()
 }
 
 /* ---------- Process Functions ---------- */
