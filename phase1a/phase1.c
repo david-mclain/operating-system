@@ -110,8 +110,8 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     if (currentProc->child != NULL) {
         new->nextSibling = currentProc->child;
         currentProc->child->prevSibling = &new;
-        currentProc->child = &new;
     }
+    currentProc->child = new;
 
     new->processMain = func;
     if (arg != NULL) {
@@ -121,12 +121,14 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     void* stackMem = malloc(stacksize);
     new->stackMem = stackMem;
     USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
+    
+    
+
     return new->pid;
 }
 
 int join(int *status) {
-    if (currentProc->child == NULL) { 
-        dumpProcesses(); return -2; } // current proc. has no unjoined children
+    if (currentProc->child == NULL) { return -2; } // current proc. has no unjoined children
     else {
         PCB* currChild = currentProc->child;
         while (currChild) {

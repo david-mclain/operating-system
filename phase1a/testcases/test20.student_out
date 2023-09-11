@@ -2,3 +2,310 @@ phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: Attempt to create MAXPROC+2 processes (without calling join() on any of them).  This will work many times but eventually fail because all of the procTable slots are full.  We will only print out info about the failed ones.
+testcase_main(): start 52 processes
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+testcase_main(): fork1() failed: i=47, pid is -1.
+testcase_main(): fork1() failed: i=48, pid is -1.
+testcase_main(): fork1() failed: i=49, pid is -1.
+testcase_main(): fork1() failed: i=50, pid is -1.
+testcase_main(): fork1() failed: i=51, pid is -1.
+Process Name: XXp1
+Process ID:   50
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: init
+Process ID:   1
+Priority:     6
+Runnable:     0
+Process Name: sentinel
+Process ID:   2
+Parent PID:   1
+Priority:     7
+Runnable:     0
+Process Name: testcase_main
+Process ID:   3
+Parent PID:   1
+Child PID:    50
+Priority:     3
+Runnable:     0
+Process Name: XXp1
+Process ID:   4
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   5
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   6
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   7
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   8
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   9
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   10
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   11
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   12
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   13
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   14
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   15
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   16
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   17
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   18
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   19
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   20
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   21
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   22
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   23
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   24
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   25
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   26
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   27
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   28
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   29
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   30
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   31
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   32
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   33
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   34
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   35
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   36
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   37
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   38
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   39
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   40
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   41
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   42
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   43
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   44
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   45
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   46
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   47
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   48
+Parent PID:   3
+Priority:     2
+Runnable:     2
+Process Name: XXp1
+Process ID:   49
+Parent PID:   3
+Priority:     2
+Runnable:     2
+testcase_main(): Calling join() on 52 processes.  The number of 'failed' calls here should be the same as the number of 'failed' fork1() calls.
+double free or corruption (top)
