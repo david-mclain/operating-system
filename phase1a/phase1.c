@@ -148,7 +148,7 @@ void dumpProcesses(void) {
 
 void TEMP_switchTo(int pid) {
     PCB* switchTo = &processes[pid % MAXPROC];
-    USLOSS_Context* prev_context = &(currentProc->context)
+    USLOSS_Context* prev_context = &(currentProc->context);
     currentProc = switchTo;
     USLOSS_ContextSwitch(prev_context, &(switchTo->context));
 }
