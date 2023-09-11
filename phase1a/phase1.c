@@ -85,7 +85,7 @@ void startProcesses(void) {
 }
 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
-    printf("forking process %s\n", name);
+    USLOSS_Console("forking process %s\n", name);
     if (stacksize < USLOSS_MIN_STACK) {
         return -2;
     }
@@ -108,18 +108,31 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     if (currentProc->child != NULL) {
         new.nextSibling = currentProc->child;
         currentProc->child->prevSibling = &new;
+        currentProc->child = &new;
     }
     // allocate stack, initialize context, and context switch to init
     void* stackMem = malloc(stacksize);
     new.stackMem = stackMem;
     USLOSS_ContextInit(&new.context, stackMem, stacksize, NULL, &trampoline);
     processes[new.pid % MAXPROC] = new;    
-    printf("status of new process: %d\n", new.status);
+    USLOSS_Console("status of new process: %d\n", new.status);
     return new.pid;
 }
 
-int join(int *status) {     //miles
-    return 0;
+int join(int *status) {
+    if (!currentProc->child) { return -2 } // current proc. has no unjoined children
+    else {
+        PCB* currChild = currentProc->child;
+        while (currChild) {
+            if (currChild->isDead) {
+                // collect status (and clean up child pcb entry?)
+                return currChild->pid;
+            }
+            currChild = currChild->nextSibling;
+        }
+
+        return 0; // in 1b block here, but shouldn't ever get here in 1a
+    }
 }
 
 void quit(int status, int switchToPid) {    // david
@@ -135,13 +148,13 @@ void dumpProcesses(void) {
     for (int i = 0; i < MAXPROC; i++) {
         if (processes[i].isAllocated) {
             PCB cur = processes[i];
-            printf("Process Name: %s\n", cur.processName);
-            printf("Process ID:   %d\n", cur.pid);
+            USLOSS_Console("Process Name: %s\n", cur.processName);
+            USLOSS_Console("Process ID:   %d\n", cur.pid);
             if (cur.parent != NULL) {
-                printf("Parent PID:   %d\n", cur.parent->pid);
+                USLOSS_Console("Parent PID:   %d\n", cur.parent->pid);
             }
-            printf("Priority:     %d\n", cur.priority);
-            printf("Runnable:     %d\n", cur.status);
+            USLOSS_Console("Priority:     %d\n", cur.priority);
+            USLOSS_Console("Runnable:     %d\n", cur.status);
         }
     }
 }
@@ -170,8 +183,8 @@ void initMain() {
     char test[] = "testcase_main";
     int sentinelPid = fork1(sen, &sentinelMain, NULL, USLOSS_MIN_STACK, 7);           // stack size?? how to choose
     int testcaseMainPid = fork1(test, &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
-    TEMP_switchTo(testcaseMainPid);     // call dispatcher here in 1b
     dumpProcesses();
+    TEMP_switchTo(testcaseMainPid);     // call dispatcher here in 1b
     /*
     while (1) {
         join();
