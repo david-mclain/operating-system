@@ -133,10 +133,24 @@ int join(int *status) {
         PCB* currChild = currentProc->child;
         while (currChild) {
             if (currChild->isDead) {
-                // collect status and clean up child pcb entry
+
+                // collect status and 
                 *status = currChild->status; // run status vs. exit status?
+                
+                // change parent's child pointer to next child (if any)
+                currentProc->child = currChild->nextSibling; 
+                if (currentProc->child != NULL) {
+                    currentProc->child->prevSibling = NULL;
+                }
+
+                // free up child's stack and clear pointers
                 free(currChild->stackMem);
                 currChild->isAllocated = 0;
+                currChild->parent = NULL;
+                currChild->prevSibling = NULL;
+                currChild->nextSibling = NULL;
+                currChild->child = NULL;
+
                 return currChild->pid;
             }
             currChild = currChild->nextSibling;
