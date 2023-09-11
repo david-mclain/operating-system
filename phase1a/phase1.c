@@ -9,6 +9,7 @@ typedef struct PCB {
     int priority;
     int status;
 
+    char args[MAXARG];
     char processName[MAXNAME];
     char isAllocated;
     char isDead;
@@ -21,7 +22,6 @@ typedef struct PCB {
     USLOSS_Context context;
 
     int (*processMain)(char*);
-    char arg[MAXARG];
 
     void* stackMem;
 } PCB;
@@ -51,7 +51,7 @@ void phase1_init(void) {
         processes[i].status = 0;
         processes[i].isAllocated = 0;
         processes[i].isDead = 0;
-        memset(processes[i].arg, 0, sizeof(char) * MAXARG);
+        memset(processes[i].args, 0, sizeof(char) * MAXARG);
         memset(processes[i].processName, 0, sizeof(char) * MAXNAME);
         processes[i].parent = NULL;
         processes[i].child = NULL;
@@ -86,14 +86,13 @@ void startProcesses(void) {
 }
 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
-    USLOSS_Console("forking process %s\n", name);
     if (stacksize < USLOSS_MIN_STACK) {
         return -2;
     }
     if (priority < 1 || priority > 5 || func == NULL || name == NULL || strlen(name) > MAXNAME) {
         return -1;
     }
-    PCB new;
+
     int i = 0;
     for (; i < MAXPROC && processes[currentPID % MAXPROC].isAllocated; i++) {
         currentPID++;
@@ -101,6 +100,8 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     if (i == MAXPROC) {
         return -1;
     }
+
+    PCB new;
     new.pid = currentPID;
     new.priority = priority;
     new.isAllocated = 1;
@@ -111,17 +112,21 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
         currentProc->child->prevSibling = &new;
         currentProc->child = &new;
     }
+
+    new.processMain = func;
+    if (arg != NULL) {
+        strcpy(new.args, arg);
+    }
     // allocate stack, initialize context, and context switch to init
     void* stackMem = malloc(stacksize);
     new.stackMem = stackMem;
     USLOSS_ContextInit(&new.context, stackMem, stacksize, NULL, &trampoline);
     processes[new.pid % MAXPROC] = new;    
-    USLOSS_Console("status of %s: %d\n", new.processName, new.status);
     return new.pid;
 }
 
 int join(int *status) {
-    if (!currentProc->child) { return -2 } // current proc. has no unjoined children
+    if (!currentProc->child) { return -2; } // current proc. has no unjoined children
     else {
         PCB* currChild = currentProc->child;
         while (currChild) {
@@ -140,6 +145,7 @@ int join(int *status) {
 }
 
 void quit(int status, int switchToPid) {    // david
+    printf("qutting\n");
     while(1){}
 }
 
@@ -171,7 +177,7 @@ void TEMP_switchTo(int pid) {
 }
 
 void trampoline() {
-    (*currentProc->processMain)(currentProc->arg);
+    (*currentProc->processMain)(currentProc->args);
 }
 
 /* ---------- Process Functions ---------- */
@@ -188,7 +194,6 @@ void initMain() {
     int sentinelPid = startSentinel();
     int testcaseMainPid = fork1(test, &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
 
-    dumpProcesses();
     TEMP_switchTo(testcaseMainPid);     // call dispatcher here in 1b
     /*
     while (1) {
