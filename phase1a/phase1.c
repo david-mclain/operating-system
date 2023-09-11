@@ -124,7 +124,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     new->stackMem = stackMem;
     USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
     
-    
+    dumpProcesses();   
 
     return new->pid;
 }
