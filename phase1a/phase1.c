@@ -145,8 +145,8 @@ int join(int *status) {
 }
 
 void quit(int status, int switchToPid) {    // david
-    printf("qutting\n");
-    while(1){}
+    currentProc->status = status;
+    TEMP_switchTo(switchToPid);
 }
 
 int getpid(void) {
