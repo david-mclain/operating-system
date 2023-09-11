@@ -101,32 +101,32 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
         return -1;
     }
 
-    PCB new;
-    new.pid = currentPID;
-    new.priority = priority;
-    new.isAllocated = 1;
-    strcpy(new.processName, name);
-    new.parent = currentProc;
+    PCB* new = &processes[currentPID % MAXPROC];
+    new->pid = currentPID;
+    new->priority = priority;
+    new->isAllocated = 1;
+    strcpy(new->processName, name);
+    new->parent = currentProc;
     if (currentProc->child != NULL) {
-        new.nextSibling = currentProc->child;
+        new->nextSibling = currentProc->child;
         currentProc->child->prevSibling = &new;
         currentProc->child = &new;
     }
 
-    new.processMain = func;
+    new->processMain = func;
     if (arg != NULL) {
-        strcpy(new.args, arg);
+        strcpy(new->args, arg);
     }
     // allocate stack, initialize context, and context switch to init
     void* stackMem = malloc(stacksize);
-    new.stackMem = stackMem;
-    USLOSS_ContextInit(&new.context, stackMem, stacksize, NULL, &trampoline);
-    processes[new.pid % MAXPROC] = new;    
-    return new.pid;
+    new->stackMem = stackMem;
+    USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
+    return new->pid;
 }
 
 int join(int *status) {
-    if (!currentProc->child) { return -2; } // current proc. has no unjoined children
+    if (currentProc->child == NULL) { 
+        dumpProcesses(); return -2; } // current proc. has no unjoined children
     else {
         PCB* currChild = currentProc->child;
         while (currChild) {
@@ -162,6 +162,9 @@ void dumpProcesses(void) {
             USLOSS_Console("Process ID:   %d\n", cur.pid);
             if (cur.parent != NULL) {
                 USLOSS_Console("Parent PID:   %d\n", cur.parent->pid);
+            }
+            if (cur.child != NULL) {
+                USLOSS_Console("Child PID:    %d\n", cur.child->pid);
             }
             USLOSS_Console("Priority:     %d\n", cur.priority);
             USLOSS_Console("Runnable:     %d\n", cur.status);
