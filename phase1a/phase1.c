@@ -200,6 +200,7 @@ void initMain() {
     int sentinelPid = startSentinel();
     int testcaseMainPid = fork1(test, &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
 
+    USLOSS_Console("Phase 1A TEMPORARY HACK: init() manually switching to testcase_main() after using fork1() to create it.\n");
     TEMP_switchTo(testcaseMainPid);     // call dispatcher here in 1b
     /*
     while (1) {
@@ -234,6 +235,7 @@ int sentinelMain(char* arg) {           // david
 
 int testcaseMainMain(char* arg) {
     int test_return = testcase_main();
+    USLOSS_Console("Phase 1A TEMPORARY HACK: testcase_main() returned, simulation will now halt.\n");
     if (test_return != 0) { 
         USLOSS_Console("testcase_main returned with a nonzero error code: %d\n", test_return); // do this for all printouts
     }
