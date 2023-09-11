@@ -13,13 +13,13 @@ XXp2(): terminating!
 XXp1(): fork() rc=5
 Process Name: init
 Process ID:   1
+Child PID:    3
 Priority:     6
 Runnable:     0
 Process Name: sentinel
 Process ID:   2
 Parent PID:   1
-Child PID:    544105832
-Priority:     7
+Priority:     3
 Runnable:     0
 Process Name: testcase_main
 Process ID:   3

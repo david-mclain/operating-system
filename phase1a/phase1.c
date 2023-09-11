@@ -128,20 +128,33 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
 }
 
 int join(int *status) {
+    //dumpProcesses();
     if (currentProc->child == NULL) { return -2; } // current proc. has no unjoined children
     else {
         PCB* currChild = currentProc->child;
         while (currChild) {
             if (currChild->isDead) {
 
-                // collect status and 
+                // collect status
                 *status = currChild->status; // run status vs. exit status?
+
+
+                // remove child from the linked list
                 
-                // change parent's child pointer to next child (if any)
-                currentProc->child = currChild->nextSibling; 
-                if (currentProc->child != NULL) {
-                    currentProc->child->prevSibling = NULL;
+                if (currChild->prevSibling != NULL){    // change left sibling's ptr
+                    currChild->prevSibling->nextSibling = currChild->nextSibling;
                 }
+                else {  // change parent's child ptr
+                    if (currChild->nextSibling != NULL) {
+                        currChild->nextSibling->prevSibling = NULL;
+                    }
+                    currentProc->child = currChild->nextSibling; 
+                }
+
+                if (currChild->nextSibling != NULL) {   // change right sibling's ptr
+                    currChild->nextSibling->prevSibling = currChild->prevSibling;
+                } 
+                
 
                 // free up child's stack and clear pointers
                 free(currChild->stackMem);

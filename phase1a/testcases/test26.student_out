@@ -18,4 +18,8 @@ testcase_main(): after fork of child 5
 testcase_main(): performing first join
 testcase_main(): exit status for child 5 is 2
 testcase_main(): performing second join
-double free or corruption (top)
+testcase_main(): exit status for child 4 is 1
+testcase_main(): performing third join, have no unjoined children
+testcase_main(): value returned by join is -2 expected value was -2
+Phase 1A TEMPORARY HACK: testcase_main() returned, simulation will now halt.
+TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0
