@@ -35,6 +35,7 @@ int currentPID = 1;     // next available PID
 void trampoline();
 void initMain();
 int sentinelMain();
+int startSentinel();
 int testcaseMainMain();
 
 
@@ -89,7 +90,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     if (stacksize < USLOSS_MIN_STACK) {
         return -2;
     }
-    if (priority < 1 || priority > 7 || func == NULL || name == NULL || strlen(name) > MAXNAME) {
+    if (priority < 1 || priority > 5 || func == NULL || name == NULL || strlen(name) > MAXNAME) {
         return -1;
     }
     PCB new;
@@ -115,7 +116,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     new.stackMem = stackMem;
     USLOSS_ContextInit(&new.context, stackMem, stacksize, NULL, &trampoline);
     processes[new.pid % MAXPROC] = new;    
-    USLOSS_Console("status of new process: %d\n", new.status);
+    USLOSS_Console("status of %s: %d\n", new.processName, new.status);
     return new.pid;
 }
 
@@ -163,7 +164,7 @@ void TEMP_switchTo(int pid) {
     PCB* switchTo = &processes[pid % MAXPROC];
     USLOSS_Context* prev_context = &(currentProc->context);
     currentProc = switchTo;
-    USLOSS_ContextSwitch(prev_context, &(switchTo->context));
+    USLOSS_ContextSwitch(prev_context, &(switchTo->context)); // ERROR HERE GETTING SEG FAULT
 }
 
 void trampoline() {
@@ -181,8 +182,9 @@ void initMain() {
     // create sentinel and testcase_main, switch to testcase_main
     char sen[] = "sentinel";            // maybe change l8r, enforce length or smth
     char test[] = "testcase_main";
-    int sentinelPid = fork1(sen, &sentinelMain, NULL, USLOSS_MIN_STACK, 7);           // stack size?? how to choose
+    int sentinelPid = startSentinel();
     int testcaseMainPid = fork1(test, &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
+
     dumpProcesses();
     TEMP_switchTo(testcaseMainPid);     // call dispatcher here in 1b
     /*
@@ -190,6 +192,26 @@ void initMain() {
         join();
     }
     */
+}
+
+int startSentinel() {
+    PCB new;
+    new.pid = currentPID;
+    new.priority = 7;
+    new.isAllocated = 1;
+    new.status = 0;
+    strcpy(new.processName, "sentinel");
+    new.parent = currentProc;
+    if (currentProc->child != NULL) {
+        new.nextSibling = currentProc->child;
+        currentProc->child->prevSibling = &new;
+    }
+    // allocate stack, initialize context, and context switch to init
+    void* stackMem = malloc(USLOSS_MIN_STACK);
+    new.stackMem = stackMem;
+    USLOSS_ContextInit(&new.context, stackMem, USLOSS_MIN_STACK, NULL, &trampoline);
+    processes[new.pid % MAXPROC] = new;    
+    return new.pid;
 }
 
 int sentinelMain(char* arg) {           // david
