@@ -2,6 +2,7 @@ phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
+Phase 1A TEMPORARY HACK: init() manually switching to testcase_main() after using fork1() to create it.
 testcase_main(): started
 EXPECTATION: main() creates many XXp1 children, and join()s all of them; then repeats twice.  Process count is large enough to fill process table - meaning that students must free old process table entries.
 
@@ -225,6 +226,7 @@ Runnable:     0
 Process Name: sentinel
 Process ID:   2
 Parent PID:   1
+Child PID:    1711942186
 Priority:     7
 Runnable:     0
 Process Name: testcase_main

@@ -2,6 +2,7 @@ phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
+Phase 1A TEMPORARY HACK: init() manually switching to testcase_main() after using fork1() to create it.
 testcase_main(): started
 QUICK SUMMARY: Checking to see what happens when you call join() with no children at all.
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()

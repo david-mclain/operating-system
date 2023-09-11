@@ -66,33 +66,33 @@ void phase1_init(void) {
 
 void startProcesses(void) {
     // Create init PCB and populate fields
-    PCB init;
-    init.pid = currentPID;
-    init.priority = 6;
-    init.isAllocated = 1;
-    strcpy(init.processName, "init");
-    processes[currentPID++] = init;
+    PCB* init = &processes[currentPID % MAXPROC];
+    init->pid = currentPID++;
+    init->priority = 6;
+    init->isAllocated = 1;
+    strcpy(init->processName, "init");
 
     // allocate stack, initialize context 
     void* stackMem = malloc(USLOSS_MIN_STACK);
-    init.stackMem = stackMem;
-    USLOSS_ContextInit(&init.context, stackMem, USLOSS_MIN_STACK, NULL, &initMain); // maybe change to an int main() and use trampoline?
+    init->stackMem = stackMem;
+    USLOSS_ContextInit(&init->context, stackMem, USLOSS_MIN_STACK, NULL, &initMain); // maybe change to an int main() and use trampoline?
 
     // Set init as the current running process
-    currentProc = &init;
+    currentProc = init;
 
     // context switch to init
-    USLOSS_ContextSwitch(NULL, &init.context); // call dispatcher here for 1b
+    USLOSS_ContextSwitch(NULL, &init->context); // call dispatcher here for 1b
 }
 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
     if (stacksize < USLOSS_MIN_STACK) {
         return -2;
     }
-    if (priority < 1 || priority > 5 || func == NULL || name == NULL || strlen(name) > MAXNAME) {
+    if (priority < 1 || (priority > 5 && strcmp(name, "sentinel") != 0 && priority != 7) ||
+            func == NULL || name == NULL || strlen(name) > MAXNAME) 
+    {
         return -1;
     }
-
     int i = 0;
     for (; i < MAXPROC && processes[currentPID % MAXPROC].isAllocated; i++) {
         currentPID++;
@@ -109,7 +109,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     new->parent = currentProc;
     if (currentProc->child != NULL) {
         new->nextSibling = currentProc->child;
-        currentProc->child->prevSibling = &new;
+        currentProc->child->prevSibling = new;
     }
     currentProc->child = new;
 
@@ -122,8 +122,6 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     new->stackMem = stackMem;
     USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
     
-    
-
     return new->pid;
 }
 
@@ -160,17 +158,17 @@ int getpid(void) {
 void dumpProcesses(void) {
     for (int i = 0; i < MAXPROC; i++) {
         if (processes[i].isAllocated) {
-            PCB cur = processes[i];
-            USLOSS_Console("Process Name: %s\n", cur.processName);
-            USLOSS_Console("Process ID:   %d\n", cur.pid);
-            if (cur.parent != NULL) {
-                USLOSS_Console("Parent PID:   %d\n", cur.parent->pid);
+            PCB* cur = &processes[i];
+            USLOSS_Console("Process Name: %s\n", cur->processName);
+            USLOSS_Console("Process ID:   %d\n", cur->pid);
+            if (cur->parent != NULL) {
+                USLOSS_Console("Parent PID:   %d\n", cur->parent->pid);
             }
-            if (cur.child != NULL) {
-                USLOSS_Console("Child PID:    %d\n", cur.child->pid);
+            if (cur->child != NULL) {
+                USLOSS_Console("Child PID:    %d\n", cur->child->pid);
             }
-            USLOSS_Console("Priority:     %d\n", cur.priority);
-            USLOSS_Console("Runnable:     %d\n", cur.status);
+            USLOSS_Console("Priority:     %d\n", cur->priority);
+            USLOSS_Console("Runnable:     %d\n", cur->status);
         }
     }
 }
@@ -197,7 +195,7 @@ void initMain() {
     // create sentinel and testcase_main, switch to testcase_main
     char sen[] = "sentinel";            // maybe change l8r, enforce length or smth
     char test[] = "testcase_main";
-    int sentinelPid = startSentinel();
+    int sentinelPid = fork1(sen, &sentinelMain, NULL, USLOSS_MIN_STACK, 3);
     int testcaseMainPid = fork1(test, &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
 
     USLOSS_Console("Phase 1A TEMPORARY HACK: init() manually switching to testcase_main() after using fork1() to create it.\n");
