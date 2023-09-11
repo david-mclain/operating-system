@@ -144,8 +144,9 @@ int join(int *status) {
     }
 }
 
-void quit(int status, int switchToPid) {    // david
+void quit(int status, int switchToPid) {
     currentProc->status = status;
+    currentProc->isDead = 1;
     TEMP_switchTo(switchToPid);
 }
 
