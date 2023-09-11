@@ -33,14 +33,16 @@ int currentPID = 1;     // next available PID
 /* ---------- Prototypes ---------- */
 
 void trampoline();
+int startSentinel();
+
 void initMain();
 int sentinelMain();
-int startSentinel();
 int testcaseMainMain();
 
 
 /* ---------- Phase 1a Functions ---------- */
 // NEED TO DISABLE & RE-ENABLE INTERRUPTS FOR EACH OF THESE FUNCTIONS (except getpid)
+// AND CHECK TO ENSURE WE'RE IN KERNEL MODE
 
 // MEMSET NOT WORKING PROPERLY, NEED TO FIX
 void phase1_init(void) {
@@ -182,9 +184,32 @@ void TEMP_switchTo(int pid) {
     USLOSS_ContextSwitch(prev_context, &(switchTo->context)); // ERROR HERE GETTING SEG FAULT
 }
 
+/* ---------- Helper Functions ---------- */
+
 void trampoline() {
     (*currentProc->processMain)(currentProc->args);
 }
+
+int startSentinel() {
+    PCB new;
+    new.pid = currentPID;
+    new.priority = 7;
+    new.isAllocated = 1;
+    new.status = 0;
+    strcpy(new.processName, "sentinel");
+    new.parent = currentProc;
+    if (currentProc->child != NULL) {
+        new.nextSibling = currentProc->child;
+        currentProc->child->prevSibling = &new;
+    }
+    // allocate stack, initialize context, and context switch to init
+    void* stackMem = malloc(USLOSS_MIN_STACK);
+    new.stackMem = stackMem;
+    USLOSS_ContextInit(&new.context, stackMem, USLOSS_MIN_STACK, NULL, &trampoline);
+    processes[new.pid % MAXPROC] = new;    
+    return new.pid;
+}
+
 
 /* ---------- Process Functions ---------- */
 
@@ -207,26 +232,6 @@ void initMain() {
         join();
     }
     */
-}
-
-int startSentinel() {
-    PCB new;
-    new.pid = currentPID;
-    new.priority = 7;
-    new.isAllocated = 1;
-    new.status = 0;
-    strcpy(new.processName, "sentinel");
-    new.parent = currentProc;
-    if (currentProc->child != NULL) {
-        new.nextSibling = currentProc->child;
-        currentProc->child->prevSibling = &new;
-    }
-    // allocate stack, initialize context, and context switch to init
-    void* stackMem = malloc(USLOSS_MIN_STACK);
-    new.stackMem = stackMem;
-    USLOSS_ContextInit(&new.context, stackMem, USLOSS_MIN_STACK, NULL, &trampoline);
-    processes[new.pid % MAXPROC] = new;    
-    return new.pid;
 }
 
 int sentinelMain(char* arg) {           // david
