@@ -9,10 +9,9 @@ typedef struct PCB {
     int priority;
     int status;
 
+    char processName[MAXNAME];
     char isAllocated;
     char isDead;
-    char args[MAXARG];
-    char processName[MAXNAME];
 
     struct PCB* parent;
     struct PCB* child;
@@ -22,13 +21,14 @@ typedef struct PCB {
     USLOSS_Context context;
 
     int (*processMain)(char*);
+    char arg[MAXARG];
 
     void* stackMem;
 } PCB;
 
 PCB processes[MAXPROC];
-PCB* currentProc;
-int currentPID = 1;
+PCB* currentProc;       // currently running process
+int currentPID = 1;     // next available PID
 
 /* ---------- Prototypes ---------- */
 
@@ -39,6 +39,8 @@ int testcaseMainMain();
 
 
 /* ---------- Phase 1a Functions ---------- */
+// NEED TO DISABLE & RE-ENABLE INTERRUPTS FOR EACH OF THESE FUNCTIONS (except getpid)
+
 // MEMSET NOT WORKING PROPERLY, NEED TO FIX
 void phase1_init(void) {
     // TEMPORARY UNTIL FIGURE OUT MEMSET????
@@ -48,7 +50,7 @@ void phase1_init(void) {
         processes[i].status = 0;
         processes[i].isAllocated = 0;
         processes[i].isDead = 0;
-        memset(processes[i].args, 0, sizeof(char) * MAXARG);
+        memset(processes[i].arg, 0, sizeof(char) * MAXARG);
         memset(processes[i].processName, 0, sizeof(char) * MAXNAME);
         processes[i].parent = NULL;
         processes[i].child = NULL;
@@ -70,11 +72,15 @@ void startProcesses(void) {
     strcpy(init.processName, "init");
     processes[currentPID++] = init;
 
-    // Set init as the current running process
-    currentProc = &init;    // maybe move later
-    // allocate stack, initialize context, and context switch to init
+    // allocate stack, initialize context 
     void* stackMem = malloc(USLOSS_MIN_STACK);
-    USLOSS_ContextInit(&init.context, stackMem, USLOSS_MIN_STACK, NULL, &initMain);
+    init.stackMem = stackMem;
+    USLOSS_ContextInit(&init.context, stackMem, USLOSS_MIN_STACK, NULL, &initMain); // maybe change to an int main() and use trampoline?
+
+    // Set init as the current running process
+    currentProc = &init;
+
+    // context switch to init
     USLOSS_ContextSwitch(NULL, &init.context); // call dispatcher here for 1b
 }
 
@@ -120,8 +126,9 @@ void quit(int status, int switchToPid) {    // david
     while(1){}
 }
 
-int getpid(void) {      // miles
-    return 0;
+int getpid(void) {
+    if (currentProc) { return currentProc->pid; }
+    else { return -1; }  // is this good? return something else? ask
 }
 
 void dumpProcesses(void) {
@@ -139,12 +146,15 @@ void dumpProcesses(void) {
     }
 }
 
-void TEMP_switchTo(int pid) {       // miles
-    
+void TEMP_switchTo(int pid) {
+    PCB* switchTo = &processes[pid % MAXPROC];
+    USLOSS_Context* prev_context = &(currentProc->context)
+    currentProc = switchTo;
+    USLOSS_ContextSwitch(prev_context, &(switchTo->context));
 }
 
 void trampoline() {
-    (*currentProc->processMain)(currentProc->args);
+    (*currentProc->processMain)(currentProc->arg);
 }
 
 /* ---------- Process Functions ---------- */
@@ -176,7 +186,7 @@ int sentinelMain(char* arg) {           // david
 int testcaseMainMain(char* arg) {
     int test_return = testcase_main();
     if (test_return != 0) { 
-        printf("testcase_main returned with a nonzero error code: %d\n", test_return);
+        USLOSS_Console("testcase_main returned with a nonzero error code: %d\n", test_return); // do this for all printouts
     }
     USLOSS_Halt(test_return); // pass zero? ask about this
     return 0;
