@@ -126,7 +126,10 @@ int join(int *status) {
         PCB* currChild = currentProc->child;
         while (currChild) {
             if (currChild->isDead) {
-                // collect status (and clean up child pcb entry?)
+                // collect status and clean up child pcb entry
+                *status = currChild->status; // run status vs. exit status?
+                free(currChild->stackMem);
+                currChild->isAllocated = 0;
                 return currChild->pid;
             }
             currChild = currChild->nextSibling;
