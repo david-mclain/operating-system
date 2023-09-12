@@ -37,7 +37,6 @@ int currentPID = 1;     // next available PID
 /* ---------- Prototypes ---------- */
 
 void trampoline();
-int startSentinel();
 
 void initMain();
 int sentinelMain();
@@ -51,6 +50,7 @@ int testcaseMainMain();
 // MEMSET NOT WORKING PROPERLY, NEED TO FIX
 void phase1_init(void) {
     // TEMPORARY UNTIL FIGURE OUT MEMSET????
+    /*
     for (int i = 0; i < MAXPROC; i++) {
         processes[i].pid = 0;
         processes[i].priority = 0;
@@ -67,7 +67,8 @@ void phase1_init(void) {
         processes[i].processMain = NULL;
         processes[i].stackMem = NULL;
     }
-    //memset(processes, 0, sizeof(processes));
+    */
+    memset(processes, 0, sizeof(processes));
 }
 
 void startProcesses(void) {
@@ -92,6 +93,7 @@ void startProcesses(void) {
 }
 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
+    USLOSS_PsrSet(1);
     if (stacksize < USLOSS_MIN_STACK) {
         return -2;
     }
@@ -129,12 +131,16 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     void* stackMem = malloc(stacksize);
     new->stackMem = stackMem;
     USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
-    
+    USLOSS_PsrSet(0);
     return new->pid;
 }
 
 int join(int *status) {
-    if (currentProc->child == NULL) { return -2; } // current proc. has no unjoined children
+    USLOSS_PsrSet(1);
+    if (currentProc->child == NULL) {
+        USLOSS_PsrSet(0);
+        return -2;
+    } // current proc. has no unjoined children
     else {
         PCB* currChild = currentProc->child;
         while (currChild) {
@@ -168,28 +174,41 @@ int join(int *status) {
                 currChild->prevSibling = NULL;
                 currChild->nextSibling = NULL;
                 currChild->child = NULL;
-
+                USLOSS_PsrSet(0);
                 return currChild->pid;
             }
             currChild = currChild->nextSibling;
         }
-
+        USLOSS_PsrSet(0);
         return 0; // in 1b block here, but shouldn't ever get here in 1a
     }
 }
 
 void quit(int status, int switchToPid) {
+    USLOSS_PsrSet(1);
+    if (currentProc->child) {
+        USLOSS_Console("ERROR: Process pid %d called quit() while it still had children.\n", currentProc->pid);
+        USLOSS_Halt(1);
+    }
     currentProc->status = status;
     currentProc->runState = DEAD;
     TEMP_switchTo(switchToPid);
 }
 
 int getpid(void) {
-    if (currentProc) { return currentProc->pid; }
-    else { return -1; }  // is this good? return something else? ask
+    USLOSS_PsrSet(1);
+    if (currentProc) { 
+        USLOSS_PsrSet(0);
+        return currentProc->pid;
+    }
+    else {
+        USLOSS_PsrSet(0);
+        return -1;
+    }  // is this good? return something else? ask
 }
 
 void dumpProcesses(void) {
+    USLOSS_PsrSet(1);
     USLOSS_Console(" PID  PPID  NAME              PRIORITY  STATE\n");
     for (int i = 0; i < MAXPROC; i++) {
         if (processes[i].isAllocated) {
@@ -219,43 +238,26 @@ void dumpProcesses(void) {
             USLOSS_Console("\n");
         }
     }
+    USLOSS_PsrSet(0);
 }
 
 void TEMP_switchTo(int pid) {
+    USLOSS_PsrSet(1);
     PCB* switchTo = &processes[pid % MAXPROC];
     USLOSS_Context* prev_context = &(currentProc->context);
     if (currentProc->runState == RUNNING) { currentProc->runState=RUNNABLE; }
     switchTo->runState = RUNNING;
     currentProc = switchTo;
     USLOSS_ContextSwitch(prev_context, &(switchTo->context)); // ERROR HERE GETTING SEG FAULT
+    USLOSS_PsrSet(0);
 }
 
 /* ---------- Helper Functions ---------- */
 
 void trampoline() {
+    USLOSS_PsrSet(0);
     (*currentProc->processMain)(currentProc->args);
 }
-
-int startSentinel() {
-    PCB new;
-    new.pid = currentPID;
-    new.priority = 7;
-    new.isAllocated = 1;
-    new.status = RUNNABLE;
-    strcpy(new.processName, "sentinel");
-    new.parent = currentProc;
-    if (currentProc->child != NULL) {
-        new.nextSibling = currentProc->child;
-        currentProc->child->prevSibling = &new;
-    }
-    // allocate stack, initialize context, and context switch to init
-    void* stackMem = malloc(USLOSS_MIN_STACK);
-    new.stackMem = stackMem;
-    USLOSS_ContextInit(&new.context, stackMem, USLOSS_MIN_STACK, NULL, &trampoline);
-    processes[new.pid % MAXPROC] = new;    
-    return new.pid;
-}
-
 
 /* ---------- Process Functions ---------- */
 
@@ -268,7 +270,7 @@ void initMain() {
     // create sentinel and testcase_main, switch to testcase_main
     char sen[] = "sentinel";            // maybe change l8r, enforce length or smth
     char test[] = "testcase_main";
-    int sentinelPid = fork1(sen, &sentinelMain, NULL, USLOSS_MIN_STACK, 3);
+    int sentinelPid = fork1(sen, &sentinelMain, NULL, USLOSS_MIN_STACK, 7);
     int testcaseMainPid = fork1(test, &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
 
     USLOSS_Console("Phase 1A TEMPORARY HACK: init() manually switching to testcase_main() after using fork1() to create it.\n");

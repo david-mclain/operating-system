@@ -61,7 +61,7 @@ testcase_main(): fork1() failed: i=51, pid is -1.
  PID  PPID  NAME              PRIORITY  STATE
   50     3  XXp1              2         Terminated(2)
    1     0  init              6         Runnable
-   2     1  sentinel          3         Runnable
+   2     1  sentinel          7         Runnable
    3     1  testcase_main     3         Running
    4     3  XXp1              2         Terminated(2)
    5     3  XXp1              2         Terminated(2)
@@ -117,7 +117,7 @@ testcase_main(): join() failed: i=50, pid is -2.
 testcase_main(): join() failed: i=51, pid is -2.
  PID  PPID  NAME              PRIORITY  STATE
    1     0  init              6         Runnable
-   2     1  sentinel          3         Runnable
+   2     1  sentinel          7         Runnable
    3     1  testcase_main     3         Running
 Phase 1A TEMPORARY HACK: testcase_main() returned, simulation will now halt.
 TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0
