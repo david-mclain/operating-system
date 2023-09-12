@@ -58,277 +58,66 @@ testcase_main(): fork1() failed: i=48, pid is -1.
 testcase_main(): fork1() failed: i=49, pid is -1.
 testcase_main(): fork1() failed: i=50, pid is -1.
 testcase_main(): fork1() failed: i=51, pid is -1.
-Process Name: XXp1
-Process ID:   50
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: init
-Process ID:   1
-Child PID:    3
-Priority:     6
-Runnable:     0
-Process Name: sentinel
-Process ID:   2
-Parent PID:   1
-Priority:     3
-Runnable:     0
-Process Name: testcase_main
-Process ID:   3
-Parent PID:   1
-Child PID:    50
-Priority:     3
-Runnable:     0
-Process Name: XXp1
-Process ID:   4
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   5
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   6
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   7
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   8
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   9
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   10
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   11
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   12
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   13
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   14
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   15
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   16
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   17
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   18
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   19
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   20
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   21
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   22
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   23
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   24
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   25
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   26
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   27
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   28
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   29
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   30
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   31
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   32
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   33
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   34
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   35
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   36
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   37
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   38
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   39
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   40
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   41
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   42
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   43
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   44
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   45
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   46
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   47
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   48
-Parent PID:   3
-Priority:     2
-Runnable:     2
-Process Name: XXp1
-Process ID:   49
-Parent PID:   3
-Priority:     2
-Runnable:     2
+ PID  PPID  NAME              PRIORITY  STATE
+  50     3  XXp1              2         Terminated(2)
+   1     0  init              6         Runnable
+   2     1  sentinel          3         Runnable
+   3     1  testcase_main     3         Running
+   4     3  XXp1              2         Terminated(2)
+   5     3  XXp1              2         Terminated(2)
+   6     3  XXp1              2         Terminated(2)
+   7     3  XXp1              2         Terminated(2)
+   8     3  XXp1              2         Terminated(2)
+   9     3  XXp1              2         Terminated(2)
+  10     3  XXp1              2         Terminated(2)
+  11     3  XXp1              2         Terminated(2)
+  12     3  XXp1              2         Terminated(2)
+  13     3  XXp1              2         Terminated(2)
+  14     3  XXp1              2         Terminated(2)
+  15     3  XXp1              2         Terminated(2)
+  16     3  XXp1              2         Terminated(2)
+  17     3  XXp1              2         Terminated(2)
+  18     3  XXp1              2         Terminated(2)
+  19     3  XXp1              2         Terminated(2)
+  20     3  XXp1              2         Terminated(2)
+  21     3  XXp1              2         Terminated(2)
+  22     3  XXp1              2         Terminated(2)
+  23     3  XXp1              2         Terminated(2)
+  24     3  XXp1              2         Terminated(2)
+  25     3  XXp1              2         Terminated(2)
+  26     3  XXp1              2         Terminated(2)
+  27     3  XXp1              2         Terminated(2)
+  28     3  XXp1              2         Terminated(2)
+  29     3  XXp1              2         Terminated(2)
+  30     3  XXp1              2         Terminated(2)
+  31     3  XXp1              2         Terminated(2)
+  32     3  XXp1              2         Terminated(2)
+  33     3  XXp1              2         Terminated(2)
+  34     3  XXp1              2         Terminated(2)
+  35     3  XXp1              2         Terminated(2)
+  36     3  XXp1              2         Terminated(2)
+  37     3  XXp1              2         Terminated(2)
+  38     3  XXp1              2         Terminated(2)
+  39     3  XXp1              2         Terminated(2)
+  40     3  XXp1              2         Terminated(2)
+  41     3  XXp1              2         Terminated(2)
+  42     3  XXp1              2         Terminated(2)
+  43     3  XXp1              2         Terminated(2)
+  44     3  XXp1              2         Terminated(2)
+  45     3  XXp1              2         Terminated(2)
+  46     3  XXp1              2         Terminated(2)
+  47     3  XXp1              2         Terminated(2)
+  48     3  XXp1              2         Terminated(2)
+  49     3  XXp1              2         Terminated(2)
 testcase_main(): Calling join() on 52 processes.  The number of 'failed' calls here should be the same as the number of 'failed' fork1() calls.
 testcase_main(): join() failed: i=47, pid is -2.
 testcase_main(): join() failed: i=48, pid is -2.
 testcase_main(): join() failed: i=49, pid is -2.
 testcase_main(): join() failed: i=50, pid is -2.
 testcase_main(): join() failed: i=51, pid is -2.
-Process Name: init
-Process ID:   1
-Child PID:    3
-Priority:     6
-Runnable:     0
-Process Name: sentinel
-Process ID:   2
-Parent PID:   1
-Priority:     3
-Runnable:     0
-Process Name: testcase_main
-Process ID:   3
-Parent PID:   1
-Priority:     3
-Runnable:     0
+ PID  PPID  NAME              PRIORITY  STATE
+   1     0  init              6         Runnable
+   2     1  sentinel          3         Runnable
+   3     1  testcase_main     3         Running
 Phase 1A TEMPORARY HACK: testcase_main() returned, simulation will now halt.
 TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0

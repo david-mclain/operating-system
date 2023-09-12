@@ -4,6 +4,10 @@
 #include <string.h>
 #include "phase1.h"
 
+#define RUNNABLE    0
+#define RUNNING     1
+#define DEAD        2
+
 typedef struct PCB {
     int pid;
     int priority;
@@ -12,7 +16,7 @@ typedef struct PCB {
     char args[MAXARG];
     char processName[MAXNAME];
     char isAllocated;
-    char isDead;
+    char runState;
 
     struct PCB* parent;
     struct PCB* child;
@@ -52,7 +56,7 @@ void phase1_init(void) {
         processes[i].priority = 0;
         processes[i].status = 0;
         processes[i].isAllocated = 0;
-        processes[i].isDead = 0;
+        processes[i].runState = 0;
         memset(processes[i].args, 0, sizeof(char) * MAXARG);
         memset(processes[i].processName, 0, sizeof(char) * MAXNAME);
         processes[i].parent = NULL;
@@ -81,6 +85,7 @@ void startProcesses(void) {
 
     // Set init as the current running process
     currentProc = init;
+    init->runState = RUNNING;
 
     // context switch to init
     USLOSS_ContextSwitch(NULL, &init->context); // call dispatcher here for 1b
@@ -106,6 +111,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     PCB* new = &processes[currentPID % MAXPROC];
     new->pid = currentPID;
     new->priority = priority;
+    new->runState = RUNNABLE;
     new->isAllocated = 1;
     strcpy(new->processName, name);
     new->parent = currentProc;
@@ -128,12 +134,11 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
 }
 
 int join(int *status) {
-    //dumpProcesses();
     if (currentProc->child == NULL) { return -2; } // current proc. has no unjoined children
     else {
         PCB* currChild = currentProc->child;
         while (currChild) {
-            if (currChild->isDead) {
+            if (currChild->runState == DEAD) {
 
                 // collect status
                 *status = currChild->status; // run status vs. exit status?
@@ -175,7 +180,7 @@ int join(int *status) {
 
 void quit(int status, int switchToPid) {
     currentProc->status = status;
-    currentProc->isDead = 1;
+    currentProc->runState = DEAD;
     TEMP_switchTo(switchToPid);
 }
 
@@ -185,19 +190,33 @@ int getpid(void) {
 }
 
 void dumpProcesses(void) {
+    USLOSS_Console(" PID  PPID  NAME              PRIORITY  STATE\n");
     for (int i = 0; i < MAXPROC; i++) {
         if (processes[i].isAllocated) {
             PCB* cur = &processes[i];
-            USLOSS_Console("Process Name: %s\n", cur->processName);
-            USLOSS_Console("Process ID:   %d\n", cur->pid);
-            if (cur->parent != NULL) {
-                USLOSS_Console("Parent PID:   %d\n", cur->parent->pid);
+
+            USLOSS_Console("%4d  ", cur->pid);
+
+            if (cur->parent != NULL) { USLOSS_Console("%4d  ", cur->parent->pid); }
+            else { USLOSS_Console("   0  "); }
+
+            USLOSS_Console("%-16s  ", cur->processName);
+
+            //if (cur->child != NULL) { USLOSS_Console("%8d  ", cur->child->pid); }
+
+            USLOSS_Console("%-8d  ", cur->priority);
+            switch (cur->runState) {
+                case RUNNABLE:
+                    USLOSS_Console("Runnable");
+                    break;
+                case RUNNING:
+                    USLOSS_Console("Running");
+                    break;
+                case DEAD:
+                    USLOSS_Console("Terminated(%d)", cur->status);
+                    break;
             }
-            if (cur->child != NULL) {
-                USLOSS_Console("Child PID:    %d\n", cur->child->pid);
-            }
-            USLOSS_Console("Priority:     %d\n", cur->priority);
-            USLOSS_Console("Runnable:     %d\n", cur->status);
+            USLOSS_Console("\n");
         }
     }
 }
@@ -205,6 +224,8 @@ void dumpProcesses(void) {
 void TEMP_switchTo(int pid) {
     PCB* switchTo = &processes[pid % MAXPROC];
     USLOSS_Context* prev_context = &(currentProc->context);
+    if (currentProc->runState == RUNNING) { currentProc->runState=RUNNABLE; }
+    switchTo->runState = RUNNING;
     currentProc = switchTo;
     USLOSS_ContextSwitch(prev_context, &(switchTo->context)); // ERROR HERE GETTING SEG FAULT
 }
@@ -220,7 +241,7 @@ int startSentinel() {
     new.pid = currentPID;
     new.priority = 7;
     new.isAllocated = 1;
-    new.status = 0;
+    new.status = RUNNABLE;
     strcpy(new.processName, "sentinel");
     new.parent = currentProc;
     if (currentProc->child != NULL) {

@@ -219,232 +219,52 @@ XXp1(): this process will terminate immediately.
 testcase_main(): after fork of child 45 -- you will see this after the just-created child runs, and completes.  So expect an alternation of XXp1() output, followed by these fork messages.
 
 **************** Calling dumpProcesses() *******************
-Process Name: init
-Process ID:   1
-Child PID:    3
-Priority:     6
-Runnable:     0
-Process Name: sentinel
-Process ID:   2
-Parent PID:   1
-Priority:     3
-Runnable:     0
-Process Name: testcase_main
-Process ID:   3
-Parent PID:   1
-Child PID:    45
-Priority:     3
-Runnable:     0
-Process Name: XXp1
-Process ID:   4
-Parent PID:   3
-Priority:     2
-Runnable:     4
-Process Name: XXp1
-Process ID:   5
-Parent PID:   3
-Priority:     2
-Runnable:     5
-Process Name: XXp1
-Process ID:   6
-Parent PID:   3
-Priority:     2
-Runnable:     6
-Process Name: XXp1
-Process ID:   7
-Parent PID:   3
-Priority:     2
-Runnable:     7
-Process Name: XXp1
-Process ID:   8
-Parent PID:   3
-Priority:     2
-Runnable:     8
-Process Name: XXp1
-Process ID:   9
-Parent PID:   3
-Priority:     2
-Runnable:     9
-Process Name: XXp1
-Process ID:   10
-Parent PID:   3
-Priority:     2
-Runnable:     10
-Process Name: XXp1
-Process ID:   11
-Parent PID:   3
-Priority:     2
-Runnable:     11
-Process Name: XXp1
-Process ID:   12
-Parent PID:   3
-Priority:     2
-Runnable:     12
-Process Name: XXp1
-Process ID:   13
-Parent PID:   3
-Priority:     2
-Runnable:     13
-Process Name: XXp1
-Process ID:   14
-Parent PID:   3
-Priority:     2
-Runnable:     14
-Process Name: XXp1
-Process ID:   15
-Parent PID:   3
-Priority:     2
-Runnable:     15
-Process Name: XXp1
-Process ID:   16
-Parent PID:   3
-Priority:     2
-Runnable:     16
-Process Name: XXp1
-Process ID:   17
-Parent PID:   3
-Priority:     2
-Runnable:     17
-Process Name: XXp1
-Process ID:   18
-Parent PID:   3
-Priority:     2
-Runnable:     18
-Process Name: XXp1
-Process ID:   19
-Parent PID:   3
-Priority:     2
-Runnable:     19
-Process Name: XXp1
-Process ID:   20
-Parent PID:   3
-Priority:     2
-Runnable:     20
-Process Name: XXp1
-Process ID:   21
-Parent PID:   3
-Priority:     2
-Runnable:     21
-Process Name: XXp1
-Process ID:   22
-Parent PID:   3
-Priority:     2
-Runnable:     22
-Process Name: XXp1
-Process ID:   23
-Parent PID:   3
-Priority:     2
-Runnable:     23
-Process Name: XXp1
-Process ID:   24
-Parent PID:   3
-Priority:     2
-Runnable:     24
-Process Name: XXp1
-Process ID:   25
-Parent PID:   3
-Priority:     2
-Runnable:     25
-Process Name: XXp1
-Process ID:   26
-Parent PID:   3
-Priority:     2
-Runnable:     26
-Process Name: XXp1
-Process ID:   27
-Parent PID:   3
-Priority:     2
-Runnable:     27
-Process Name: XXp1
-Process ID:   28
-Parent PID:   3
-Priority:     2
-Runnable:     28
-Process Name: XXp1
-Process ID:   29
-Parent PID:   3
-Priority:     2
-Runnable:     29
-Process Name: XXp1
-Process ID:   30
-Parent PID:   3
-Priority:     2
-Runnable:     30
-Process Name: XXp1
-Process ID:   31
-Parent PID:   3
-Priority:     2
-Runnable:     31
-Process Name: XXp1
-Process ID:   32
-Parent PID:   3
-Priority:     2
-Runnable:     32
-Process Name: XXp1
-Process ID:   33
-Parent PID:   3
-Priority:     2
-Runnable:     33
-Process Name: XXp1
-Process ID:   34
-Parent PID:   3
-Priority:     2
-Runnable:     34
-Process Name: XXp1
-Process ID:   35
-Parent PID:   3
-Priority:     2
-Runnable:     35
-Process Name: XXp1
-Process ID:   36
-Parent PID:   3
-Priority:     2
-Runnable:     36
-Process Name: XXp1
-Process ID:   37
-Parent PID:   3
-Priority:     2
-Runnable:     37
-Process Name: XXp1
-Process ID:   38
-Parent PID:   3
-Priority:     2
-Runnable:     38
-Process Name: XXp1
-Process ID:   39
-Parent PID:   3
-Priority:     2
-Runnable:     39
-Process Name: XXp1
-Process ID:   40
-Parent PID:   3
-Priority:     2
-Runnable:     40
-Process Name: XXp1
-Process ID:   41
-Parent PID:   3
-Priority:     2
-Runnable:     41
-Process Name: XXp1
-Process ID:   42
-Parent PID:   3
-Priority:     2
-Runnable:     42
-Process Name: XXp1
-Process ID:   43
-Parent PID:   3
-Priority:     2
-Runnable:     43
-Process Name: XXp1
-Process ID:   44
-Parent PID:   3
-Priority:     2
-Runnable:     44
-Process Name: XXp1
-Process ID:   45
-Parent PID:   3
-Priority:     2
-Runnable:     45
+ PID  PPID  NAME              PRIORITY  STATE
+   1     0  init              6         Runnable
+   2     1  sentinel          3         Runnable
+   3     1  testcase_main     3         Running
+   4     3  XXp1              2         Terminated(4)
+   5     3  XXp1              2         Terminated(5)
+   6     3  XXp1              2         Terminated(6)
+   7     3  XXp1              2         Terminated(7)
+   8     3  XXp1              2         Terminated(8)
+   9     3  XXp1              2         Terminated(9)
+  10     3  XXp1              2         Terminated(10)
+  11     3  XXp1              2         Terminated(11)
+  12     3  XXp1              2         Terminated(12)
+  13     3  XXp1              2         Terminated(13)
+  14     3  XXp1              2         Terminated(14)
+  15     3  XXp1              2         Terminated(15)
+  16     3  XXp1              2         Terminated(16)
+  17     3  XXp1              2         Terminated(17)
+  18     3  XXp1              2         Terminated(18)
+  19     3  XXp1              2         Terminated(19)
+  20     3  XXp1              2         Terminated(20)
+  21     3  XXp1              2         Terminated(21)
+  22     3  XXp1              2         Terminated(22)
+  23     3  XXp1              2         Terminated(23)
+  24     3  XXp1              2         Terminated(24)
+  25     3  XXp1              2         Terminated(25)
+  26     3  XXp1              2         Terminated(26)
+  27     3  XXp1              2         Terminated(27)
+  28     3  XXp1              2         Terminated(28)
+  29     3  XXp1              2         Terminated(29)
+  30     3  XXp1              2         Terminated(30)
+  31     3  XXp1              2         Terminated(31)
+  32     3  XXp1              2         Terminated(32)
+  33     3  XXp1              2         Terminated(33)
+  34     3  XXp1              2         Terminated(34)
+  35     3  XXp1              2         Terminated(35)
+  36     3  XXp1              2         Terminated(36)
+  37     3  XXp1              2         Terminated(37)
+  38     3  XXp1              2         Terminated(38)
+  39     3  XXp1              2         Terminated(39)
+  40     3  XXp1              2         Terminated(40)
+  41     3  XXp1              2         Terminated(41)
+  42     3  XXp1              2         Terminated(42)
+  43     3  XXp1              2         Terminated(43)
+  44     3  XXp1              2         Terminated(44)
+  45     3  XXp1              2         Terminated(45)
 **************** end dumpProcesses() *******************
 
 testcase_main(): after join of child 45, status = 45
@@ -703,232 +523,52 @@ XXp1(): this process will terminate immediately.
 testcase_main(): after fork of child 89 -- you will see this after the just-created child runs, and completes.  So expect an alternation of XXp1() output, followed by these fork messages.
 
 **************** Calling dumpProcesses() *******************
-Process Name: XXp1
-Process ID:   50
-Parent PID:   3
-Priority:     2
-Runnable:     50
-Process Name: init
-Process ID:   1
-Child PID:    3
-Priority:     6
-Runnable:     0
-Process Name: sentinel
-Process ID:   2
-Parent PID:   1
-Priority:     3
-Runnable:     0
-Process Name: testcase_main
-Process ID:   3
-Parent PID:   1
-Child PID:    89
-Priority:     3
-Runnable:     0
-Process Name: XXp1
-Process ID:   54
-Parent PID:   3
-Priority:     2
-Runnable:     54
-Process Name: XXp1
-Process ID:   55
-Parent PID:   3
-Priority:     2
-Runnable:     55
-Process Name: XXp1
-Process ID:   56
-Parent PID:   3
-Priority:     2
-Runnable:     56
-Process Name: XXp1
-Process ID:   57
-Parent PID:   3
-Priority:     2
-Runnable:     57
-Process Name: XXp1
-Process ID:   58
-Parent PID:   3
-Priority:     2
-Runnable:     58
-Process Name: XXp1
-Process ID:   59
-Parent PID:   3
-Priority:     2
-Runnable:     59
-Process Name: XXp1
-Process ID:   60
-Parent PID:   3
-Priority:     2
-Runnable:     60
-Process Name: XXp1
-Process ID:   61
-Parent PID:   3
-Priority:     2
-Runnable:     61
-Process Name: XXp1
-Process ID:   62
-Parent PID:   3
-Priority:     2
-Runnable:     62
-Process Name: XXp1
-Process ID:   63
-Parent PID:   3
-Priority:     2
-Runnable:     63
-Process Name: XXp1
-Process ID:   64
-Parent PID:   3
-Priority:     2
-Runnable:     64
-Process Name: XXp1
-Process ID:   65
-Parent PID:   3
-Priority:     2
-Runnable:     65
-Process Name: XXp1
-Process ID:   66
-Parent PID:   3
-Priority:     2
-Runnable:     66
-Process Name: XXp1
-Process ID:   67
-Parent PID:   3
-Priority:     2
-Runnable:     67
-Process Name: XXp1
-Process ID:   68
-Parent PID:   3
-Priority:     2
-Runnable:     68
-Process Name: XXp1
-Process ID:   69
-Parent PID:   3
-Priority:     2
-Runnable:     69
-Process Name: XXp1
-Process ID:   70
-Parent PID:   3
-Priority:     2
-Runnable:     70
-Process Name: XXp1
-Process ID:   71
-Parent PID:   3
-Priority:     2
-Runnable:     71
-Process Name: XXp1
-Process ID:   72
-Parent PID:   3
-Priority:     2
-Runnable:     72
-Process Name: XXp1
-Process ID:   73
-Parent PID:   3
-Priority:     2
-Runnable:     73
-Process Name: XXp1
-Process ID:   74
-Parent PID:   3
-Priority:     2
-Runnable:     74
-Process Name: XXp1
-Process ID:   75
-Parent PID:   3
-Priority:     2
-Runnable:     75
-Process Name: XXp1
-Process ID:   76
-Parent PID:   3
-Priority:     2
-Runnable:     76
-Process Name: XXp1
-Process ID:   77
-Parent PID:   3
-Priority:     2
-Runnable:     77
-Process Name: XXp1
-Process ID:   78
-Parent PID:   3
-Priority:     2
-Runnable:     78
-Process Name: XXp1
-Process ID:   79
-Parent PID:   3
-Priority:     2
-Runnable:     79
-Process Name: XXp1
-Process ID:   80
-Parent PID:   3
-Priority:     2
-Runnable:     80
-Process Name: XXp1
-Process ID:   81
-Parent PID:   3
-Priority:     2
-Runnable:     81
-Process Name: XXp1
-Process ID:   82
-Parent PID:   3
-Priority:     2
-Runnable:     82
-Process Name: XXp1
-Process ID:   83
-Parent PID:   3
-Priority:     2
-Runnable:     83
-Process Name: XXp1
-Process ID:   84
-Parent PID:   3
-Priority:     2
-Runnable:     84
-Process Name: XXp1
-Process ID:   85
-Parent PID:   3
-Priority:     2
-Runnable:     85
-Process Name: XXp1
-Process ID:   86
-Parent PID:   3
-Priority:     2
-Runnable:     86
-Process Name: XXp1
-Process ID:   87
-Parent PID:   3
-Priority:     2
-Runnable:     87
-Process Name: XXp1
-Process ID:   88
-Parent PID:   3
-Priority:     2
-Runnable:     88
-Process Name: XXp1
-Process ID:   89
-Parent PID:   3
-Priority:     2
-Runnable:     89
-Process Name: XXp1
-Process ID:   45
-Parent PID:   3
-Priority:     2
-Runnable:     45
-Process Name: XXp1
-Process ID:   46
-Parent PID:   3
-Priority:     2
-Runnable:     46
-Process Name: XXp1
-Process ID:   47
-Parent PID:   3
-Priority:     2
-Runnable:     47
-Process Name: XXp1
-Process ID:   48
-Parent PID:   3
-Priority:     2
-Runnable:     48
-Process Name: XXp1
-Process ID:   49
-Parent PID:   3
-Priority:     2
-Runnable:     49
+ PID  PPID  NAME              PRIORITY  STATE
+  50     3  XXp1              2         Terminated(50)
+   1     0  init              6         Runnable
+   2     1  sentinel          3         Runnable
+   3     1  testcase_main     3         Running
+  54     3  XXp1              2         Terminated(54)
+  55     3  XXp1              2         Terminated(55)
+  56     3  XXp1              2         Terminated(56)
+  57     3  XXp1              2         Terminated(57)
+  58     3  XXp1              2         Terminated(58)
+  59     3  XXp1              2         Terminated(59)
+  60     3  XXp1              2         Terminated(60)
+  61     3  XXp1              2         Terminated(61)
+  62     3  XXp1              2         Terminated(62)
+  63     3  XXp1              2         Terminated(63)
+  64     3  XXp1              2         Terminated(64)
+  65     3  XXp1              2         Terminated(65)
+  66     3  XXp1              2         Terminated(66)
+  67     3  XXp1              2         Terminated(67)
+  68     3  XXp1              2         Terminated(68)
+  69     3  XXp1              2         Terminated(69)
+  70     3  XXp1              2         Terminated(70)
+  71     3  XXp1              2         Terminated(71)
+  72     3  XXp1              2         Terminated(72)
+  73     3  XXp1              2         Terminated(73)
+  74     3  XXp1              2         Terminated(74)
+  75     3  XXp1              2         Terminated(75)
+  76     3  XXp1              2         Terminated(76)
+  77     3  XXp1              2         Terminated(77)
+  78     3  XXp1              2         Terminated(78)
+  79     3  XXp1              2         Terminated(79)
+  80     3  XXp1              2         Terminated(80)
+  81     3  XXp1              2         Terminated(81)
+  82     3  XXp1              2         Terminated(82)
+  83     3  XXp1              2         Terminated(83)
+  84     3  XXp1              2         Terminated(84)
+  85     3  XXp1              2         Terminated(85)
+  86     3  XXp1              2         Terminated(86)
+  87     3  XXp1              2         Terminated(87)
+  88     3  XXp1              2         Terminated(88)
+  89     3  XXp1              2         Terminated(89)
+  45     3  XXp1              2         Terminated(45)
+  46     3  XXp1              2         Terminated(46)
+  47     3  XXp1              2         Terminated(47)
+  48     3  XXp1              2         Terminated(48)
+  49     3  XXp1              2         Terminated(49)
 **************** end dumpProcesses() *******************
 
 testcase_main(): after join of child 89, status = 89
@@ -1187,232 +827,52 @@ XXp1(): this process will terminate immediately.
 testcase_main(): after fork of child 133 -- you will see this after the just-created child runs, and completes.  So expect an alternation of XXp1() output, followed by these fork messages.
 
 **************** Calling dumpProcesses() *******************
-Process Name: XXp1
-Process ID:   100
-Parent PID:   3
-Priority:     2
-Runnable:     100
-Process Name: init
-Process ID:   1
-Child PID:    3
-Priority:     6
-Runnable:     0
-Process Name: sentinel
-Process ID:   2
-Parent PID:   1
-Priority:     3
-Runnable:     0
-Process Name: testcase_main
-Process ID:   3
-Parent PID:   1
-Child PID:    133
-Priority:     3
-Runnable:     0
-Process Name: XXp1
-Process ID:   104
-Parent PID:   3
-Priority:     2
-Runnable:     104
-Process Name: XXp1
-Process ID:   105
-Parent PID:   3
-Priority:     2
-Runnable:     105
-Process Name: XXp1
-Process ID:   106
-Parent PID:   3
-Priority:     2
-Runnable:     106
-Process Name: XXp1
-Process ID:   107
-Parent PID:   3
-Priority:     2
-Runnable:     107
-Process Name: XXp1
-Process ID:   108
-Parent PID:   3
-Priority:     2
-Runnable:     108
-Process Name: XXp1
-Process ID:   109
-Parent PID:   3
-Priority:     2
-Runnable:     109
-Process Name: XXp1
-Process ID:   110
-Parent PID:   3
-Priority:     2
-Runnable:     110
-Process Name: XXp1
-Process ID:   111
-Parent PID:   3
-Priority:     2
-Runnable:     111
-Process Name: XXp1
-Process ID:   112
-Parent PID:   3
-Priority:     2
-Runnable:     112
-Process Name: XXp1
-Process ID:   113
-Parent PID:   3
-Priority:     2
-Runnable:     113
-Process Name: XXp1
-Process ID:   114
-Parent PID:   3
-Priority:     2
-Runnable:     114
-Process Name: XXp1
-Process ID:   115
-Parent PID:   3
-Priority:     2
-Runnable:     115
-Process Name: XXp1
-Process ID:   116
-Parent PID:   3
-Priority:     2
-Runnable:     116
-Process Name: XXp1
-Process ID:   117
-Parent PID:   3
-Priority:     2
-Runnable:     117
-Process Name: XXp1
-Process ID:   118
-Parent PID:   3
-Priority:     2
-Runnable:     118
-Process Name: XXp1
-Process ID:   119
-Parent PID:   3
-Priority:     2
-Runnable:     119
-Process Name: XXp1
-Process ID:   120
-Parent PID:   3
-Priority:     2
-Runnable:     120
-Process Name: XXp1
-Process ID:   121
-Parent PID:   3
-Priority:     2
-Runnable:     121
-Process Name: XXp1
-Process ID:   122
-Parent PID:   3
-Priority:     2
-Runnable:     122
-Process Name: XXp1
-Process ID:   123
-Parent PID:   3
-Priority:     2
-Runnable:     123
-Process Name: XXp1
-Process ID:   124
-Parent PID:   3
-Priority:     2
-Runnable:     124
-Process Name: XXp1
-Process ID:   125
-Parent PID:   3
-Priority:     2
-Runnable:     125
-Process Name: XXp1
-Process ID:   126
-Parent PID:   3
-Priority:     2
-Runnable:     126
-Process Name: XXp1
-Process ID:   127
-Parent PID:   3
-Priority:     2
-Runnable:     127
-Process Name: XXp1
-Process ID:   128
-Parent PID:   3
-Priority:     2
-Runnable:     128
-Process Name: XXp1
-Process ID:   129
-Parent PID:   3
-Priority:     2
-Runnable:     129
-Process Name: XXp1
-Process ID:   130
-Parent PID:   3
-Priority:     2
-Runnable:     130
-Process Name: XXp1
-Process ID:   131
-Parent PID:   3
-Priority:     2
-Runnable:     131
-Process Name: XXp1
-Process ID:   132
-Parent PID:   3
-Priority:     2
-Runnable:     132
-Process Name: XXp1
-Process ID:   133
-Parent PID:   3
-Priority:     2
-Runnable:     133
-Process Name: XXp1
-Process ID:   89
-Parent PID:   3
-Priority:     2
-Runnable:     89
-Process Name: XXp1
-Process ID:   90
-Parent PID:   3
-Priority:     2
-Runnable:     90
-Process Name: XXp1
-Process ID:   91
-Parent PID:   3
-Priority:     2
-Runnable:     91
-Process Name: XXp1
-Process ID:   92
-Parent PID:   3
-Priority:     2
-Runnable:     92
-Process Name: XXp1
-Process ID:   93
-Parent PID:   3
-Priority:     2
-Runnable:     93
-Process Name: XXp1
-Process ID:   94
-Parent PID:   3
-Priority:     2
-Runnable:     94
-Process Name: XXp1
-Process ID:   95
-Parent PID:   3
-Priority:     2
-Runnable:     95
-Process Name: XXp1
-Process ID:   96
-Parent PID:   3
-Priority:     2
-Runnable:     96
-Process Name: XXp1
-Process ID:   97
-Parent PID:   3
-Priority:     2
-Runnable:     97
-Process Name: XXp1
-Process ID:   98
-Parent PID:   3
-Priority:     2
-Runnable:     98
-Process Name: XXp1
-Process ID:   99
-Parent PID:   3
-Priority:     2
-Runnable:     99
+ PID  PPID  NAME              PRIORITY  STATE
+ 100     3  XXp1              2         Terminated(100)
+   1     0  init              6         Runnable
+   2     1  sentinel          3         Runnable
+   3     1  testcase_main     3         Running
+ 104     3  XXp1              2         Terminated(104)
+ 105     3  XXp1              2         Terminated(105)
+ 106     3  XXp1              2         Terminated(106)
+ 107     3  XXp1              2         Terminated(107)
+ 108     3  XXp1              2         Terminated(108)
+ 109     3  XXp1              2         Terminated(109)
+ 110     3  XXp1              2         Terminated(110)
+ 111     3  XXp1              2         Terminated(111)
+ 112     3  XXp1              2         Terminated(112)
+ 113     3  XXp1              2         Terminated(113)
+ 114     3  XXp1              2         Terminated(114)
+ 115     3  XXp1              2         Terminated(115)
+ 116     3  XXp1              2         Terminated(116)
+ 117     3  XXp1              2         Terminated(117)
+ 118     3  XXp1              2         Terminated(118)
+ 119     3  XXp1              2         Terminated(119)
+ 120     3  XXp1              2         Terminated(120)
+ 121     3  XXp1              2         Terminated(121)
+ 122     3  XXp1              2         Terminated(122)
+ 123     3  XXp1              2         Terminated(123)
+ 124     3  XXp1              2         Terminated(124)
+ 125     3  XXp1              2         Terminated(125)
+ 126     3  XXp1              2         Terminated(126)
+ 127     3  XXp1              2         Terminated(127)
+ 128     3  XXp1              2         Terminated(128)
+ 129     3  XXp1              2         Terminated(129)
+ 130     3  XXp1              2         Terminated(130)
+ 131     3  XXp1              2         Terminated(131)
+ 132     3  XXp1              2         Terminated(132)
+ 133     3  XXp1              2         Terminated(133)
+  89     3  XXp1              2         Terminated(89)
+  90     3  XXp1              2         Terminated(90)
+  91     3  XXp1              2         Terminated(91)
+  92     3  XXp1              2         Terminated(92)
+  93     3  XXp1              2         Terminated(93)
+  94     3  XXp1              2         Terminated(94)
+  95     3  XXp1              2         Terminated(95)
+  96     3  XXp1              2         Terminated(96)
+  97     3  XXp1              2         Terminated(97)
+  98     3  XXp1              2         Terminated(98)
+  99     3  XXp1              2         Terminated(99)
 **************** end dumpProcesses() *******************
 
 testcase_main(): after join of child 133, status = 133
