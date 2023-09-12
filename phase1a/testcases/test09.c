@@ -39,7 +39,6 @@ int XXp1(char *arg)
     for (i = 0; i < 100; i++)
         ;
 
-    printf("USLOSS_Psr: %04X\n", USLOSS_PsrGet());
     result = USLOSS_PsrSet( USLOSS_PsrGet() & ~USLOSS_PSR_CURRENT_MODE );
     if ( result != USLOSS_DEV_OK ) {
         USLOSS_Console("testcase_main: USLOSS_PsrSet returned %d\n", result);

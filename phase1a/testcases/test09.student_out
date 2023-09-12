@@ -8,7 +8,5 @@ EXPECTATION: The simulation should be terminated as soon as quit() is called, si
 Phase 1A TEMPORARY HACK: Manually switching to XXp1()
 XXp1(): started
 XXp1(): arg = 'XXp1'
-USLOSS_Psr: 0001
-testcase_main: USLOSS_PsrSet returned 1
-Halting...
+ERROR: Someone attempted to call quit while in user mode!
 TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0

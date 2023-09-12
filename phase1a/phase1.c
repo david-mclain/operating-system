@@ -38,6 +38,10 @@ int currentPID = 1;     // next available PID
 
 void trampoline();
 
+void checkMode(char* fnName);
+int disableInterrupts();
+void restoreInterrupts(int prevInt);
+
 void initMain();
 int sentinelMain();
 int testcaseMainMain();
@@ -52,6 +56,9 @@ void phase1_init(void) {
 }
 
 void startProcesses(void) {
+    checkMode("startProcesses");
+    int prevInt = disableInterrupts(); // could this be interrupted?
+
     // Create init PCB and populate fields
     PCB* init = &processes[currentPID % MAXPROC];
     init->pid = currentPID++;
@@ -68,12 +75,15 @@ void startProcesses(void) {
     currentProc = init;
     init->runState = RUNNING;
 
-    // context switch to init
+    // restore interrupts and context switch to init
+    restoreInterrupts(prevInt);
     USLOSS_ContextSwitch(NULL, &init->context); // call dispatcher here for 1b
 }
 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
-    
+    checkMode("fork1");
+    int prevInt = disableInterrupts();
+
     if (stacksize < USLOSS_MIN_STACK) {
         return -2;
     }
@@ -111,16 +121,16 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     void* stackMem = malloc(stacksize);
     new->stackMem = stackMem;
     USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
-    
+
+    restoreInterrupts(prevInt);
     return new->pid;
 }
 
 int join(int *status) {
+    checkMode("join");
+    int prevInt = disableInterrupts();
     
-    if (currentProc->child == NULL) {
-        
-        return -2;
-    } // current proc. has no unjoined children
+    if (currentProc->child == NULL) { return -2; } // current proc. has no unjoined children
     else {
         PCB* currChild = currentProc->child;
         while (currChild) {
@@ -154,20 +164,21 @@ int join(int *status) {
                 currChild->prevSibling = NULL;
                 currChild->nextSibling = NULL;
                 currChild->child = NULL;
-                
+
+                restoreInterrupts(prevInt);
                 return currChild->pid;
             }
             currChild = currChild->nextSibling;
         }
-        
+
+        restoreInterrupts(prevInt);
         return 0; // in 1b block here, but shouldn't ever get here in 1a
     }
 }
 
 void quit(int status, int switchToPid) {
-    if (USLOSS_PsrGet() & 0x1 == 0) {
-        printf("ERORORORORORORR\n");
-    }
+    checkMode("quit");
+    int prevInt = disableInterrupts();
     
     if (currentProc->child) {
         USLOSS_Console("ERROR: Process pid %d called quit() while it still had children.\n", currentProc->pid);
@@ -175,22 +186,21 @@ void quit(int status, int switchToPid) {
     }
     currentProc->status = status;
     currentProc->runState = DEAD;
+
+    restoreInterrupts(prevInt);
     TEMP_switchTo(switchToPid);
 }
 
 int getpid(void) {
-    
-    if (currentProc) { 
-        
-        return currentProc->pid;
-    }
-    else {
-        
-        return -1;
-    }  // is this good? return something else? ask
+    checkMode("getpid");
+
+    if (currentProc) { return currentProc->pid; }
+    else { return -1; }  // is this good? return something else? ask
 }
 
 void dumpProcesses(void) {
+    checkMode("dumpProcesses");
+    int prevInt = disableInterrupts();
     
     USLOSS_Console(" PID  PPID  NAME              PRIORITY  STATE\n");
     for (int i = 0; i < MAXPROC; i++) {
@@ -221,25 +231,48 @@ void dumpProcesses(void) {
             USLOSS_Console("\n");
         }
     }
-    
+    restoreInterrupts(prevInt);
 }
 
 void TEMP_switchTo(int pid) {
-    
+    checkMode("dumpProcesses");
+    int prevInt = disableInterrupts();
+
     PCB* switchTo = &processes[pid % MAXPROC];
     USLOSS_Context* prev_context = &(currentProc->context);
     if (currentProc->runState == RUNNING) { currentProc->runState=RUNNABLE; }
     switchTo->runState = RUNNING;
     currentProc = switchTo;
     
-    USLOSS_ContextSwitch(prev_context, &(switchTo->context)); // ERROR HERE GETTING SEG FAULT
+    restoreInterrupts(prevInt);
+    USLOSS_ContextSwitch(prev_context, &(switchTo->context));
 }
 
 /* ---------- Helper Functions ---------- */
 
+void checkMode(char* fnName) {
+    if (!(USLOSS_PsrGet() & USLOSS_PSR_CURRENT_MODE)) {
+        USLOSS_Console("ERROR: Someone attempted to call %s while in user mode!\n",
+                fnName);
+        USLOSS_Halt(1);
+    }
+}
+
+int disableInterrupts() {
+    int prevInt = USLOSS_PsrGet() & USLOSS_PSR_CURRENT_INT; // previous interrupt status
+    USLOSS_PsrSet(prevInt & ~USLOSS_PSR_CURRENT_INT);
+    return prevInt;
+}
+
+void restoreInterrupts(int prevInt) {
+    USLOSS_PsrSet(USLOSS_PsrGet() | prevInt);
+}
+
 void trampoline() {
-    
+    // enable interrupts
+    USLOSS_PsrSet(USLOSS_PsrGet() | USLOSS_PSR_CURRENT_INT);
     (*currentProc->processMain)(currentProc->args);
+    // do something (call quit? halt?) here
 }
 
 /* ---------- Process Functions ---------- */
