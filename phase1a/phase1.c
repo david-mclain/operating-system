@@ -1,3 +1,10 @@
+/**
+ * File: phase1.c
+ * Authors: David McLain, Miles Gendreau
+ *
+ * Purpose: phase1.c ....
+ */
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -100,7 +107,7 @@ void startProcesses(void) {
 }
 /**
  * Purpose:
- * Creates the init process, then context switches to init
+ * Creates a new process and fills in all PCB fields for it
  * 
  * Parameters:
  * char* name - Name for the new process to create
@@ -160,7 +167,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
 }
 /**
  * Purpose:
- * Creates the init process, then context switches to init
+ * Cleans up zombie children processes
  * 
  * Parameters:
  * int* status - status of the child process being joined
@@ -218,13 +225,14 @@ int join(int *status) {
 }
 /**
  * Purpose:
- * Creates the init process, then context switches to init
+ * Makes a process a zombie
  * 
  * Parameters:
- * int* status - status of the child process being joined
+ * int status - status of process to make zombie
+ * int switchToPid - PID of process to switch to after making process a zombie
  *
  * Return:
- * int - PID of child process that was joined
+ * None
  */ 
 void quit(int status, int switchToPid) {
     checkMode("quit");
@@ -240,14 +248,32 @@ void quit(int status, int switchToPid) {
     restoreInterrupts(prevInt);
     TEMP_switchTo(switchToPid);
 }
-
+/**
+ * Purpose:
+ * Returns PID of current running process
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * int - PID of current running process
+ */ 
 int getpid(void) {
     checkMode("getpid");
 
     if (currentProc) { return currentProc->pid; }
     else { return -1; }  // is this good? return something else? ask
 }
-
+/**
+ * Purpose:
+ * Dumps out information on all running or zombies processes
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * None
+ */ 
 void dumpProcesses(void) {
     checkMode("dumpProcesses");
     int prevInt = disableInterrupts();
