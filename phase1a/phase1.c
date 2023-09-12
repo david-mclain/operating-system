@@ -47,27 +47,7 @@ int testcaseMainMain();
 // NEED TO DISABLE & RE-ENABLE INTERRUPTS FOR EACH OF THESE FUNCTIONS (except getpid)
 // AND CHECK TO ENSURE WE'RE IN KERNEL MODE
 
-// MEMSET NOT WORKING PROPERLY, NEED TO FIX
 void phase1_init(void) {
-    // TEMPORARY UNTIL FIGURE OUT MEMSET????
-    /*
-    for (int i = 0; i < MAXPROC; i++) {
-        processes[i].pid = 0;
-        processes[i].priority = 0;
-        processes[i].status = 0;
-        processes[i].isAllocated = 0;
-        processes[i].runState = 0;
-        memset(processes[i].args, 0, sizeof(char) * MAXARG);
-        memset(processes[i].processName, 0, sizeof(char) * MAXNAME);
-        processes[i].parent = NULL;
-        processes[i].child = NULL;
-        processes[i].prevSibling = NULL;
-        processes[i].nextSibling = NULL;
-        processes[i].context = (USLOSS_Context){NULL, 0, 0}; 
-        processes[i].processMain = NULL;
-        processes[i].stackMem = NULL;
-    }
-    */
     memset(processes, 0, sizeof(processes));
 }
 
@@ -93,7 +73,7 @@ void startProcesses(void) {
 }
 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
-    USLOSS_PsrSet(1);
+    
     if (stacksize < USLOSS_MIN_STACK) {
         return -2;
     }
@@ -131,14 +111,14 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     void* stackMem = malloc(stacksize);
     new->stackMem = stackMem;
     USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
-    USLOSS_PsrSet(0);
+    
     return new->pid;
 }
 
 int join(int *status) {
-    USLOSS_PsrSet(1);
+    
     if (currentProc->child == NULL) {
-        USLOSS_PsrSet(0);
+        
         return -2;
     } // current proc. has no unjoined children
     else {
@@ -174,18 +154,21 @@ int join(int *status) {
                 currChild->prevSibling = NULL;
                 currChild->nextSibling = NULL;
                 currChild->child = NULL;
-                USLOSS_PsrSet(0);
+                
                 return currChild->pid;
             }
             currChild = currChild->nextSibling;
         }
-        USLOSS_PsrSet(0);
+        
         return 0; // in 1b block here, but shouldn't ever get here in 1a
     }
 }
 
 void quit(int status, int switchToPid) {
-    USLOSS_PsrSet(1);
+    if (USLOSS_PsrGet() & 0x1 == 0) {
+        printf("ERORORORORORORR\n");
+    }
+    
     if (currentProc->child) {
         USLOSS_Console("ERROR: Process pid %d called quit() while it still had children.\n", currentProc->pid);
         USLOSS_Halt(1);
@@ -196,19 +179,19 @@ void quit(int status, int switchToPid) {
 }
 
 int getpid(void) {
-    USLOSS_PsrSet(1);
+    
     if (currentProc) { 
-        USLOSS_PsrSet(0);
+        
         return currentProc->pid;
     }
     else {
-        USLOSS_PsrSet(0);
+        
         return -1;
     }  // is this good? return something else? ask
 }
 
 void dumpProcesses(void) {
-    USLOSS_PsrSet(1);
+    
     USLOSS_Console(" PID  PPID  NAME              PRIORITY  STATE\n");
     for (int i = 0; i < MAXPROC; i++) {
         if (processes[i].isAllocated) {
@@ -238,24 +221,24 @@ void dumpProcesses(void) {
             USLOSS_Console("\n");
         }
     }
-    USLOSS_PsrSet(0);
+    
 }
 
 void TEMP_switchTo(int pid) {
-    USLOSS_PsrSet(1);
+    
     PCB* switchTo = &processes[pid % MAXPROC];
     USLOSS_Context* prev_context = &(currentProc->context);
     if (currentProc->runState == RUNNING) { currentProc->runState=RUNNABLE; }
     switchTo->runState = RUNNING;
     currentProc = switchTo;
+    
     USLOSS_ContextSwitch(prev_context, &(switchTo->context)); // ERROR HERE GETTING SEG FAULT
-    USLOSS_PsrSet(0);
 }
 
 /* ---------- Helper Functions ---------- */
 
 void trampoline() {
-    USLOSS_PsrSet(0);
+    
     (*currentProc->processMain)(currentProc->args);
 }
 
