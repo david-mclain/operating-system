@@ -312,11 +312,6 @@ testcase_main(): after join of child 4, status = 4
 
 *** Start of round 1 of the fork()/join() operations ***
 Phase 1A TEMPORARY HACK: Manually switching to XXp1()
-XXp1(): started, pid = 45
-XXp1(): arg = 'XXp1'
-XXp1(): this process will terminate immediately.
-testcase_main(): after fork of child 45 -- you will see this after the just-created child runs, and completes.  So expect an alternation of XXp1() output, followed by these fork messages.
-Phase 1A TEMPORARY HACK: Manually switching to XXp1()
 XXp1(): started, pid = 46
 XXp1(): arg = 'XXp1'
 XXp1(): this process will terminate immediately.
@@ -521,6 +516,11 @@ XXp1(): started, pid = 89
 XXp1(): arg = 'XXp1'
 XXp1(): this process will terminate immediately.
 testcase_main(): after fork of child 89 -- you will see this after the just-created child runs, and completes.  So expect an alternation of XXp1() output, followed by these fork messages.
+Phase 1A TEMPORARY HACK: Manually switching to XXp1()
+XXp1(): started, pid = 90
+XXp1(): arg = 'XXp1'
+XXp1(): this process will terminate immediately.
+testcase_main(): after fork of child 90 -- you will see this after the just-created child runs, and completes.  So expect an alternation of XXp1() output, followed by these fork messages.
 
 **************** Calling dumpProcesses() *******************
  PID  PPID  NAME              PRIORITY  STATE
@@ -564,13 +564,14 @@ testcase_main(): after fork of child 89 -- you will see this after the just-crea
   87     3  XXp1              2         Terminated(87)
   88     3  XXp1              2         Terminated(88)
   89     3  XXp1              2         Terminated(89)
-  45     3  XXp1              2         Terminated(45)
+  90     3  XXp1              2         Terminated(90)
   46     3  XXp1              2         Terminated(46)
   47     3  XXp1              2         Terminated(47)
   48     3  XXp1              2         Terminated(48)
   49     3  XXp1              2         Terminated(49)
 **************** end dumpProcesses() *******************
 
+testcase_main(): after join of child 90, status = 90
 testcase_main(): after join of child 89, status = 89
 testcase_main(): after join of child 88, status = 88
 testcase_main(): after join of child 87, status = 87
@@ -612,19 +613,8 @@ testcase_main(): after join of child 49, status = 49
 testcase_main(): after join of child 48, status = 48
 testcase_main(): after join of child 47, status = 47
 testcase_main(): after join of child 46, status = 46
-testcase_main(): after join of child 45, status = 45
 
 *** Start of round 2 of the fork()/join() operations ***
-Phase 1A TEMPORARY HACK: Manually switching to XXp1()
-XXp1(): started, pid = 89
-XXp1(): arg = 'XXp1'
-XXp1(): this process will terminate immediately.
-testcase_main(): after fork of child 89 -- you will see this after the just-created child runs, and completes.  So expect an alternation of XXp1() output, followed by these fork messages.
-Phase 1A TEMPORARY HACK: Manually switching to XXp1()
-XXp1(): started, pid = 90
-XXp1(): arg = 'XXp1'
-XXp1(): this process will terminate immediately.
-testcase_main(): after fork of child 90 -- you will see this after the just-created child runs, and completes.  So expect an alternation of XXp1() output, followed by these fork messages.
 Phase 1A TEMPORARY HACK: Manually switching to XXp1()
 XXp1(): started, pid = 91
 XXp1(): arg = 'XXp1'
@@ -825,6 +815,16 @@ XXp1(): started, pid = 133
 XXp1(): arg = 'XXp1'
 XXp1(): this process will terminate immediately.
 testcase_main(): after fork of child 133 -- you will see this after the just-created child runs, and completes.  So expect an alternation of XXp1() output, followed by these fork messages.
+Phase 1A TEMPORARY HACK: Manually switching to XXp1()
+XXp1(): started, pid = 134
+XXp1(): arg = 'XXp1'
+XXp1(): this process will terminate immediately.
+testcase_main(): after fork of child 134 -- you will see this after the just-created child runs, and completes.  So expect an alternation of XXp1() output, followed by these fork messages.
+Phase 1A TEMPORARY HACK: Manually switching to XXp1()
+XXp1(): started, pid = 135
+XXp1(): arg = 'XXp1'
+XXp1(): this process will terminate immediately.
+testcase_main(): after fork of child 135 -- you will see this after the just-created child runs, and completes.  So expect an alternation of XXp1() output, followed by these fork messages.
 
 **************** Calling dumpProcesses() *******************
  PID  PPID  NAME              PRIORITY  STATE
@@ -862,8 +862,8 @@ testcase_main(): after fork of child 133 -- you will see this after the just-cre
  131     3  XXp1              2         Terminated(131)
  132     3  XXp1              2         Terminated(132)
  133     3  XXp1              2         Terminated(133)
-  89     3  XXp1              2         Terminated(89)
-  90     3  XXp1              2         Terminated(90)
+ 134     3  XXp1              2         Terminated(134)
+ 135     3  XXp1              2         Terminated(135)
   91     3  XXp1              2         Terminated(91)
   92     3  XXp1              2         Terminated(92)
   93     3  XXp1              2         Terminated(93)
@@ -875,6 +875,8 @@ testcase_main(): after fork of child 133 -- you will see this after the just-cre
   99     3  XXp1              2         Terminated(99)
 **************** end dumpProcesses() *******************
 
+testcase_main(): after join of child 135, status = 135
+testcase_main(): after join of child 134, status = 134
 testcase_main(): after join of child 133, status = 133
 testcase_main(): after join of child 132, status = 132
 testcase_main(): after join of child 131, status = 131
@@ -915,7 +917,5 @@ testcase_main(): after join of child 94, status = 94
 testcase_main(): after join of child 93, status = 93
 testcase_main(): after join of child 92, status = 92
 testcase_main(): after join of child 91, status = 91
-testcase_main(): after join of child 90, status = 90
-testcase_main(): after join of child 89, status = 89
 Phase 1A TEMPORARY HACK: testcase_main() returned, simulation will now halt.
 TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0
