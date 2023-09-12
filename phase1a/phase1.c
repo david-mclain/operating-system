@@ -51,10 +51,29 @@ int testcaseMainMain();
 // NEED TO DISABLE & RE-ENABLE INTERRUPTS FOR EACH OF THESE FUNCTIONS (except getpid)
 // AND CHECK TO ENSURE WE'RE IN KERNEL MODE
 
+/**
+ * Purpose:
+ * Initializes PCB data structure for OS simulation
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * None
+ */ 
 void phase1_init(void) {
     memset(processes, 0, sizeof(processes));
 }
-
+/**
+ * Purpose:
+ * Creates the init process, then context switches to init
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * None
+ */ 
 void startProcesses(void) {
     checkMode("startProcesses");
     int prevInt = disableInterrupts(); // could this be interrupted?
@@ -79,7 +98,20 @@ void startProcesses(void) {
     restoreInterrupts(prevInt);
     USLOSS_ContextSwitch(NULL, &init->context); // call dispatcher here for 1b
 }
-
+/**
+ * Purpose:
+ * Creates the init process, then context switches to init
+ * 
+ * Parameters:
+ * char* name - Name for the new process to create
+ * int (*func)(char*) - Function pointer to new processes main function
+ * char* arg - Arguments to pass into processes main function
+ * int stacksize - Size of stack for process
+ * int priority - Priority to set for process
+ *
+ * Return:
+ * int - PID of new process
+ */ 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
     checkMode("fork1");
     int prevInt = disableInterrupts();
@@ -122,10 +154,20 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     new->stackMem = stackMem;
     USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
 
+    currentPID++;
     restoreInterrupts(prevInt);
     return new->pid;
 }
-
+/**
+ * Purpose:
+ * Creates the init process, then context switches to init
+ * 
+ * Parameters:
+ * int* status - status of the child process being joined
+ *
+ * Return:
+ * int - PID of child process that was joined
+ */ 
 int join(int *status) {
     checkMode("join");
     int prevInt = disableInterrupts();
@@ -137,8 +179,7 @@ int join(int *status) {
             if (currChild->runState == DEAD) {
 
                 // collect status
-                *status = currChild->status; // run status vs. exit status?
-
+                *status = currChild->status;
 
                 // remove child from the linked list
                 
@@ -175,7 +216,16 @@ int join(int *status) {
         return 0; // in 1b block here, but shouldn't ever get here in 1a
     }
 }
-
+/**
+ * Purpose:
+ * Creates the init process, then context switches to init
+ * 
+ * Parameters:
+ * int* status - status of the child process being joined
+ *
+ * Return:
+ * int - PID of child process that was joined
+ */ 
 void quit(int status, int switchToPid) {
     checkMode("quit");
     int prevInt = disableInterrupts();

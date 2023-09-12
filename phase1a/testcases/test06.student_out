@@ -2,20 +2,15 @@ phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
-new pid: 2
-new pid: 3
 Phase 1A TEMPORARY HACK: init() manually switching to testcase_main() after using fork1() to create it.
 testcase_main(): started
 EXPECTATION: Create XXp1 (moderate priority); that creates 2 XXp2 children (low priority).  XXp1 will block on join(), which will cause main() to wake up and report the fork() results - after which the XXp2 processes will run.
-new pid: 4
 Phase 1A TEMPORARY HACK: Manually switching to XXp1()
 XXp1(): started
 XXp1(): arg = 'XXp1'
 XXp1(): executing fork of first child
-new pid: 5
 XXp1(): fork1 of first child returned pid = 5
 XXp1(): executing fork of second child
-new pid: 6
 XXp1(): fork1 of second child returned pid = 6
 XXp1(): performing first join
 Phase 1A TEMPORARY HACK: Manually switching to testcase_main(), since XXp1 has created its two children, which are lower priority than 
