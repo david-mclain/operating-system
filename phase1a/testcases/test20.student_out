@@ -2,56 +2,105 @@ phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
+new pid: 2
+new pid: 3
 Phase 1A TEMPORARY HACK: init() manually switching to testcase_main() after using fork1() to create it.
 testcase_main(): started
 EXPECTATION: Attempt to create MAXPROC+2 processes (without calling join() on any of them).  This will work many times but eventually fail because all of the procTable slots are full.  We will only print out info about the failed ones.
 testcase_main(): start 52 processes
+new pid: 4
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 5
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 6
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 7
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 8
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 9
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 10
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 11
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 12
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 13
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 14
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 15
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 16
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 17
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 18
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 19
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 20
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 21
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 22
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 23
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 24
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 25
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 26
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 27
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 28
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 29
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 30
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 31
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 32
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 33
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 34
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 35
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 36
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 37
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 38
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 39
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 40
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 41
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 42
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 43
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 44
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 45
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 46
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 47
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 48
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 49
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
+new pid: 50
 Phase 1A TEMPORARY HACK: Manually switching to the recently created XXp1()
 testcase_main(): fork1() failed: i=47, pid is -1.
 testcase_main(): fork1() failed: i=48, pid is -1.
