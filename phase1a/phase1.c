@@ -44,7 +44,8 @@ PCB processes[MAXPROC];
 PCB* currentProc;       // currently running process
 int currentPID = 1;     // next available PID
 
-/* ---------- Prototypes ---------- */
+
+    /* ---------- Prototypes ---------- */
 
 void trampoline();
 
@@ -57,9 +58,7 @@ int sentinelMain();
 int testcaseMainMain();
 
 
-/* ---------- Phase 1a Functions ---------- */
-// NEED TO DISABLE & RE-ENABLE INTERRUPTS FOR EACH OF THESE FUNCTIONS (except getpid)
-// AND CHECK TO ENSURE WE'RE IN KERNEL MODE
+    /* ---------- Phase 1a Functions ---------- */
 
 /**
  * Purpose:
@@ -74,6 +73,7 @@ int testcaseMainMain();
 void phase1_init(void) {
     memset(processes, 0, sizeof(processes));
 }
+
 /**
  * Purpose:
  * Creates the init process, then context switches to init
@@ -86,7 +86,7 @@ void phase1_init(void) {
  */ 
 void startProcesses(void) {
     checkMode("startProcesses");
-    int prevInt = disableInterrupts(); // could this be interrupted?
+    int prevInt = disableInterrupts();
 
     // Create init PCB and populate fields
     PCB* init = &processes[currentPID % MAXPROC];
@@ -108,19 +108,20 @@ void startProcesses(void) {
     restoreInterrupts(prevInt);
     USLOSS_ContextSwitch(NULL, &init->context); // call dispatcher here for 1b
 }
+
 /**
  * Purpose:
  * Creates a new process and fills in all PCB fields for it
  * 
  * Parameters:
- * char* name - Name for the new process to create
- * int (*func)(char*) - Function pointer to new processes main function
- * char* arg - Arguments to pass into processes main function
- * int stacksize - Size of stack for process
- * int priority - Priority to set for process
+ * char* name           Name for the new process to create
+ * int (*func)(char*)   Function pointer to new processes main function
+ * char* arg            Arguments to pass into processes main function
+ * int stacksize        Size of stack for process
+ * int priority         Priority to set for process
  *
  * Return:
- * int - PID of new process
+ * int  PID of new process
  */ 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
     checkMode("fork1");
@@ -143,7 +144,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     }
 
     PCB* new = &processes[currentPID % MAXPROC];
-    new->pid = currentPID;
+    new->pid = currentPID++;
     new->priority = priority;
     new->runState = RUNNABLE;
     new->isAllocated = 1;
@@ -159,15 +160,16 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     if (arg != NULL) {
         strcpy(new->args, arg);
     }
-    // allocate stack, initialize context, and context switch to init
+
+    // allocate stack, initialize context
     void* stackMem = malloc(stacksize);
     new->stackMem = stackMem;
     USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
 
-    currentPID++;
     restoreInterrupts(prevInt);
     return new->pid;
 }
+
 /**
  * Purpose:
  * Cleans up zombie children processes
@@ -183,49 +185,46 @@ int join(int *status) {
     int prevInt = disableInterrupts();
     
     if (currentProc->child == NULL) { return -2; } // current proc. has no unjoined children
-    else {
-        PCB* currChild = currentProc->child;
-        while (currChild) {
-            if (currChild->runState == DEAD) {
+                                                   
+    PCB* currChild = currentProc->child;
+    while (currChild) {
+        if (currChild->runState == DEAD) {
 
-                // collect status
-                *status = currChild->status;
+            *status = currChild->status; // collect status
 
-                // remove child from the linked list
-                
-                if (currChild->prevSibling != NULL){    // change left sibling's ptr
-                    currChild->prevSibling->nextSibling = currChild->nextSibling;
-                }
-                else {  // change parent's child ptr
-                    if (currChild->nextSibling != NULL) {
-                        currChild->nextSibling->prevSibling = NULL;
-                    }
-                    currentProc->child = currChild->nextSibling; 
-                }
-
-                if (currChild->nextSibling != NULL) {   // change right sibling's ptr
-                    currChild->nextSibling->prevSibling = currChild->prevSibling;
-                } 
-                
-
-                // free up child's stack and clear pointers
-                free(currChild->stackMem);
-                currChild->isAllocated = 0;
-                currChild->parent = NULL;
-                currChild->prevSibling = NULL;
-                currChild->nextSibling = NULL;
-                currChild->child = NULL;
-
-                restoreInterrupts(prevInt);
-                return currChild->pid;
+            // remove child from the linked list
+            if (currChild->prevSibling != NULL){    // change left sibling's ptr
+                currChild->prevSibling->nextSibling = currChild->nextSibling;
             }
-            currChild = currChild->nextSibling;
-        }
+            else {  // change parent's child ptr
+                if (currChild->nextSibling != NULL) {
+                    currChild->nextSibling->prevSibling = NULL;
+                }
+                currentProc->child = currChild->nextSibling; 
+            }
 
-        restoreInterrupts(prevInt);
-        return 0; // in 1b block here, but shouldn't ever get here in 1a
+            if (currChild->nextSibling != NULL) {   // change right sibling's ptr
+                currChild->nextSibling->prevSibling = currChild->prevSibling;
+            } 
+
+            // free up child's stack and clear pointers
+            free(currChild->stackMem);
+            currChild->isAllocated = 0;
+            currChild->parent = NULL;
+            currChild->prevSibling = NULL;
+            currChild->nextSibling = NULL;
+            currChild->child = NULL;
+
+            restoreInterrupts(prevInt);
+            return currChild->pid;
+        }
+        currChild = currChild->nextSibling;
     }
+
+    restoreInterrupts(prevInt);
+    return 0; // in 1b block here, but shouldn't ever get here in 1a
 }
+
 /**
  * Purpose:
  * Makes a process a zombie
@@ -251,6 +250,7 @@ void quit(int status, int switchToPid) {
     restoreInterrupts(prevInt);
     TEMP_switchTo(switchToPid);
 }
+
 /**
  * Purpose:
  * Returns PID of current running process
@@ -267,6 +267,7 @@ int getpid(void) {
     if (currentProc) { return currentProc->pid; }
     else { return -1; }  // is this good? return something else? ask
 }
+
 /**
  * Purpose:
  * Dumps out information on all running or zombies processes
@@ -312,6 +313,7 @@ void dumpProcesses(void) {
     }
     restoreInterrupts(prevInt);
 }
+
 /**
  * Purpose:
  * TEMPORARY FUNCTION. Switches current process to the process with passed in pid
@@ -336,7 +338,9 @@ void TEMP_switchTo(int pid) {
     USLOSS_ContextSwitch(prev_context, &(switchTo->context));
 }
 
-/* ---------- Helper Functions ---------- */
+
+    /* ---------- Helper Functions ---------- */
+
 /**
  * Purpose:
  * Checks the current mode of the operating system, halts if user mode attempts to
@@ -355,6 +359,7 @@ void checkMode(char* fnName) {
         USLOSS_Halt(1);
     }
 }
+
 /**
  * Purpose:
  * Disables interrupts for when executing kernel mode functions
@@ -370,6 +375,7 @@ int disableInterrupts() {
     USLOSS_PsrSet(prevInt & ~USLOSS_PSR_CURRENT_INT);
     return prevInt;
 }
+
 /**
  * Purpose:
  * Restores interrupts after kernel function has finished executing
@@ -383,6 +389,7 @@ int disableInterrupts() {
 void restoreInterrupts(int prevInt) {
     USLOSS_PsrSet(USLOSS_PsrGet() | prevInt);
 }
+
 /**
  * Purpose:
  * Trampoline function used to bounce current process start function to it's
@@ -401,7 +408,9 @@ void trampoline() {
     // do something (call quit? halt?) here
 }
 
-/* ---------- Process Functions ---------- */
+
+    /* ---------- Process Functions ---------- */
+
 /**
  * Purpose:
  * Main function for init process, handles starting other service processes
@@ -433,6 +442,7 @@ void initMain() {
     }
     */
 }
+
 /**
  * Purpose:
  * Main function for sentinel process, handles deadlocks
@@ -446,6 +456,7 @@ void initMain() {
 int sentinelMain(char* args) {           // david
     return 0;
 }
+
 /**
  * Purpose:
  * Main function for testcase_main process
@@ -460,7 +471,7 @@ int testcaseMainMain(char* arg) {
     int test_return = testcase_main();
     USLOSS_Console("Phase 1A TEMPORARY HACK: testcase_main() returned, simulation will now halt.\n");
     if (test_return != 0) { 
-        USLOSS_Console("testcase_main returned with a nonzero error code: %d\n", test_return); // do this for all printouts
+        USLOSS_Console("testcase_main returned with a nonzero error code: %d\n", test_return);
     }
     USLOSS_Halt(test_return); // pass zero? ask about this
     return 0;
