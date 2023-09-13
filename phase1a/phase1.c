@@ -309,7 +309,16 @@ void dumpProcesses(void) {
     }
     restoreInterrupts(prevInt);
 }
-
+/**
+ * Purpose:
+ * TEMPORARY FUNCTION. Switches current process to the process with passed in pid
+ * 
+ * Parameters:
+ * int pid - PID to switch to for the current running process
+ *
+ * Return:
+ * None
+ */ 
 void TEMP_switchTo(int pid) {
     checkMode("dumpProcesses");
     int prevInt = disableInterrupts();
@@ -325,7 +334,17 @@ void TEMP_switchTo(int pid) {
 }
 
 /* ---------- Helper Functions ---------- */
-
+/**
+ * Purpose:
+ * Checks the current mode of the operating system, halts if user mode attempts to
+ * execute kernel functions
+ * 
+ * Parameters:
+ * char* fnName - Name of function that user mode process attempted to execute
+ *
+ * Return:
+ * None
+ */ 
 void checkMode(char* fnName) {
     if (!(USLOSS_PsrGet() & USLOSS_PSR_CURRENT_MODE)) {
         USLOSS_Console("ERROR: Someone attempted to call %s while in user mode!\n",
@@ -333,17 +352,45 @@ void checkMode(char* fnName) {
         USLOSS_Halt(1);
     }
 }
-
+/**
+ * Purpose:
+ * Disables interrupts for when executing kernel mode functions
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * int - State that interrupts were in before function call
+ */ 
 int disableInterrupts() {
     int prevInt = USLOSS_PsrGet() & USLOSS_PSR_CURRENT_INT; // previous interrupt status
     USLOSS_PsrSet(prevInt & ~USLOSS_PSR_CURRENT_INT);
     return prevInt;
 }
-
+/**
+ * Purpose:
+ * Restores interrupts after kernel function has finished executing
+ * 
+ * Parameters:
+ * int prevInt - State that interrupts were in before function call
+ *
+ * Return:
+ * None
+ */ 
 void restoreInterrupts(int prevInt) {
     USLOSS_PsrSet(USLOSS_PsrGet() | prevInt);
 }
-
+/**
+ * Purpose:
+ * Trampoline function used to bounce current process start function to it's
+ * main function
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * None
+ */ 
 void trampoline() {
     // enable interrupts
     USLOSS_PsrSet(USLOSS_PsrGet() | USLOSS_PSR_CURRENT_INT);
@@ -352,7 +399,17 @@ void trampoline() {
 }
 
 /* ---------- Process Functions ---------- */
-
+/**
+ * Purpose:
+ * Main function for init process, handles starting other service processes
+ * and forking other processes to get test case and sentinel running
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * None
+ */ 
 void initMain() {
     phase2_start_service_processes();
     phase3_start_service_processes();
@@ -373,11 +430,29 @@ void initMain() {
     }
     */
 }
-
-int sentinelMain(char* arg) {           // david
+/**
+ * Purpose:
+ * Main function for sentinel process, handles deadlocks
+ * 
+ * Parameters:
+ * char* args - Arguments for sentinel main function
+ *
+ * Return:
+ * int - Return status of main function (should never return)
+ */ 
+int sentinelMain(char* args) {           // david
     return 0;
 }
-
+/**
+ * Purpose:
+ * Main function for testcase_main process
+ * 
+ * Parameters:
+ * char* args - Arguments for testcase_main main function
+ *
+ * Return:
+ * int - Return status of main function
+ */ 
 int testcaseMainMain(char* arg) {
     int test_return = testcase_main();
     USLOSS_Console("Phase 1A TEMPORARY HACK: testcase_main() returned, simulation will now halt.\n");
