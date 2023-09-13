@@ -2,7 +2,10 @@
  * File: phase1.c
  * Authors: David McLain, Miles Gendreau
  *
- * Purpose: phase1.c ....
+ * Purpose: phase1.c contains function implementations for 
+ * the very first steps of simulating an operating system.
+ * Creates process table and PCB data types and manages starting
+ * different types of processes, joining and quitting them.
  */
 
 #include <stddef.h>
