@@ -53,6 +53,8 @@ void checkMode(char* fnName);
 int disableInterrupts();
 void restoreInterrupts(int prevInt);
 
+void dispatch();
+
 void initMain();
 int sentinelMain();
 int testcaseMainMain();
@@ -416,7 +418,9 @@ void trampoline() {
     // do something (call quit? halt?) here
 }
 
-
+void dispatch() {
+    // dispatch here ez pz lemon squeezy
+}
     /* ---------- Process Functions ---------- */
 
 /**
