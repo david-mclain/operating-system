@@ -57,7 +57,6 @@ void initMain();
 int sentinelMain();
 int testcaseMainMain();
 
-
     /* ---------- Phase 1a Functions ---------- */
 
 /**
@@ -106,6 +105,7 @@ void startProcesses(void) {
 
     // restore interrupts and context switch to init
     restoreInterrupts(prevInt);
+    // CALL DISPATCHER HERE
     USLOSS_ContextSwitch(NULL, &init->context); // call dispatcher here for 1b
 }
 
@@ -248,7 +248,7 @@ void quit(int status, int switchToPid) {
     currentProc->runState = DEAD;
 
     restoreInterrupts(prevInt);
-    TEMP_switchTo(switchToPid);
+    // CALL DISPATCHER HERE
 }
 
 /**
@@ -314,30 +314,38 @@ void dumpProcesses(void) {
     restoreInterrupts(prevInt);
 }
 
-/**
- * Purpose:
- * TEMPORARY FUNCTION. Switches current process to the process with passed in pid
- * 
- * Parameters:
- * int pid - PID to switch to for the current running process
- *
- * Return:
- * None
- */ 
-void TEMP_switchTo(int pid) {
-    checkMode("dumpProcesses");
-    int prevInt = disableInterrupts();
+    /* -------- FUNCTIONS TO IMPLEMENT -------- */
+void zap(int pid) {
 
-    PCB* switchTo = &processes[pid % MAXPROC];
-    USLOSS_Context* prev_context = &(currentProc->context);
-    if (currentProc->runState == RUNNING) { currentProc->runState=RUNNABLE; }
-    switchTo->runState = RUNNING;
-    currentProc = switchTo;
-    
-    restoreInterrupts(prevInt);
-    USLOSS_ContextSwitch(prev_context, &(switchTo->context));
 }
 
+int isZapped(void) {
+    return 0;
+}
+
+void blockMe(int block_status) {
+
+}
+
+int unblockProc(int pid) {
+
+}
+
+int readCurStartTime(void) {
+
+}
+
+void timeSlice(void) {
+
+}
+
+int readtime(void) {
+
+}
+
+int currentTime(void) {
+
+}
 
     /* ---------- Helper Functions ---------- */
 
@@ -435,7 +443,6 @@ void initMain() {
     int testcaseMainPid = fork1(test, &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
 
     USLOSS_Console("Phase 1A TEMPORARY HACK: init() manually switching to testcase_main() after using fork1() to create it.\n");
-    TEMP_switchTo(testcaseMainPid);     // call dispatcher here in 1b
     /*
     while (1) {
         join();
