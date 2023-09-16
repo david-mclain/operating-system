@@ -316,7 +316,8 @@ void dumpProcesses(void) {
     restoreInterrupts(prevInt);
 }
 
-    /* -------- FUNCTIONS TO IMPLEMENT -------- */
+    /* -------- Phase 1b Functions -------- */
+
 void zap(int pid) {
 
 }
@@ -402,7 +403,7 @@ void restoreInterrupts(int prevInt) {
 
 /**
  * Purpose:
- * Trampoline function used to bounce current process start function to it's
+ * Trampoline function used to bounce current process start function to its
  * main function
  * 
  * Parameters:
@@ -421,6 +422,8 @@ void trampoline() {
 void dispatch() {
     // dispatch here ez pz lemon squeezy
 }
+
+
     /* ---------- Process Functions ---------- */
 
 /**

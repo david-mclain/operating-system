@@ -49,9 +49,9 @@ int currentPID = 1;     // next available PID
 
 void trampoline();
 
-void checkMode(char* fnName);
+void checkMode();
 int disableInterrupts();
-void restoreInterrupts(int prevInt);
+void restoreInterrupts();
 
 void initMain();
 int sentinelMain();
@@ -98,7 +98,7 @@ void startProcesses(void) {
     // allocate stack, initialize context 
     void* stackMem = malloc(USLOSS_MIN_STACK);
     init->stackMem = stackMem;
-    USLOSS_ContextInit(&init->context, stackMem, USLOSS_MIN_STACK, NULL, &initMain); // maybe change to an int main() and use trampoline?
+    USLOSS_ContextInit(&init->context, stackMem, USLOSS_MIN_STACK, NULL, &initMain);
 
     // Set init as the current running process
     currentProc = init;
@@ -175,10 +175,10 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
  * Cleans up zombie children processes
  * 
  * Parameters:
- * int* status - status of the child process being joined
+ * int* status  Status of the child process being joined
  *
  * Return:
- * int - PID of child process that was joined
+ * int  PID of child process that was joined
  */ 
 int join(int *status) {
     checkMode("join");
@@ -230,8 +230,8 @@ int join(int *status) {
  * Makes a process a zombie
  * 
  * Parameters:
- * int status - status of process to make zombie
- * int switchToPid - PID of process to switch to after making process a zombie
+ * int status           Status of process to make zombie
+ * int switchToPid      PID of process to switch to after making process a zombie
  *
  * Return:
  * None
@@ -259,7 +259,7 @@ void quit(int status, int switchToPid) {
  * None
  *
  * Return:
- * int - PID of current running process
+ * int  PID of current running process
  */ 
 int getpid(void) {
     checkMode("getpid");
@@ -319,7 +319,7 @@ void dumpProcesses(void) {
  * TEMPORARY FUNCTION. Switches current process to the process with passed in pid
  * 
  * Parameters:
- * int pid - PID to switch to for the current running process
+ * int pid  PID to switch to for the current running process
  *
  * Return:
  * None
@@ -347,7 +347,7 @@ void TEMP_switchTo(int pid) {
  * execute kernel functions
  * 
  * Parameters:
- * char* fnName - Name of function that user mode process attempted to execute
+ * char* fnName     Name of function that user mode process attempted to execute
  *
  * Return:
  * None
@@ -368,7 +368,7 @@ void checkMode(char* fnName) {
  * None
  *
  * Return:
- * int - State that interrupts were in before function call
+ * int  State that interrupts were in before function call
  */ 
 int disableInterrupts() {
     int prevInt = USLOSS_PsrGet() & USLOSS_PSR_CURRENT_INT; // previous interrupt status
@@ -381,7 +381,7 @@ int disableInterrupts() {
  * Restores interrupts after kernel function has finished executing
  * 
  * Parameters:
- * int prevInt - State that interrupts were in before function call
+ * int prevInt  State that interrupts were in before function call
  *
  * Return:
  * None
@@ -405,7 +405,6 @@ void trampoline() {
     // enable interrupts
     USLOSS_PsrSet(USLOSS_PsrGet() | USLOSS_PSR_CURRENT_INT);
     (*currentProc->processMain)(currentProc->args);
-    // do something (call quit? halt?) here
 }
 
 
@@ -448,10 +447,10 @@ void initMain() {
  * Main function for sentinel process, handles deadlocks
  * 
  * Parameters:
- * char* args - Arguments for sentinel main function
+ * char* args   Arguments for sentinel main function
  *
  * Return:
- * int - Return status of main function (should never return)
+ * int  Return status of main function (should never return)
  */ 
 int sentinelMain(char* args) {           // david
     return 0;
@@ -462,10 +461,10 @@ int sentinelMain(char* args) {           // david
  * Main function for testcase_main process
  * 
  * Parameters:
- * char* args - Arguments for testcase_main main function
+ * char* args   Arguments for testcase_main main function
  *
  * Return:
- * int - Return status of main function
+ * int  Return status of main function
  */ 
 int testcaseMainMain(char* arg) {
     int test_return = testcase_main();
