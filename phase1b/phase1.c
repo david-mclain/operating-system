@@ -572,85 +572,44 @@ void dispatch() {
     USLOSS_Console("im working on it :/\n");
 }
 
+// Fixed your messy function :D
+// I think it would be even better to have an array of Queues instead of explicitly defining
+// individual queues for each priority level because you wouldn't even need a switch
+// at all, or this nested function I made
 void addToQueue(PCB* process) {
+    void addTo(Queue q) {
+        if (q.head == NULL) {
+            q.head = process;
+            q.tail = process;
+        }
+        else {
+            q.tail->nextInQueue = process;
+            process->prevInQueue = q.tail;
+            q.tail = process;
+        }
+    }
     switch(process->priority) {
         case 1:
-            if (queueP1.head == NULL) {
-                queueP1.head = process;
-                queueP1.tail = process;
-            }
-            else {
-                queueP1.tail->nextInQueue = process;
-                process->prevInQueue = queueP1.tail;
-                queueP1.tail = process;
-            }
-        break;
+            addTo(queueP1);
+            break;
         case 2:
-            if (queueP2.head == NULL) {
-                queueP2.head = process;
-                queueP2.tail = process;
-            }
-            else {
-                queueP2.tail->nextInQueue = process;
-                process->prevInQueue = queueP2.tail;
-                queueP2.tail = process;
-            }
-        break;
+            addTo(queueP2);
+            break;
         case 3:
-            if (queueP3.head == NULL) {
-                queueP3.head = process;
-                queueP3.tail = process;
-            }
-            else {
-                queueP3.tail->nextInQueue = process;
-                process->prevInQueue = queueP3.tail;
-                queueP3.tail = process;
-            }
-        break;
+            addTo(queueP3);
+            break;
         case 4:
-            if (queueP4.head == NULL) {
-                queueP4.head = process;
-                queueP4.tail = process;
-            }
-            else {
-                queueP4.tail->nextInQueue = process;
-                process->prevInQueue = queueP4.tail;
-                queueP4.tail = process;
-            }
-        break;
+            addTo(queueP4);
+            break;
         case 5:
-            if (queueP5.head == NULL) {
-                queueP5.head = process;
-                queueP5.tail = process;
-            }
-            else {
-                queueP5.tail->nextInQueue = process;
-                process->prevInQueue = queueP5.tail;
-                queueP5.tail = process;
-            }
-        break;
+            addTo(queueP5);
+            break;
         case 6:
-            if (queueP6.head == NULL) {
-                queueP6.head = process;
-                queueP6.tail = process;
-            }
-            else {
-                queueP6.tail->nextInQueue = process;
-                process->prevInQueue = queueP6.tail;
-                queueP6.tail = process;
-            }
-        break;
+            addTo(queueP6);
+            break;
         case 7:
-            if (queueP7.head == NULL) {
-                queueP7.head = process;
-                queueP7.tail = process;
-            }
-            else {
-                queueP7.tail->nextInQueue = process;
-                process->prevInQueue = queueP7.tail;
-                queueP7.tail = process;
-            }
-        break;
+            addTo(queueP7);
+            break;
     }
 }
 
