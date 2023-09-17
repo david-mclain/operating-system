@@ -14,6 +14,8 @@
 #include <string.h>
 #include "phase1.h"
 
+#define NUMPRIORITIES   7
+
 #define RUNNABLE    0
 #define RUNNING     1
 #define BLOCKED     2
@@ -52,19 +54,15 @@ typedef struct Queue {
     PCB* tail;
 } Queue;
 
+
+    /* ---------- Globals ---------- */
+
 PCB processes[MAXPROC];
 PCB* currentProc;       // currently running process
 int currentPID = 1;     // next available PID
 
-    /* ---------- Queues for Dispatcher ---------- */
+Queue queues[NUMPRIORITIES]; // queues for dispatcher
 
-Queue queueP1;
-Queue queueP2;
-Queue queueP3;
-Queue queueP4;
-Queue queueP5;
-Queue queueP6;
-Queue queueP7;
 
     /* ---------- Prototypes ---------- */
 
@@ -82,6 +80,7 @@ void initMain();
 int sentinelMain();
 int testcaseMainMain();
 
+
     /* ---------- Phase 1a Functions ---------- */
 
 /**
@@ -96,13 +95,7 @@ int testcaseMainMain();
  */ 
 void phase1_init(void) {
     memset(processes, 0, sizeof(processes));
-    memset(&queueP1, 0, sizeof(queueP1));
-    memset(&queueP2, 0, sizeof(queueP2));
-    memset(&queueP3, 0, sizeof(queueP3));
-    memset(&queueP4, 0, sizeof(queueP4));
-    memset(&queueP5, 0, sizeof(queueP5));
-    memset(&queueP6, 0, sizeof(queueP6));
-    memset(&queueP7, 0, sizeof(queueP7));
+    memset(queues, 0, sizeof(queues));
 }
 
 /**
@@ -145,47 +138,14 @@ void startProcesses(void) {
 
 /* ---------- TEMPORARY PRINT FUNCTION FOR DEBUGGING ---------- */
 void printQueues() {
-    PCB* cur = queueP1.head;
-    printf("Queue P1\n");
-    while (cur != NULL) {
-        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
-        cur = cur->nextInQueue;
-    }
-    cur = queueP2.head;
-    printf("Queue P2\n");
-    while (cur != NULL) {
-        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
-        cur = cur->nextInQueue;
-    }
-    cur = queueP3.head;
-    printf("Queue P3\n");
-    while (cur != NULL) {
-        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
-        cur = cur->nextInQueue;
-    }
-    cur = queueP4.head;
-    printf("Queue P4\n");
-    while (cur != NULL) {
-        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
-        cur = cur->nextInQueue;
-    }
-    cur = queueP5.head;
-    printf("Queue P5\n");
-    while (cur != NULL) {
-        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
-        cur = cur->nextInQueue;
-    }
-    cur = queueP6.head;
-    printf("Queue P6\n");
-    while (cur != NULL) {
-        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
-        cur = cur->nextInQueue;
-    }
-    cur = queueP7.head;
-    printf("Queue P7\n");
-    while (cur != NULL) {
-        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
-        cur = cur->nextInQueue;
+    PCB* cur;
+    for (int i = 0; i < NUMPRIORITIES; i++) {
+        cur = queues[i].head;
+        USLOSS_Console("Queue P%d\n", i+1);
+        while (cur != NULL) {
+            USLOSS_Console("process: %s, priority: %d\n", cur->processName, cur->priority);
+            cur = cur->nextInQueue;
+        }
     }
 }
 
@@ -432,6 +392,7 @@ void zap(int pid) {
 }
 
 int isZapped(void) {
+    checkMode("isZapped");
     return (currentProc->zappedBy != NULL);
 }
 
@@ -536,80 +497,34 @@ void dispatch() {
     int prevInt = disableInterrupts();
     PCB* new;
     // dispatch here ez pz lemon squeezy
-    if (queueP1.head != NULL) {
-        new = queueP1.head;
-        queueP1.head = queueP1.head->nextInQueue;
-    }
-    else if (queueP2.head != NULL) {
-        new = queueP2.head;
-        queueP2.head = queueP2.head->nextInQueue;
-    }
-    else if (queueP3.head != NULL) {
-        new = queueP3.head;
-        queueP3.head = queueP3.head->nextInQueue;
-    }
-    else if (queueP4.head != NULL) {
-        new = queueP4.head;
-        queueP4.head = queueP4.head->nextInQueue;
-    }
-    else if (queueP5.head != NULL) {
-        new = queueP5.head;
-        queueP5.head = queueP5.head->nextInQueue;
-    }
-    else if (queueP6.head != NULL) {
-        new = queueP6.head;
-        queueP6.head = queueP6.head->nextInQueue;
-    }
-    else if (queueP7.head != NULL) {
-        new = queueP7.head;
-        queueP7.head = queueP7.head->nextInQueue;
+    // fixed your messy branching logic :D
+    for (int i = 0; i < NUMPRIORITIES; i++) {
+        if (queues[i].head != NULL) {
+            new = queues[i].head;
+            queues[i].head = queues[i].head->nextInQueue;
+            break;
+        }
     }
     currentProc = new;
+    currentProc->runState = RUNNING;
     restoreInterrupts(prevInt);
-    printf("switching to process: %d\n", new->pid);
+    USLOSS_Console("switching to process: %d\n", new->pid);
     USLOSS_ContextSwitch(NULL, &(new->context));
     USLOSS_Console("dispatcher: Not implemented yet :(\n");
     USLOSS_Console("im working on it :/\n");
 }
 
 // Fixed your messy function :D
-// I think it would be even better to have an array of Queues instead of explicitly defining
-// individual queues for each priority level because you wouldn't even need a switch
-// at all, or this nested function I made
 void addToQueue(PCB* process) {
-    void addTo(Queue q) {
-        if (q.head == NULL) {
-            q.head = process;
-            q.tail = process;
-        }
-        else {
-            q.tail->nextInQueue = process;
-            process->prevInQueue = q.tail;
-            q.tail = process;
-        }
+    Queue* addTo = &queues[(process->priority)-1];
+    if (addTo->head == NULL) {
+        addTo->head = process;
+        addTo->tail = process;
     }
-    switch(process->priority) {
-        case 1:
-            addTo(queueP1);
-            break;
-        case 2:
-            addTo(queueP2);
-            break;
-        case 3:
-            addTo(queueP3);
-            break;
-        case 4:
-            addTo(queueP4);
-            break;
-        case 5:
-            addTo(queueP5);
-            break;
-        case 6:
-            addTo(queueP6);
-            break;
-        case 7:
-            addTo(queueP7);
-            break;
+    else {
+        addTo->tail->nextInQueue = process;
+        process->prevInQueue = addTo->tail;
+        addTo->tail = process;
     }
 }
 
