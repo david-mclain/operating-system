@@ -69,19 +69,19 @@ Queue queueP7;
     /* ---------- Prototypes ---------- */
 
 void trampoline();
-void addToQueue(PCB*);
 
 void checkMode(char* fnName);
 int disableInterrupts();
 void restoreInterrupts(int prevInt);
 
+void addToQueue(PCB*);
+void printQueues();
 void dispatch();
 
 void initMain();
 int sentinelMain();
 int testcaseMainMain();
 
-void printQueues();
     /* ---------- Phase 1a Functions ---------- */
 
 /**
