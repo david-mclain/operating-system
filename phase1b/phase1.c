@@ -16,7 +16,8 @@
 
 #define RUNNABLE    0
 #define RUNNING     1
-#define DEAD        2
+#define BLOCKED     2
+#define DEAD        3
 
 typedef struct PCB {
     int pid;
@@ -32,6 +33,9 @@ typedef struct PCB {
     struct PCB* child;
     struct PCB* prevSibling;
     struct PCB* nextSibling;
+
+    struct PCB* zappedBy;   // head of list of procs currently zap()-ing this proc
+    struct PCB* nextZapper; // next (after this) in list of procs zap()-ing some OTHER proc
 
     USLOSS_Context context;
 
@@ -233,12 +237,11 @@ int join(int *status) {
  * 
  * Parameters:
  * int status - status of process to make zombie
- * int switchToPid - PID of process to switch to after making process a zombie
  *
  * Return:
  * None
  */ 
-void quit(int status, int switchToPid) {
+void quit(int status) {
     checkMode("quit");
     int prevInt = disableInterrupts();
     
@@ -319,11 +322,43 @@ void dumpProcesses(void) {
     /* -------- Phase 1b Functions -------- */
 
 void zap(int pid) {
+    checkMode("zap");
+    int prevInt = disableInterrupts();
 
+    // check for invalid pid
+    char err[] = "ERROR: Attempt to zap()";
+    if (pid <= 0) {
+        USLOSS_Console("%s a PID which is <=0. other_pid = %d\n", err, pid);
+        USLOSS_Halt(1);
+    }
+    if (pid == 1) {
+        USLOSS_Console("%s init.\n", err);
+        USLOSS_Halt(1);
+    }
+    if (pid == currentProc->pid) {
+        USLOSS_Console("%s itself.\n", err);
+        USLOSS_Halt(1);
+    }
+    if (!processes[pid % MAXPROC].isAllocated) {
+        USLOSS_Console("%s a non-existent process.\n", err);
+        USLOSS_Halt(1);
+    }
+    // USLOSS_Console("%s a process that is already in the process of dying.\n", err);
+    // not sure what conditions would apply for this one, but saw it in testcases
+
+    // add self to list of processes currently zap()-ing process pid
+    PCB* toZap = &processes[pid % MAXPROC]; // do this for every ref. to processes?
+    currentProc->nextZapper = toZap->zappedBy;
+    toZap->zappedBy = currentProc;
+
+    // block and call dispatcher
+    currentProc->runState = BLOCKED;
+    restoreInterrupts(prevInt); // ?
+    dispatch();
 }
 
 int isZapped(void) {
-    return 0;
+    return (currentProc->zappedBy != NULL);
 }
 
 void blockMe(int block_status) {
@@ -421,6 +456,7 @@ void trampoline() {
 
 void dispatch() {
     // dispatch here ez pz lemon squeezy
+    USLOSS_Console("dispatcher: Not implemented yet :(");
 }
 
 
