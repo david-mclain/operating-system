@@ -499,9 +499,10 @@ void dispatch() {
     // dispatch here ez pz lemon squeezy
     // fixed your messy branching logic :D
     for (int i = 0; i < NUMPRIORITIES; i++) {
-        if (queues[i].head != NULL) {
-            new = queues[i].head;
-            queues[i].head = queues[i].head->nextInQueue;
+        Queue* q = &queues[i];
+        if (q->head != NULL) {
+            new = q->head;
+            q->head = q->head->nextInQueue;
             break;
         }
     }
@@ -514,7 +515,7 @@ void dispatch() {
     USLOSS_Console("im working on it :/\n");
 }
 
-// Fixed your messy function :D
+// fixed your messy function :D
 void addToQueue(PCB* process) {
     Queue* addTo = &queues[(process->priority)-1];
     if (addTo->head == NULL) {
