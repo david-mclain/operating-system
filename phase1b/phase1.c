@@ -533,35 +533,42 @@ void trampoline() {
 
 void dispatch() {
     int prevInt = disableInterrupts();
+    PCB* new;
     // dispatch here ez pz lemon squeezy
     if (queueP1.head != NULL) {
-        
+        new = queueP1.head;
+        queueP1.head = queueP1.head->nextInQueue;
     }
     else if (queueP2.head != NULL) {
-
+        new = queueP2.head;
+        queueP2.head = queueP2.head->nextInQueue;
     }
     else if (queueP3.head != NULL) {
-
+        new = queueP3.head;
+        queueP3.head = queueP3.head->nextInQueue;
     }
     else if (queueP4.head != NULL) {
-
+        new = queueP4.head;
+        queueP4.head = queueP4.head->nextInQueue;
     }
     else if (queueP5.head != NULL) {
-
+        new = queueP5.head;
+        queueP5.head = queueP5.head->nextInQueue;
     }
     else if (queueP6.head != NULL) {
-
+        new = queueP6.head;
+        queueP6.head = queueP6.head->nextInQueue;
     }
     else if (queueP7.head != NULL) {
-
+        new = queueP7.head;
+        queueP7.head = queueP7.head->nextInQueue;
     }
     // TEMPORARY FOR TESTING
-    currentProc = &processes[1];
-    USLOSS_ContextSwitch(NULL, &processes[1].context);
+    currentProc = new;
+    restoreInterrupts(prevInt);
+    USLOSS_ContextSwitch(NULL, &(new->context));
     USLOSS_Console("dispatcher: Not implemented yet :(\n");
     USLOSS_Console("im working on it :/\n");
-
-    restoreInterrupts(prevInt);
 }
 
 void addToQueue(PCB* process) {
@@ -660,6 +667,7 @@ void addToQueue(PCB* process) {
  * None
  */ 
 void initMain() {
+    printf("init init\n");
     phase2_start_service_processes();
     phase3_start_service_processes();
     phase4_start_service_processes();
