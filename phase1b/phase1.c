@@ -24,7 +24,7 @@ typedef struct PCB {
     int priority;
     int status;
 
-    char args[MAXARG];
+    char arg[MAXARG];
     char processName[MAXNAME];
     char isAllocated;
     char runState;
@@ -40,7 +40,6 @@ typedef struct PCB {
     USLOSS_Context context;
 
     int (*processMain)(char*);
-
     void* stackMem;
 } PCB;
 
@@ -97,22 +96,24 @@ void startProcesses(void) {
     PCB* init = &processes[currentPID % MAXPROC];
     init->pid = currentPID++;
     init->priority = 6;
-    init->isAllocated = 1;
     strcpy(init->processName, "init");
+    init->isAllocated = 1;
+    init->runState = RUNNABLE;
 
     // allocate stack, initialize context 
     void* stackMem = malloc(USLOSS_MIN_STACK);
     init->stackMem = stackMem;
     USLOSS_ContextInit(&init->context, stackMem, USLOSS_MIN_STACK, NULL, &initMain); // maybe change to an int main() and use trampoline?
 
+    /*  DISPATCHER SHOULD HANDLE THIS NOW
     // Set init as the current running process
     currentProc = init;
     init->runState = RUNNING;
+    */
 
-    // restore interrupts and context switch to init
+    // restore interrupts and call dispatcher to switch to init
     restoreInterrupts(prevInt);
-    // CALL DISPATCHER HERE
-    USLOSS_ContextSwitch(NULL, &init->context); // call dispatcher here for 1b
+    dispatch();
 }
 
 /**
@@ -164,7 +165,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
 
     new->processMain = func;
     if (arg != NULL) {
-        strcpy(new->args, arg);
+        strcpy(new->arg, arg);
     }
 
     // allocate stack, initialize context
@@ -450,13 +451,13 @@ void restoreInterrupts(int prevInt) {
 void trampoline() {
     // enable interrupts
     USLOSS_PsrSet(USLOSS_PsrGet() | USLOSS_PSR_CURRENT_INT);
-    (*currentProc->processMain)(currentProc->args);
+    (*currentProc->processMain)(currentProc->arg);
     // do something (call quit? halt?) here
 }
 
 void dispatch() {
     // dispatch here ez pz lemon squeezy
-    USLOSS_Console("dispatcher: Not implemented yet :(");
+    USLOSS_Console("dispatcher: Not implemented yet :(\n");
 }
 
 
@@ -479,18 +480,16 @@ void initMain() {
     phase4_start_service_processes();
     phase5_start_service_processes();
 
-    // create sentinel and testcase_main, switch to testcase_main
-    char sen[] = "sentinel";            // maybe change l8r, enforce length or smth
-    char test[] = "testcase_main";
-    int sentinelPid = fork1(sen, &sentinelMain, NULL, USLOSS_MIN_STACK, 7);
-    int testcaseMainPid = fork1(test, &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
+    // create sentinel and testcase_main
+    int sentinelPid = fork1("sentinel", &sentinelMain, NULL, USLOSS_MIN_STACK, 7);
+    int testcaseMainPid = fork1("testcase_main", &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
 
-    USLOSS_Console("Phase 1A TEMPORARY HACK: init() manually switching to testcase_main() after using fork1() to create it.\n");
-    /*
+    // continuously clean up dead children
+    int childPid, childStatus;
     while (1) {
-        join();
+        childPid = join(&childStatus);
+        // maybe do something with status here?
     }
-    */
 }
 
 /**
@@ -498,12 +497,12 @@ void initMain() {
  * Main function for sentinel process, handles deadlocks
  * 
  * Parameters:
- * char* args - Arguments for sentinel main function
+ * char* arg - Arguments for sentinel main function
  *
  * Return:
  * int - Return status of main function (should never return)
  */ 
-int sentinelMain(char* args) {           // david
+int sentinelMain(char* arg) {           // david
     return 0;
 }
 
@@ -512,17 +511,16 @@ int sentinelMain(char* args) {           // david
  * Main function for testcase_main process
  * 
  * Parameters:
- * char* args - Arguments for testcase_main main function
+ * char* arg - Arguments for testcase_main main function
  *
  * Return:
  * int - Return status of main function
  */ 
 int testcaseMainMain(char* arg) {
     int test_return = testcase_main();
-    USLOSS_Console("Phase 1A TEMPORARY HACK: testcase_main() returned, simulation will now halt.\n");
     if (test_return != 0) { 
         USLOSS_Console("testcase_main returned with a nonzero error code: %d\n", test_return);
     }
-    USLOSS_Halt(test_return); // pass zero? ask about this
+    USLOSS_Halt(test_return);
     return 0;
 }
