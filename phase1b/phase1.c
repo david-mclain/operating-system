@@ -136,19 +136,6 @@ void startProcesses(void) {
     dispatch();
 }
 
-/* ---------- TEMPORARY PRINT FUNCTION FOR DEBUGGING ---------- */
-void printQueues() {
-    PCB* cur;
-    for (int i = 0; i < NUMPRIORITIES; i++) {
-        cur = queues[i].head;
-        USLOSS_Console("Queue P%d\n", i+1);
-        while (cur != NULL) {
-            USLOSS_Console("process: %s, priority: %d\n", cur->processName, cur->priority);
-            cur = cur->nextInQueue;
-        }
-    }
-}
-
 /**
  * Purpose:
  * Creates a new process and fills in all PCB fields for it
@@ -171,8 +158,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
         return -2;
     }
     if (priority < 1 || (priority > 5 && strcmp(name, "sentinel") != 0 && priority != 7) ||
-            func == NULL || name == NULL || strlen(name) > MAXNAME) 
-    {
+    func == NULL || name == NULL || strlen(name) > MAXNAME) {
         return -1;
     }
     int i = 0;
@@ -183,6 +169,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
         return -1;
     }
     PCB* new = &processes[currentPID % MAXPROC];
+    // maybe do a memset here to ensure everything is good?
     new->pid = currentPID++;
     new->priority = priority;
     new->runState = RUNNABLE;
@@ -229,27 +216,30 @@ int join(int *status) {
     PCB* currChild = currentProc->child;
     while (currChild) {
         if (currChild->runState == DEAD) {
-
             *status = currChild->status; // collect status
 
             // remove child from the linked list
-            if (currChild->prevSibling != NULL){    // change left sibling's ptr
+            if (currChild->prevSibling != NULL){
+                // change left sibling's ptr
                 currChild->prevSibling->nextSibling = currChild->nextSibling;
             }
-            else {  // change parent's child ptr
+            else {
+                // change parent's child ptr
                 if (currChild->nextSibling != NULL) {
                     currChild->nextSibling->prevSibling = NULL;
                 }
                 currentProc->child = currChild->nextSibling; 
             }
 
-            if (currChild->nextSibling != NULL) {   // change right sibling's ptr
+            if (currChild->nextSibling != NULL) {
+                // change right sibling's ptr
                 currChild->nextSibling->prevSibling = currChild->prevSibling;
             } 
 
             // free up child's stack and clear pointers
             free(currChild->stackMem);
             currChild->isAllocated = 0;
+            // might not need to do this, test and see l8r
             currChild->parent = NULL;
             currChild->prevSibling = NULL;
             currChild->nextSibling = NULL;
@@ -261,8 +251,14 @@ int join(int *status) {
         currChild = currChild->nextSibling;
     }
 
+    // no dead children found; block and wait for one to die
+    // use blockMe here? unclear... otherwise need to handle queues here
+    currentProc->runState = BLOCKED;
     restoreInterrupts(prevInt);
-    return 0; // in 1b block here, but shouldn't ever get here in 1a
+    dispatch();
+
+    // now awakened, recursively call join() to collect status
+    return join(status);
 }
 
 /**
@@ -386,6 +382,7 @@ void zap(int pid) {
     toZap->zappedBy = currentProc;
 
     // block and call dispatcher
+    // use blockMe here? unclear... otherwise need to handle queues here
     currentProc->runState = BLOCKED;
     restoreInterrupts(prevInt); // ?
     dispatch();
@@ -412,18 +409,18 @@ int readCurStartTime(void) {
 
 }
 
-void timeSlice(void) {
-
-}
-
 int readtime(void) {
 
 }
+
 // Are we supposed to import the time library then use the system time from there?
 int currentTime(void) {
 
 }
 
+void timeSlice(void) {
+
+}
     /* ---------- Helper Functions ---------- */
 
 /**
@@ -528,6 +525,20 @@ void addToQueue(PCB* process) {
         addTo->tail = process;
     }
 }
+
+// TEMPORARY PRINT FUNCTION FOR DEBUGGING
+void printQueues() {
+    PCB* cur;
+    for (int i = 0; i < NUMPRIORITIES; i++) {
+        cur = queues[i].head;
+        USLOSS_Console("Queue P%d\n", i+1);
+        while (cur != NULL) {
+            USLOSS_Console("process: %s, priority: %d\n", cur->processName, cur->priority);
+            cur = cur->nextInQueue;
+        }
+    }
+}
+
 
     /* ---------- Process Functions ---------- */
 
