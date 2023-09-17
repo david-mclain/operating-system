@@ -34,8 +34,11 @@ typedef struct PCB {
     struct PCB* prevSibling;
     struct PCB* nextSibling;
 
-    struct PCB* zappedBy;   // head of list of procs currently zap()-ing this proc
-    struct PCB* nextZapper; // next (after this) in list of procs zap()-ing some OTHER proc
+    struct PCB* zappedBy;       // head of list of procs currently zap()-ing this proc
+    struct PCB* nextZapper;     // next (after this) in list of procs zap()-ing some OTHER proc
+
+    struct PCB* prevInQueue;    // Prev process in queue that has the same priority
+    struct PCB* nextInQueue;    // Next process in queue that has the same priority
 
     USLOSS_Context context;
 
@@ -43,14 +46,29 @@ typedef struct PCB {
     void* stackMem;
 } PCB;
 
+typedef struct Queue {
+    PCB* head;
+    PCB* tail;
+} Queue;
+
 PCB processes[MAXPROC];
 PCB* currentProc;       // currently running process
 int currentPID = 1;     // next available PID
 
+    /* ---------- Queues for Dispatcher ---------- */
+
+Queue queueP1;
+Queue queueP2;
+Queue queueP3;
+Queue queueP4;
+Queue queueP5;
+Queue queueP6;
+Queue queueP7;
 
     /* ---------- Prototypes ---------- */
 
 void trampoline();
+void addToQueue(PCB*);
 
 void checkMode(char* fnName);
 int disableInterrupts();
@@ -62,6 +80,7 @@ void initMain();
 int sentinelMain();
 int testcaseMainMain();
 
+void printQueues();
     /* ---------- Phase 1a Functions ---------- */
 
 /**
@@ -76,6 +95,13 @@ int testcaseMainMain();
  */ 
 void phase1_init(void) {
     memset(processes, 0, sizeof(processes));
+    memset(&queueP1, 0, sizeof(queueP1));
+    memset(&queueP2, 0, sizeof(queueP2));
+    memset(&queueP3, 0, sizeof(queueP3));
+    memset(&queueP4, 0, sizeof(queueP4));
+    memset(&queueP5, 0, sizeof(queueP5));
+    memset(&queueP6, 0, sizeof(queueP6));
+    memset(&queueP7, 0, sizeof(queueP7));
 }
 
 /**
@@ -104,7 +130,7 @@ void startProcesses(void) {
     void* stackMem = malloc(USLOSS_MIN_STACK);
     init->stackMem = stackMem;
     USLOSS_ContextInit(&init->context, stackMem, USLOSS_MIN_STACK, NULL, &initMain); // maybe change to an int main() and use trampoline?
-
+    addToQueue(init);
     /*  DISPATCHER SHOULD HANDLE THIS NOW
     // Set init as the current running process
     currentProc = init;
@@ -114,6 +140,52 @@ void startProcesses(void) {
     // restore interrupts and call dispatcher to switch to init
     restoreInterrupts(prevInt);
     dispatch();
+}
+
+/* ---------- TEMPORARY PRINT FUNCTION FOR DEBUGGING ---------- */
+void printQueues() {
+    PCB* cur = queueP1.head;
+    printf("Queue P1\n");
+    while (cur != NULL) {
+        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
+        cur = cur->nextInQueue;
+    }
+    cur = queueP2.head;
+    printf("Queue P2\n");
+    while (cur != NULL) {
+        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
+        cur = cur->nextInQueue;
+    }
+    cur = queueP3.head;
+    printf("Queue P3\n");
+    while (cur != NULL) {
+        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
+        cur = cur->nextInQueue;
+    }
+    cur = queueP4.head;
+    printf("Queue P4\n");
+    while (cur != NULL) {
+        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
+        cur = cur->nextInQueue;
+    }
+    cur = queueP5.head;
+    printf("Queue P5\n");
+    while (cur != NULL) {
+        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
+        cur = cur->nextInQueue;
+    }
+    cur = queueP6.head;
+    printf("Queue P6\n");
+    while (cur != NULL) {
+        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
+        cur = cur->nextInQueue;
+    }
+    cur = queueP7.head;
+    printf("Queue P7\n");
+    while (cur != NULL) {
+        printf("process: %s, priority: %d\n", cur->processName, cur->priority);
+        cur = cur->nextInQueue;
+    }
 }
 
 /**
@@ -149,7 +221,6 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     if (i == MAXPROC) {
         return -1;
     }
-
     PCB* new = &processes[currentPID % MAXPROC];
     new->pid = currentPID++;
     new->priority = priority;
@@ -162,7 +233,6 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
         currentProc->child->prevSibling = new;
     }
     currentProc->child = new;
-
     new->processMain = func;
     if (arg != NULL) {
         strcpy(new->arg, arg);
@@ -172,6 +242,8 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     void* stackMem = malloc(stacksize);
     new->stackMem = stackMem;
     USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
+
+    addToQueue(new);
 
     restoreInterrupts(prevInt);
     return new->pid;
@@ -368,6 +440,10 @@ void blockMe(int block_status) {
 
 int unblockProc(int pid) {
 
+
+    // Adds newly unblocked process to its respective queue
+    addToQueue(&processes[pid % MAXPROC]);
+    dispatch();
 }
 
 int readCurStartTime(void) {
@@ -456,10 +532,119 @@ void trampoline() {
 }
 
 void dispatch() {
+    int prevInt = disableInterrupts();
     // dispatch here ez pz lemon squeezy
+    if (queueP1.head != NULL) {
+        
+    }
+    else if (queueP2.head != NULL) {
+
+    }
+    else if (queueP3.head != NULL) {
+
+    }
+    else if (queueP4.head != NULL) {
+
+    }
+    else if (queueP5.head != NULL) {
+
+    }
+    else if (queueP6.head != NULL) {
+
+    }
+    else if (queueP7.head != NULL) {
+
+    }
+    // TEMPORARY FOR TESTING
+    currentProc = &processes[1];
+    USLOSS_ContextSwitch(NULL, &processes[1].context);
     USLOSS_Console("dispatcher: Not implemented yet :(\n");
+    USLOSS_Console("im working on it :/\n");
+
+    restoreInterrupts(prevInt);
 }
 
+void addToQueue(PCB* process) {
+    switch(process->priority) {
+        case 1:
+            if (queueP1.head == NULL) {
+                queueP1.head = process;
+                queueP1.tail = process;
+            }
+            else {
+                queueP1.tail->nextInQueue = process;
+                process->prevInQueue = queueP1.tail;
+                queueP1.tail = process;
+            }
+        break;
+        case 2:
+            if (queueP2.head == NULL) {
+                queueP2.head = process;
+                queueP2.tail = process;
+            }
+            else {
+                queueP2.tail->nextInQueue = process;
+                process->prevInQueue = queueP2.tail;
+                queueP2.tail = process;
+            }
+        break;
+        case 3:
+            if (queueP3.head == NULL) {
+                queueP3.head = process;
+                queueP3.tail = process;
+            }
+            else {
+                queueP3.tail->nextInQueue = process;
+                process->prevInQueue = queueP3.tail;
+                queueP3.tail = process;
+            }
+        break;
+        case 4:
+            if (queueP4.head == NULL) {
+                queueP4.head = process;
+                queueP4.tail = process;
+            }
+            else {
+                queueP4.tail->nextInQueue = process;
+                process->prevInQueue = queueP4.tail;
+                queueP4.tail = process;
+            }
+        break;
+        case 5:
+            if (queueP5.head == NULL) {
+                queueP5.head = process;
+                queueP5.tail = process;
+            }
+            else {
+                queueP5.tail->nextInQueue = process;
+                process->prevInQueue = queueP5.tail;
+                queueP5.tail = process;
+            }
+        break;
+        case 6:
+            if (queueP6.head == NULL) {
+                queueP6.head = process;
+                queueP6.tail = process;
+            }
+            else {
+                queueP6.tail->nextInQueue = process;
+                process->prevInQueue = queueP6.tail;
+                queueP6.tail = process;
+            }
+        break;
+        case 7:
+            if (queueP7.head == NULL) {
+                queueP7.head = process;
+                queueP7.tail = process;
+            }
+            else {
+                queueP7.tail->nextInQueue = process;
+                process->prevInQueue = queueP7.tail;
+                queueP7.tail = process;
+            }
+        break;
+    }
+}
 
     /* ---------- Process Functions ---------- */
 
@@ -483,7 +668,6 @@ void initMain() {
     // create sentinel and testcase_main
     int sentinelPid = fork1("sentinel", &sentinelMain, NULL, USLOSS_MIN_STACK, 7);
     int testcaseMainPid = fork1("testcase_main", &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
-
     // continuously clean up dead children
     int childPid, childStatus;
     while (1) {
