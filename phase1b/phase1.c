@@ -23,6 +23,7 @@ typedef struct PCB {
     int pid;
     int priority;
     int status;
+    int currentTimeSlice;
 
     char arg[MAXARG];
     char processName[MAXNAME];
@@ -457,7 +458,7 @@ void timeSlice(void) {
 int readtime(void) {
 
 }
-
+// Are we supposed to import the time library then use the system time from there?
 int currentTime(void) {
 
 }
@@ -563,9 +564,9 @@ void dispatch() {
         new = queueP7.head;
         queueP7.head = queueP7.head->nextInQueue;
     }
-    // TEMPORARY FOR TESTING
     currentProc = new;
     restoreInterrupts(prevInt);
+    printf("switching to process: %d\n", new->pid);
     USLOSS_ContextSwitch(NULL, &(new->context));
     USLOSS_Console("dispatcher: Not implemented yet :(\n");
     USLOSS_Console("im working on it :/\n");
