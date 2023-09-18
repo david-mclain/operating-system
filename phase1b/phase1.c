@@ -68,11 +68,12 @@ Queue queues[NUMPRIORITIES]; // queues for dispatcher
 
 void trampoline();
 
-void checkMode(char* fnName);
+void checkMode();
 int disableInterrupts();
-void restoreInterrupts(int prevInt);
+void restoreInterrupts();
 
-void addToQueue(PCB*);
+void addToQueue();
+void removeFromQueue();
 void printQueues();
 void dispatch();
 
@@ -125,12 +126,7 @@ void startProcesses(void) {
     init->stackMem = stackMem;
     USLOSS_ContextInit(&init->context, stackMem, USLOSS_MIN_STACK, NULL, &initMain); // maybe change to an int main() and use trampoline?
     addToQueue(init);
-    /*  DISPATCHER SHOULD HANDLE THIS NOW
-    // Set init as the current running process
-    currentProc = init;
-    init->runState = RUNNING;
-    */
-
+    
     // restore interrupts and call dispatcher to switch to init
     restoreInterrupts(prevInt);
     dispatch();
@@ -192,6 +188,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
 
     addToQueue(new);
+    printQueues();
 
     restoreInterrupts(prevInt);
     dispatch();
@@ -253,8 +250,8 @@ int join(int *status) {
     }
 
     // no dead children found; block and wait for one to die
-    // use blockMe here? unclear... otherwise need to handle queues here
     currentProc->runState = BLOCKED;
+    removeFromQueue(currentProc);
     restoreInterrupts(prevInt);
     dispatch();
 
@@ -282,6 +279,7 @@ void quit(int status) {
     }
     currentProc->status = status;
     currentProc->runState = DEAD;
+    removeFromQueue(currentProc); // ?
 
     PCB* cur = currentProc->zappedBy;
     while (cur) {
@@ -390,8 +388,8 @@ void zap(int pid) {
     toZap->zappedBy = currentProc;
 
     // block and call dispatcher
-    // use blockMe here? unclear... otherwise need to handle queues here
     currentProc->runState = BLOCKED;
+    removeFromQueue(currentProc);
     restoreInterrupts(prevInt); // ?
     dispatch();
 }
@@ -494,7 +492,10 @@ void restoreInterrupts(int prevInt) {
 void trampoline() {
     // enable interrupts
     USLOSS_PsrSet(USLOSS_PsrGet() | USLOSS_PSR_CURRENT_INT);
-    (*currentProc->processMain)(currentProc->arg);
+    int status = (*currentProc->processMain)(currentProc->arg);
+    USLOSS_Console("Process %d's main function returned %d\n", currentProc->pid,
+            status);
+    quit(status);
     // do something (call quit? halt?) here
 }
 
@@ -503,7 +504,6 @@ void dispatch() {
     // IF TIMESLICE >= 80 ADD TO QUEUE
     PCB* new;
     // dispatch here ez pz lemon squeezy
-    // fixed your messy branching logic :D
     for (int i = 0; i < NUMPRIORITIES; i++) {
         Queue* q = &queues[i];
         if (q->head != NULL) {
@@ -514,6 +514,8 @@ void dispatch() {
     }
     PCB* oldProc = currentProc;
     currentProc = new;
+    //dumpProcesses();
+    //printQueues();
     currentProc->runState = RUNNING;
     restoreInterrupts(prevInt);
     USLOSS_Console("switching to process: %d\n", new->pid);
@@ -539,17 +541,39 @@ void addToQueue(PCB* process) {
     }
 }
 
+void removeFromQueue(PCB* process) {
+    // change the queue's head and/or tail pointer(s) if applicable
+    Queue* removeFrom = &queues[(process->priority)-1];
+    if (removeFrom->head == process) { 
+        removeFrom->head = process->nextInQueue;
+    }
+    if (removeFrom->tail == process) {
+        removeFrom->tail = process->prevInQueue;
+    }
+
+    // connect pointers for remaining elements in the queue
+    if (process->prevInQueue) {
+        process->prevInQueue->nextInQueue = process->nextInQueue;
+    }
+    if (process->nextInQueue) {
+        process->nextInQueue->prevInQueue = process->prevInQueue;
+    }
+}
+
 // TEMPORARY PRINT FUNCTION FOR DEBUGGING
 void printQueues() {
     PCB* cur;
+    USLOSS_Console("----------\n");
     for (int i = 0; i < NUMPRIORITIES; i++) {
         cur = queues[i].head;
-        USLOSS_Console("Queue P%d\n", i+1);
+        USLOSS_Console("Queue P%d:\n", i+1);
         while (cur != NULL) {
-            USLOSS_Console("process: %s, priority: %d\n", cur->processName, cur->priority);
+            USLOSS_Console("    process: %s, priority: %d\n", cur->processName,
+                    cur->priority);
             cur = cur->nextInQueue;
         }
     }
+    USLOSS_Console("----------\n");
 }
 
 
@@ -573,6 +597,7 @@ void initMain() {
     phase5_start_service_processes();
 
     // create sentinel and testcase_main
+    printQueues();
     int sentinelPid = fork1("sentinel", &sentinelMain, NULL, USLOSS_MIN_STACK, 7);
     int testcaseMainPid = fork1("testcase_main", &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
     // continuously clean up dead children
