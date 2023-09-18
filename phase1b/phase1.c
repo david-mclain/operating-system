@@ -194,6 +194,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     addToQueue(new);
 
     restoreInterrupts(prevInt);
+    dispatch();
     return new->pid;
 }
 
@@ -282,8 +283,15 @@ void quit(int status) {
     currentProc->status = status;
     currentProc->runState = DEAD;
 
+    PCB* cur = currentProc->zappedBy;
+    while (cur) {
+        cur->runState = RUNNABLE;
+        addToQueue(cur);
+        cur = cur->nextZapper;
+    }
+
     restoreInterrupts(prevInt);
-    // CALL DISPATCHER HERE
+    dispatch();
 }
 
 /**
@@ -492,6 +500,7 @@ void trampoline() {
 
 void dispatch() {
     int prevInt = disableInterrupts();
+    // IF TIMESLICE >= 80 ADD TO QUEUE
     PCB* new;
     // dispatch here ez pz lemon squeezy
     // fixed your messy branching logic :D
@@ -503,13 +512,17 @@ void dispatch() {
             break;
         }
     }
+    PCB* oldProc = currentProc;
     currentProc = new;
     currentProc->runState = RUNNING;
     restoreInterrupts(prevInt);
     USLOSS_Console("switching to process: %d\n", new->pid);
-    USLOSS_ContextSwitch(NULL, &(new->context));
-    USLOSS_Console("dispatcher: Not implemented yet :(\n");
-    USLOSS_Console("im working on it :/\n");
+    if (oldProc) {
+        USLOSS_ContextSwitch(&(oldProc->context), &(new->context));
+    }
+    else {
+        USLOSS_ContextSwitch(NULL, &(new->context));
+    }
 }
 
 // fixed your messy function :D
@@ -554,7 +567,6 @@ void printQueues() {
  * None
  */ 
 void initMain() {
-    printf("init init\n");
     phase2_start_service_processes();
     phase3_start_service_processes();
     phase4_start_service_processes();
