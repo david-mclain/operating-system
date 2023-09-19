@@ -22,10 +22,11 @@
 #define DEAD        3
 
 typedef struct PCB {
+    int currentTimeSlice;
     int pid;
     int priority;
     int status;
-    int currentTimeSlice;
+    int totalCpuTime;
 
     char arg[MAXARG];
     char processName[MAXNAME];
@@ -412,20 +413,25 @@ int unblockProc(int pid) {
 }
 
 int readCurStartTime(void) {
-
+    return currentProc->currentTimeSlice;
 }
 
 int readtime(void) {
-
+    return currentProc->totalCpuTime + (currentTime() - readCurStartTime());
 }
 
-// Are we supposed to import the time library then use the system time from there?
 int currentTime(void) {
-
+    int prevInt = disableInterrupts();
+    int ret;
+    USLOSS_DeviceInput(USLOSS_CLOCK_DEV, 0, &ret);
+    restoreInterrupts(prevInt);
+    return ret;
 }
 
 void timeSlice(void) {
-
+    if (readCurStartTime() - currentTime() >= 80) {
+        dispatch();
+    }
 }
     /* ---------- Helper Functions ---------- */
 
@@ -500,6 +506,8 @@ void trampoline() {
 
 void dispatch() {
     int prevInt = disableInterrupts();
+    int x;
+    USLOSS_DeviceInput(USLOSS_CLOCK_DEV, 0, &x);
 
     // IF TIMESLICE >= 80 ADD TO QUEUE
     

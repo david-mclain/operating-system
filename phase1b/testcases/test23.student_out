@@ -269,5 +269,1349 @@ phase5_start_service_processes() called -- currently a NOP
 testcase_main(): started
 QUICK SUMMARY: Tests blockMe() and unblockProc().
 XXp1(): creating children
+XXp2(): started, pid = 89, calling blockMe with status 13
+XXp2(): pid = 89, after blockMe
+XXp2(): started, pid = 90, calling blockMe with status 14
+XXp2(): pid = 90, after blockMe
+XXp2(): started, pid = 91, calling blockMe with status 15
+XXp2(): pid = 91, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+  85     0  init              6         Runnable
+  86    85  sentinel          7         Runnable
+  87    85  testcase_main     3         
+  88    87  XXp1              5         Running
+  89    88  XXp2              2         Terminated(0)
+  90    88  XXp2              2         Terminated(0)
+  91    88  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 96, calling blockMe with status 13
+XXp2(): pid = 96, after blockMe
+XXp2(): started, pid = 97, calling blockMe with status 14
+XXp2(): pid = 97, after blockMe
+XXp2(): started, pid = 98, calling blockMe with status 15
+XXp2(): pid = 98, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+  92     0  init              6         Runnable
+  93    92  sentinel          7         Runnable
+  94    92  testcase_main     3         
+  95    94  XXp1              5         Running
+  96    95  XXp2              2         Terminated(0)
+  97    95  XXp2              2         Terminated(0)
+  98    95  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 103, calling blockMe with status 13
+XXp2(): pid = 103, after blockMe
+XXp2(): started, pid = 104, calling blockMe with status 14
+XXp2(): pid = 104, after blockMe
+XXp2(): started, pid = 105, calling blockMe with status 15
+XXp2(): pid = 105, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 100    99  sentinel          7         Runnable
+ 101    99  testcase_main     3         
+ 102   101  XXp1              5         Running
+ 103   102  XXp2              2         Terminated(0)
+ 104   102  XXp2              2         Terminated(0)
+ 105   102  XXp2              2         Terminated(0)
+  99     0  init              6         Runnable
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 110, calling blockMe with status 13
+XXp2(): pid = 110, after blockMe
+XXp2(): started, pid = 111, calling blockMe with status 14
+XXp2(): pid = 111, after blockMe
+XXp2(): started, pid = 112, calling blockMe with status 15
+XXp2(): pid = 112, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 106     0  init              6         Runnable
+ 107   106  sentinel          7         Runnable
+ 108   106  testcase_main     3         
+ 109   108  XXp1              5         Running
+ 110   109  XXp2              2         Terminated(0)
+ 111   109  XXp2              2         Terminated(0)
+ 112   109  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 117, calling blockMe with status 13
+XXp2(): pid = 117, after blockMe
+XXp2(): started, pid = 118, calling blockMe with status 14
+XXp2(): pid = 118, after blockMe
+XXp2(): started, pid = 119, calling blockMe with status 15
+XXp2(): pid = 119, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 113     0  init              6         Runnable
+ 114   113  sentinel          7         Runnable
+ 115   113  testcase_main     3         
+ 116   115  XXp1              5         Running
+ 117   116  XXp2              2         Terminated(0)
+ 118   116  XXp2              2         Terminated(0)
+ 119   116  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 124, calling blockMe with status 13
+XXp2(): pid = 124, after blockMe
+XXp2(): started, pid = 125, calling blockMe with status 14
+XXp2(): pid = 125, after blockMe
+XXp2(): started, pid = 126, calling blockMe with status 15
+XXp2(): pid = 126, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 120     0  init              6         Runnable
+ 121   120  sentinel          7         Runnable
+ 122   120  testcase_main     3         
+ 123   122  XXp1              5         Running
+ 124   123  XXp2              2         Terminated(0)
+ 125   123  XXp2              2         Terminated(0)
+ 126   123  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 131, calling blockMe with status 13
+XXp2(): pid = 131, after blockMe
+XXp2(): started, pid = 132, calling blockMe with status 14
+XXp2(): pid = 132, after blockMe
+XXp2(): started, pid = 133, calling blockMe with status 15
+XXp2(): pid = 133, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 127     0  init              6         Runnable
+ 128   127  sentinel          7         Runnable
+ 129   127  testcase_main     3         
+ 130   129  XXp1              5         Running
+ 131   130  XXp2              2         Terminated(0)
+ 132   130  XXp2              2         Terminated(0)
+ 133   130  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 138, calling blockMe with status 13
+XXp2(): pid = 138, after blockMe
+XXp2(): started, pid = 139, calling blockMe with status 14
+XXp2(): pid = 139, after blockMe
+XXp2(): started, pid = 140, calling blockMe with status 15
+XXp2(): pid = 140, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 134     0  init              6         Runnable
+ 135   134  sentinel          7         Runnable
+ 136   134  testcase_main     3         
+ 137   136  XXp1              5         Running
+ 138   137  XXp2              2         Terminated(0)
+ 139   137  XXp2              2         Terminated(0)
+ 140   137  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 145, calling blockMe with status 13
+XXp2(): pid = 145, after blockMe
+XXp2(): started, pid = 146, calling blockMe with status 14
+XXp2(): pid = 146, after blockMe
+XXp2(): started, pid = 147, calling blockMe with status 15
+XXp2(): pid = 147, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 141     0  init              6         Runnable
+ 142   141  sentinel          7         Runnable
+ 143   141  testcase_main     3         
+ 144   143  XXp1              5         Running
+ 145   144  XXp2              2         Terminated(0)
+ 146   144  XXp2              2         Terminated(0)
+ 147   144  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 152, calling blockMe with status 13
+XXp2(): pid = 152, after blockMe
+XXp2(): started, pid = 153, calling blockMe with status 14
+XXp2(): pid = 153, after blockMe
+XXp2(): started, pid = 154, calling blockMe with status 15
+XXp2(): pid = 154, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 150   148  testcase_main     3         
+ 151   150  XXp1              5         Running
+ 152   151  XXp2              2         Terminated(0)
+ 153   151  XXp2              2         Terminated(0)
+ 154   151  XXp2              2         Terminated(0)
+ 148     0  init              6         Runnable
+ 149   148  sentinel          7         Runnable
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 159, calling blockMe with status 13
+XXp2(): pid = 159, after blockMe
+XXp2(): started, pid = 160, calling blockMe with status 14
+XXp2(): pid = 160, after blockMe
+XXp2(): started, pid = 161, calling blockMe with status 15
+XXp2(): pid = 161, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 155     0  init              6         Runnable
+ 156   155  sentinel          7         Runnable
+ 157   155  testcase_main     3         
+ 158   157  XXp1              5         Running
+ 159   158  XXp2              2         Terminated(0)
+ 160   158  XXp2              2         Terminated(0)
+ 161   158  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 166, calling blockMe with status 13
+XXp2(): pid = 166, after blockMe
+XXp2(): started, pid = 167, calling blockMe with status 14
+XXp2(): pid = 167, after blockMe
+XXp2(): started, pid = 168, calling blockMe with status 15
+XXp2(): pid = 168, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 162     0  init              6         Runnable
+ 163   162  sentinel          7         Runnable
+ 164   162  testcase_main     3         
+ 165   164  XXp1              5         Running
+ 166   165  XXp2              2         Terminated(0)
+ 167   165  XXp2              2         Terminated(0)
+ 168   165  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 173, calling blockMe with status 13
+XXp2(): pid = 173, after blockMe
+XXp2(): started, pid = 174, calling blockMe with status 14
+XXp2(): pid = 174, after blockMe
+XXp2(): started, pid = 175, calling blockMe with status 15
+XXp2(): pid = 175, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 169     0  init              6         Runnable
+ 170   169  sentinel          7         Runnable
+ 171   169  testcase_main     3         
+ 172   171  XXp1              5         Running
+ 173   172  XXp2              2         Terminated(0)
+ 174   172  XXp2              2         Terminated(0)
+ 175   172  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 180, calling blockMe with status 13
+XXp2(): pid = 180, after blockMe
+XXp2(): started, pid = 181, calling blockMe with status 14
+XXp2(): pid = 181, after blockMe
+XXp2(): started, pid = 182, calling blockMe with status 15
+XXp2(): pid = 182, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 176     0  init              6         Runnable
+ 177   176  sentinel          7         Runnable
+ 178   176  testcase_main     3         
+ 179   178  XXp1              5         Running
+ 180   179  XXp2              2         Terminated(0)
+ 181   179  XXp2              2         Terminated(0)
+ 182   179  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 187, calling blockMe with status 13
+XXp2(): pid = 187, after blockMe
+XXp2(): started, pid = 188, calling blockMe with status 14
+XXp2(): pid = 188, after blockMe
+XXp2(): started, pid = 189, calling blockMe with status 15
+XXp2(): pid = 189, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 183     0  init              6         Runnable
+ 184   183  sentinel          7         Runnable
+ 185   183  testcase_main     3         
+ 186   185  XXp1              5         Running
+ 187   186  XXp2              2         Terminated(0)
+ 188   186  XXp2              2         Terminated(0)
+ 189   186  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 194, calling blockMe with status 13
+XXp2(): pid = 194, after blockMe
+XXp2(): started, pid = 195, calling blockMe with status 14
+XXp2(): pid = 195, after blockMe
+XXp2(): started, pid = 196, calling blockMe with status 15
+XXp2(): pid = 196, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 190     0  init              6         Runnable
+ 191   190  sentinel          7         Runnable
+ 192   190  testcase_main     3         
+ 193   192  XXp1              5         Running
+ 194   193  XXp2              2         Terminated(0)
+ 195   193  XXp2              2         Terminated(0)
+ 196   193  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 201, calling blockMe with status 13
+XXp2(): pid = 201, after blockMe
+XXp2(): started, pid = 202, calling blockMe with status 14
+XXp2(): pid = 202, after blockMe
+XXp2(): started, pid = 203, calling blockMe with status 15
+XXp2(): pid = 203, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 200   199  XXp1              5         Running
+ 201   200  XXp2              2         Terminated(0)
+ 202   200  XXp2              2         Terminated(0)
+ 203   200  XXp2              2         Terminated(0)
+ 197     0  init              6         Runnable
+ 198   197  sentinel          7         Runnable
+ 199   197  testcase_main     3         
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 208, calling blockMe with status 13
+XXp2(): pid = 208, after blockMe
+XXp2(): started, pid = 209, calling blockMe with status 14
+XXp2(): pid = 209, after blockMe
+XXp2(): started, pid = 210, calling blockMe with status 15
+XXp2(): pid = 210, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 204     0  init              6         Runnable
+ 205   204  sentinel          7         Runnable
+ 206   204  testcase_main     3         
+ 207   206  XXp1              5         Running
+ 208   207  XXp2              2         Terminated(0)
+ 209   207  XXp2              2         Terminated(0)
+ 210   207  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 215, calling blockMe with status 13
+XXp2(): pid = 215, after blockMe
+XXp2(): started, pid = 216, calling blockMe with status 14
+XXp2(): pid = 216, after blockMe
+XXp2(): started, pid = 217, calling blockMe with status 15
+XXp2(): pid = 217, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 211     0  init              6         Runnable
+ 212   211  sentinel          7         Runnable
+ 213   211  testcase_main     3         
+ 214   213  XXp1              5         Running
+ 215   214  XXp2              2         Terminated(0)
+ 216   214  XXp2              2         Terminated(0)
+ 217   214  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 222, calling blockMe with status 13
+XXp2(): pid = 222, after blockMe
+XXp2(): started, pid = 223, calling blockMe with status 14
+XXp2(): pid = 223, after blockMe
+XXp2(): started, pid = 224, calling blockMe with status 15
+XXp2(): pid = 224, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 218     0  init              6         Runnable
+ 219   218  sentinel          7         Runnable
+ 220   218  testcase_main     3         
+ 221   220  XXp1              5         Running
+ 222   221  XXp2              2         Terminated(0)
+ 223   221  XXp2              2         Terminated(0)
+ 224   221  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 229, calling blockMe with status 13
+XXp2(): pid = 229, after blockMe
+XXp2(): started, pid = 230, calling blockMe with status 14
+XXp2(): pid = 230, after blockMe
+XXp2(): started, pid = 231, calling blockMe with status 15
+XXp2(): pid = 231, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 225     0  init              6         Runnable
+ 226   225  sentinel          7         Runnable
+ 227   225  testcase_main     3         
+ 228   227  XXp1              5         Running
+ 229   228  XXp2              2         Terminated(0)
+ 230   228  XXp2              2         Terminated(0)
+ 231   228  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 236, calling blockMe with status 13
+XXp2(): pid = 236, after blockMe
+XXp2(): started, pid = 237, calling blockMe with status 14
+XXp2(): pid = 237, after blockMe
+XXp2(): started, pid = 238, calling blockMe with status 15
+XXp2(): pid = 238, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 232     0  init              6         Runnable
+ 233   232  sentinel          7         Runnable
+ 234   232  testcase_main     3         
+ 235   234  XXp1              5         Running
+ 236   235  XXp2              2         Terminated(0)
+ 237   235  XXp2              2         Terminated(0)
+ 238   235  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 243, calling blockMe with status 13
+XXp2(): pid = 243, after blockMe
+XXp2(): started, pid = 244, calling blockMe with status 14
+XXp2(): pid = 244, after blockMe
+XXp2(): started, pid = 245, calling blockMe with status 15
+XXp2(): pid = 245, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 239     0  init              6         Runnable
+ 240   239  sentinel          7         Runnable
+ 241   239  testcase_main     3         
+ 242   241  XXp1              5         Running
+ 243   242  XXp2              2         Terminated(0)
+ 244   242  XXp2              2         Terminated(0)
+ 245   242  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 250, calling blockMe with status 13
+XXp2(): pid = 250, after blockMe
+XXp2(): started, pid = 251, calling blockMe with status 14
+XXp2(): pid = 251, after blockMe
+XXp2(): started, pid = 252, calling blockMe with status 15
+XXp2(): pid = 252, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 250   249  XXp2              2         Terminated(0)
+ 251   249  XXp2              2         Terminated(0)
+ 252   249  XXp2              2         Terminated(0)
+ 246     0  init              6         Runnable
+ 247   246  sentinel          7         Runnable
+ 248   246  testcase_main     3         
+ 249   248  XXp1              5         Running
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 257, calling blockMe with status 13
+XXp2(): pid = 257, after blockMe
+XXp2(): started, pid = 258, calling blockMe with status 14
+XXp2(): pid = 258, after blockMe
+XXp2(): started, pid = 259, calling blockMe with status 15
+XXp2(): pid = 259, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 253     0  init              6         Runnable
+ 254   253  sentinel          7         Runnable
+ 255   253  testcase_main     3         
+ 256   255  XXp1              5         Running
+ 257   256  XXp2              2         Terminated(0)
+ 258   256  XXp2              2         Terminated(0)
+ 259   256  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 264, calling blockMe with status 13
+XXp2(): pid = 264, after blockMe
+XXp2(): started, pid = 265, calling blockMe with status 14
+XXp2(): pid = 265, after blockMe
+XXp2(): started, pid = 266, calling blockMe with status 15
+XXp2(): pid = 266, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 260     0  init              6         Runnable
+ 261   260  sentinel          7         Runnable
+ 262   260  testcase_main     3         
+ 263   262  XXp1              5         Running
+ 264   263  XXp2              2         Terminated(0)
+ 265   263  XXp2              2         Terminated(0)
+ 266   263  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 271, calling blockMe with status 13
+XXp2(): pid = 271, after blockMe
+XXp2(): started, pid = 272, calling blockMe with status 14
+XXp2(): pid = 272, after blockMe
+XXp2(): started, pid = 273, calling blockMe with status 15
+XXp2(): pid = 273, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 267     0  init              6         Runnable
+ 268   267  sentinel          7         Runnable
+ 269   267  testcase_main     3         
+ 270   269  XXp1              5         Running
+ 271   270  XXp2              2         Terminated(0)
+ 272   270  XXp2              2         Terminated(0)
+ 273   270  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 278, calling blockMe with status 13
+XXp2(): pid = 278, after blockMe
+XXp2(): started, pid = 279, calling blockMe with status 14
+XXp2(): pid = 279, after blockMe
+XXp2(): started, pid = 280, calling blockMe with status 15
+XXp2(): pid = 280, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 274     0  init              6         Runnable
+ 275   274  sentinel          7         Runnable
+ 276   274  testcase_main     3         
+ 277   276  XXp1              5         Running
+ 278   277  XXp2              2         Terminated(0)
+ 279   277  XXp2              2         Terminated(0)
+ 280   277  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 285, calling blockMe with status 13
+XXp2(): pid = 285, after blockMe
+XXp2(): started, pid = 286, calling blockMe with status 14
+XXp2(): pid = 286, after blockMe
+XXp2(): started, pid = 287, calling blockMe with status 15
+XXp2(): pid = 287, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 281     0  init              6         Runnable
+ 282   281  sentinel          7         Runnable
+ 283   281  testcase_main     3         
+ 284   283  XXp1              5         Running
+ 285   284  XXp2              2         Terminated(0)
+ 286   284  XXp2              2         Terminated(0)
+ 287   284  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 292, calling blockMe with status 13
+XXp2(): pid = 292, after blockMe
+XXp2(): started, pid = 293, calling blockMe with status 14
+XXp2(): pid = 293, after blockMe
+XXp2(): started, pid = 294, calling blockMe with status 15
+XXp2(): pid = 294, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 288     0  init              6         Runnable
+ 289   288  sentinel          7         Runnable
+ 290   288  testcase_main     3         
+ 291   290  XXp1              5         Running
+ 292   291  XXp2              2         Terminated(0)
+ 293   291  XXp2              2         Terminated(0)
+ 294   291  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 299, calling blockMe with status 13
+XXp2(): pid = 299, after blockMe
+XXp2(): started, pid = 300, calling blockMe with status 14
+XXp2(): pid = 300, after blockMe
+XXp2(): started, pid = 301, calling blockMe with status 15
+XXp2(): pid = 301, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 300   298  XXp2              2         Terminated(0)
+ 301   298  XXp2              2         Terminated(0)
+ 295     0  init              6         Runnable
+ 296   295  sentinel          7         Runnable
+ 297   295  testcase_main     3         
+ 298   297  XXp1              5         Running
+ 299   298  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 306, calling blockMe with status 13
+XXp2(): pid = 306, after blockMe
+XXp2(): started, pid = 307, calling blockMe with status 14
+XXp2(): pid = 307, after blockMe
+XXp2(): started, pid = 308, calling blockMe with status 15
+XXp2(): pid = 308, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 302     0  init              6         Runnable
+ 303   302  sentinel          7         Runnable
+ 304   302  testcase_main     3         
+ 305   304  XXp1              5         Running
+ 306   305  XXp2              2         Terminated(0)
+ 307   305  XXp2              2         Terminated(0)
+ 308   305  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 313, calling blockMe with status 13
+XXp2(): pid = 313, after blockMe
+XXp2(): started, pid = 314, calling blockMe with status 14
+XXp2(): pid = 314, after blockMe
+XXp2(): started, pid = 315, calling blockMe with status 15
+XXp2(): pid = 315, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 309     0  init              6         Runnable
+ 310   309  sentinel          7         Runnable
+ 311   309  testcase_main     3         
+ 312   311  XXp1              5         Running
+ 313   312  XXp2              2         Terminated(0)
+ 314   312  XXp2              2         Terminated(0)
+ 315   312  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 320, calling blockMe with status 13
+XXp2(): pid = 320, after blockMe
+XXp2(): started, pid = 321, calling blockMe with status 14
+XXp2(): pid = 321, after blockMe
+XXp2(): started, pid = 322, calling blockMe with status 15
+XXp2(): pid = 322, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 316     0  init              6         Runnable
+ 317   316  sentinel          7         Runnable
+ 318   316  testcase_main     3         
+ 319   318  XXp1              5         Running
+ 320   319  XXp2              2         Terminated(0)
+ 321   319  XXp2              2         Terminated(0)
+ 322   319  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 327, calling blockMe with status 13
+XXp2(): pid = 327, after blockMe
+XXp2(): started, pid = 328, calling blockMe with status 14
+XXp2(): pid = 328, after blockMe
+XXp2(): started, pid = 329, calling blockMe with status 15
+XXp2(): pid = 329, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 323     0  init              6         Runnable
+ 324   323  sentinel          7         Runnable
+ 325   323  testcase_main     3         
+ 326   325  XXp1              5         Running
+ 327   326  XXp2              2         Terminated(0)
+ 328   326  XXp2              2         Terminated(0)
+ 329   326  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 334, calling blockMe with status 13
+XXp2(): pid = 334, after blockMe
+XXp2(): started, pid = 335, calling blockMe with status 14
+XXp2(): pid = 335, after blockMe
+XXp2(): started, pid = 336, calling blockMe with status 15
+XXp2(): pid = 336, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 330     0  init              6         Runnable
+ 331   330  sentinel          7         Runnable
+ 332   330  testcase_main     3         
+ 333   332  XXp1              5         Running
+ 334   333  XXp2              2         Terminated(0)
+ 335   333  XXp2              2         Terminated(0)
+ 336   333  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 341, calling blockMe with status 13
+XXp2(): pid = 341, after blockMe
+XXp2(): started, pid = 342, calling blockMe with status 14
+XXp2(): pid = 342, after blockMe
+XXp2(): started, pid = 343, calling blockMe with status 15
+XXp2(): pid = 343, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 337     0  init              6         Runnable
+ 338   337  sentinel          7         Runnable
+ 339   337  testcase_main     3         
+ 340   339  XXp1              5         Running
+ 341   340  XXp2              2         Terminated(0)
+ 342   340  XXp2              2         Terminated(0)
+ 343   340  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 348, calling blockMe with status 13
+XXp2(): pid = 348, after blockMe
+XXp2(): started, pid = 349, calling blockMe with status 14
+XXp2(): pid = 349, after blockMe
+XXp2(): started, pid = 350, calling blockMe with status 15
+XXp2(): pid = 350, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 350   347  XXp2              2         Terminated(0)
+ 344     0  init              6         Runnable
+ 345   344  sentinel          7         Runnable
+ 346   344  testcase_main     3         
+ 347   346  XXp1              5         Running
+ 348   347  XXp2              2         Terminated(0)
+ 349   347  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 355, calling blockMe with status 13
+XXp2(): pid = 355, after blockMe
+XXp2(): started, pid = 356, calling blockMe with status 14
+XXp2(): pid = 356, after blockMe
+XXp2(): started, pid = 357, calling blockMe with status 15
+XXp2(): pid = 357, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 351     0  init              6         Runnable
+ 352   351  sentinel          7         Runnable
+ 353   351  testcase_main     3         
+ 354   353  XXp1              5         Running
+ 355   354  XXp2              2         Terminated(0)
+ 356   354  XXp2              2         Terminated(0)
+ 357   354  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 362, calling blockMe with status 13
+XXp2(): pid = 362, after blockMe
+XXp2(): started, pid = 363, calling blockMe with status 14
+XXp2(): pid = 363, after blockMe
+XXp2(): started, pid = 364, calling blockMe with status 15
+XXp2(): pid = 364, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 358     0  init              6         Runnable
+ 359   358  sentinel          7         Runnable
+ 360   358  testcase_main     3         
+ 361   360  XXp1              5         Running
+ 362   361  XXp2              2         Terminated(0)
+ 363   361  XXp2              2         Terminated(0)
+ 364   361  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 369, calling blockMe with status 13
+XXp2(): pid = 369, after blockMe
+XXp2(): started, pid = 370, calling blockMe with status 14
+XXp2(): pid = 370, after blockMe
+XXp2(): started, pid = 371, calling blockMe with status 15
+XXp2(): pid = 371, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 365     0  init              6         Runnable
+ 366   365  sentinel          7         Runnable
+ 367   365  testcase_main     3         
+ 368   367  XXp1              5         Running
+ 369   368  XXp2              2         Terminated(0)
+ 370   368  XXp2              2         Terminated(0)
+ 371   368  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 376, calling blockMe with status 13
+XXp2(): pid = 376, after blockMe
+XXp2(): started, pid = 377, calling blockMe with status 14
+XXp2(): pid = 377, after blockMe
+XXp2(): started, pid = 378, calling blockMe with status 15
+XXp2(): pid = 378, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 372     0  init              6         Runnable
+ 373   372  sentinel          7         Runnable
+ 374   372  testcase_main     3         
+ 375   374  XXp1              5         Running
+ 376   375  XXp2              2         Terminated(0)
+ 377   375  XXp2              2         Terminated(0)
+ 378   375  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 383, calling blockMe with status 13
+XXp2(): pid = 383, after blockMe
+XXp2(): started, pid = 384, calling blockMe with status 14
+XXp2(): pid = 384, after blockMe
+XXp2(): started, pid = 385, calling blockMe with status 15
+XXp2(): pid = 385, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 379     0  init              6         Runnable
+ 380   379  sentinel          7         Runnable
+ 381   379  testcase_main     3         
+ 382   381  XXp1              5         Running
+ 383   382  XXp2              2         Terminated(0)
+ 384   382  XXp2              2         Terminated(0)
+ 385   382  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 390, calling blockMe with status 13
+XXp2(): pid = 390, after blockMe
+XXp2(): started, pid = 391, calling blockMe with status 14
+XXp2(): pid = 391, after blockMe
+XXp2(): started, pid = 392, calling blockMe with status 15
+XXp2(): pid = 392, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 386     0  init              6         Runnable
+ 387   386  sentinel          7         Runnable
+ 388   386  testcase_main     3         
+ 389   388  XXp1              5         Running
+ 390   389  XXp2              2         Terminated(0)
+ 391   389  XXp2              2         Terminated(0)
+ 392   389  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 397, calling blockMe with status 13
+XXp2(): pid = 397, after blockMe
+XXp2(): started, pid = 398, calling blockMe with status 14
+XXp2(): pid = 398, after blockMe
+XXp2(): started, pid = 399, calling blockMe with status 15
+XXp2(): pid = 399, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 393     0  init              6         Runnable
+ 394   393  sentinel          7         Runnable
+ 395   393  testcase_main     3         
+ 396   395  XXp1              5         Running
+ 397   396  XXp2              2         Terminated(0)
+ 398   396  XXp2              2         Terminated(0)
+ 399   396  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 404, calling blockMe with status 13
+XXp2(): pid = 404, after blockMe
+XXp2(): started, pid = 405, calling blockMe with status 14
+XXp2(): pid = 405, after blockMe
+XXp2(): started, pid = 406, calling blockMe with status 15
+XXp2(): pid = 406, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 400     0  init              6         Runnable
+ 401   400  sentinel          7         Runnable
+ 402   400  testcase_main     3         
+ 403   402  XXp1              5         Running
+ 404   403  XXp2              2         Terminated(0)
+ 405   403  XXp2              2         Terminated(0)
+ 406   403  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 411, calling blockMe with status 13
+XXp2(): pid = 411, after blockMe
+XXp2(): started, pid = 412, calling blockMe with status 14
+XXp2(): pid = 412, after blockMe
+XXp2(): started, pid = 413, calling blockMe with status 15
+XXp2(): pid = 413, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 407     0  init              6         Runnable
+ 408   407  sentinel          7         Runnable
+ 409   407  testcase_main     3         
+ 410   409  XXp1              5         Running
+ 411   410  XXp2              2         Terminated(0)
+ 412   410  XXp2              2         Terminated(0)
+ 413   410  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 418, calling blockMe with status 13
+XXp2(): pid = 418, after blockMe
+XXp2(): started, pid = 419, calling blockMe with status 14
+XXp2(): pid = 419, after blockMe
+XXp2(): started, pid = 420, calling blockMe with status 15
+XXp2(): pid = 420, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 414     0  init              6         Runnable
+ 415   414  sentinel          7         Runnable
+ 416   414  testcase_main     3         
+ 417   416  XXp1              5         Running
+ 418   417  XXp2              2         Terminated(0)
+ 419   417  XXp2              2         Terminated(0)
+ 420   417  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 425, calling blockMe with status 13
+XXp2(): pid = 425, after blockMe
+XXp2(): started, pid = 426, calling blockMe with status 14
+XXp2(): pid = 426, after blockMe
+XXp2(): started, pid = 427, calling blockMe with status 15
+XXp2(): pid = 427, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 421     0  init              6         Runnable
+ 422   421  sentinel          7         Runnable
+ 423   421  testcase_main     3         
+ 424   423  XXp1              5         Running
+ 425   424  XXp2              2         Terminated(0)
+ 426   424  XXp2              2         Terminated(0)
+ 427   424  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 432, calling blockMe with status 13
+XXp2(): pid = 432, after blockMe
+XXp2(): started, pid = 433, calling blockMe with status 14
+XXp2(): pid = 433, after blockMe
+XXp2(): started, pid = 434, calling blockMe with status 15
+XXp2(): pid = 434, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 428     0  init              6         Runnable
+ 429   428  sentinel          7         Runnable
+ 430   428  testcase_main     3         
+ 431   430  XXp1              5         Running
+ 432   431  XXp2              2         Terminated(0)
+ 433   431  XXp2              2         Terminated(0)
+ 434   431  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 439, calling blockMe with status 13
+XXp2(): pid = 439, after blockMe
+XXp2(): started, pid = 440, calling blockMe with status 14
+XXp2(): pid = 440, after blockMe
+XXp2(): started, pid = 441, calling blockMe with status 15
+XXp2(): pid = 441, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 435     0  init              6         Runnable
+ 436   435  sentinel          7         Runnable
+ 437   435  testcase_main     3         
+ 438   437  XXp1              5         Running
+ 439   438  XXp2              2         Terminated(0)
+ 440   438  XXp2              2         Terminated(0)
+ 441   438  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 446, calling blockMe with status 13
+XXp2(): pid = 446, after blockMe
+XXp2(): started, pid = 447, calling blockMe with status 14
+XXp2(): pid = 447, after blockMe
+XXp2(): started, pid = 448, calling blockMe with status 15
+XXp2(): pid = 448, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 442     0  init              6         Runnable
+ 443   442  sentinel          7         Runnable
+ 444   442  testcase_main     3         
+ 445   444  XXp1              5         Running
+ 446   445  XXp2              2         Terminated(0)
+ 447   445  XXp2              2         Terminated(0)
+ 448   445  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 453, calling blockMe with status 13
+XXp2(): pid = 453, after blockMe
+XXp2(): started, pid = 454, calling blockMe with status 14
+XXp2(): pid = 454, after blockMe
+XXp2(): started, pid = 455, calling blockMe with status 15
+XXp2(): pid = 455, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 450   449  sentinel          7         Runnable
+ 451   449  testcase_main     3         
+ 452   451  XXp1              5         Running
+ 453   452  XXp2              2         Terminated(0)
+ 454   452  XXp2              2         Terminated(0)
+ 455   452  XXp2              2         Terminated(0)
+ 449     0  init              6         Runnable
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 460, calling blockMe with status 13
+XXp2(): pid = 460, after blockMe
+XXp2(): started, pid = 461, calling blockMe with status 14
+XXp2(): pid = 461, after blockMe
+XXp2(): started, pid = 462, calling blockMe with status 15
+XXp2(): pid = 462, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 456     0  init              6         Runnable
+ 457   456  sentinel          7         Runnable
+ 458   456  testcase_main     3         
+ 459   458  XXp1              5         Running
+ 460   459  XXp2              2         Terminated(0)
+ 461   459  XXp2              2         Terminated(0)
+ 462   459  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 467, calling blockMe with status 13
+XXp2(): pid = 467, after blockMe
+XXp2(): started, pid = 468, calling blockMe with status 14
+XXp2(): pid = 468, after blockMe
+XXp2(): started, pid = 469, calling blockMe with status 15
+XXp2(): pid = 469, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 463     0  init              6         Runnable
+ 464   463  sentinel          7         Runnable
+ 465   463  testcase_main     3         
+ 466   465  XXp1              5         Running
+ 467   466  XXp2              2         Terminated(0)
+ 468   466  XXp2              2         Terminated(0)
+ 469   466  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 474, calling blockMe with status 13
+XXp2(): pid = 474, after blockMe
+XXp2(): started, pid = 475, calling blockMe with status 14
+XXp2(): pid = 475, after blockMe
+XXp2(): started, pid = 476, calling blockMe with status 15
+XXp2(): pid = 476, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 470     0  init              6         Runnable
+ 471   470  sentinel          7         Runnable
+ 472   470  testcase_main     3         
+ 473   472  XXp1              5         Running
+ 474   473  XXp2              2         Terminated(0)
+ 475   473  XXp2              2         Terminated(0)
+ 476   473  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 481, calling blockMe with status 13
+XXp2(): pid = 481, after blockMe
+XXp2(): started, pid = 482, calling blockMe with status 14
+XXp2(): pid = 482, after blockMe
+XXp2(): started, pid = 483, calling blockMe with status 15
+XXp2(): pid = 483, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 477     0  init              6         Runnable
+ 478   477  sentinel          7         Runnable
+ 479   477  testcase_main     3         
+ 480   479  XXp1              5         Running
+ 481   480  XXp2              2         Terminated(0)
+ 482   480  XXp2              2         Terminated(0)
+ 483   480  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 488, calling blockMe with status 13
+XXp2(): pid = 488, after blockMe
+XXp2(): started, pid = 489, calling blockMe with status 14
+XXp2(): pid = 489, after blockMe
+XXp2(): started, pid = 490, calling blockMe with status 15
+XXp2(): pid = 490, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 484     0  init              6         Runnable
+ 485   484  sentinel          7         Runnable
+ 486   484  testcase_main     3         
+ 487   486  XXp1              5         Running
+ 488   487  XXp2              2         Terminated(0)
+ 489   487  XXp2              2         Terminated(0)
+ 490   487  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 495, calling blockMe with status 13
+XXp2(): pid = 495, after blockMe
+XXp2(): started, pid = 496, calling blockMe with status 14
+XXp2(): pid = 496, after blockMe
+XXp2(): started, pid = 497, calling blockMe with status 15
+XXp2(): pid = 497, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 491     0  init              6         Runnable
+ 492   491  sentinel          7         Runnable
+ 493   491  testcase_main     3         
+ 494   493  XXp1              5         Running
+ 495   494  XXp2              2         Terminated(0)
+ 496   494  XXp2              2         Terminated(0)
+ 497   494  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 502, calling blockMe with status 13
+XXp2(): pid = 502, after blockMe
+XXp2(): started, pid = 503, calling blockMe with status 14
+XXp2(): pid = 503, after blockMe
+XXp2(): started, pid = 504, calling blockMe with status 15
+XXp2(): pid = 504, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 500   498  testcase_main     3         
+ 501   500  XXp1              5         Running
+ 502   501  XXp2              2         Terminated(0)
+ 503   501  XXp2              2         Terminated(0)
+ 504   501  XXp2              2         Terminated(0)
+ 498     0  init              6         Runnable
+ 499   498  sentinel          7         Runnable
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 509, calling blockMe with status 13
+XXp2(): pid = 509, after blockMe
+XXp2(): started, pid = 510, calling blockMe with status 14
+XXp2(): pid = 510, after blockMe
+XXp2(): started, pid = 511, calling blockMe with status 15
+XXp2(): pid = 511, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 505     0  init              6         Runnable
+ 506   505  sentinel          7         Runnable
+ 507   505  testcase_main     3         
+ 508   507  XXp1              5         Running
+ 509   508  XXp2              2         Terminated(0)
+ 510   508  XXp2              2         Terminated(0)
+ 511   508  XXp2              2         Terminated(0)
+XXp1(): unblocking children
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 516, calling blockMe with status 13
+XXp2(): pid = 516, after blockMe
 SIMULATOR TRAP: USLOSS_IntVec[USLOSS_CLOCK_INT] is NULL!
 
