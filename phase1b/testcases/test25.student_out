@@ -1,6 +1,10 @@
-switching to process: 1
 phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
-switching to process: 2
+testcase_main(): started
+QUICK SUMMARY: TODO
+XXp1(): creating children
+XXp2(): started, pid = 5, calling blockMe
+XXp2(): pid = 5, after blockMe
+XXp2(): pid = 5, isZapped() = 0

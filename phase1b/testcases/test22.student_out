@@ -1,6 +1,9 @@
-switching to process: 1
 phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
-switching to process: 2
+testcase_main(): started
+QUICK SUMMARY: Attempt to fork1() with invalid priorities.
+testcase_main(): could not fork a child--invalid priority
+testcase_main(): could not fork a child--invalid priority
+TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0

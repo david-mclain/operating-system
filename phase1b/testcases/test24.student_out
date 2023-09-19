@@ -1,6 +1,31 @@
-switching to process: 1
 phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
-switching to process: 2
+testcase_main(): started
+QUICK SUMMARY: TODO
+XXp1(): creating children
+XXp2(): started, pid = 5, calling blockMe
+XXp2(): pid = 5, after blockMe
+XXp2(): pid = 5, isZapped() = 0
+XXp2(): started, pid = 6, calling blockMe
+XXp2(): pid = 6, after blockMe
+XXp2(): pid = 6, isZapped() = 0
+XXp2(): started, pid = 7, calling blockMe
+XXp2(): pid = 7, after blockMe
+XXp2(): pid = 7, isZapped() = 0
+XXp1(): creating zapper child
+XXp3(): started, pid = 8, calling zap on pid 5
+ PID  PPID  NAME              PRIORITY  STATE
+   1     0  init              6         Runnable
+   2     1  sentinel          7         Runnable
+   3     1  testcase_main     3         
+   4     3  XXp1              5         Running
+   5     4  XXp2              3         Terminated(0)
+   6     4  XXp2              3         Terminated(0)
+   7     4  XXp2              3         Terminated(0)
+   8     4  XXp3              4         
+XXp1(): unblocking children
+XXp3(): started, pid = 5, calling zap on pid 5
+ERROR: Attempt to zap() itself.
+TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0

@@ -1,6 +1,19 @@
-switching to process: 1
 phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
-switching to process: 2
+testcase_main(): started
+QUICK SUMMARY: Create 3 children; some of them create grandchildren; one of them tries to zap() its sibling.  Because of complex interactions of blocking and priorities, the sequence of events in the testcase is quite complex.
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp4(): started
+XXp4(): arg = 'XXp4FromXXp1' -- this process will terminate immediately.
+testcase_main(): after fork of child 4
+XXp1(): after fork of child 5
+XXp1(): performing join
+XXp1(): exit status for child 5 is 4
+XXp2(): started
+XXp2(): arg = 'XXp2'
+XXp2(): calling zap(0)
+ERROR: Attempt to zap() a PID which is <=0. other_pid = 0
+TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0

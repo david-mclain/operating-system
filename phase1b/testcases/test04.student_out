@@ -1,6 +1,10 @@
-switching to process: 1
 phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
-switching to process: 2
+testcase_main(): started
+EXPECTATION: Similar to test03 (create a few processes, join with them, do it again) - but this one will run many iterations of the loop.  Also, each child will have a tight spin loop.  And finally, dumpProcesses() will be called from a child instead of testcase_main().
+testcase_main(): calling fork(), arg_buf = 'XXp1_0' -- testcase_main() will block until this child terminates, because the child is higher priority.
+XXp1(): XXp1_0, started, pid = 4
+SIMULATOR TRAP: USLOSS_IntVec[USLOSS_CLOCK_INT] is NULL!
+

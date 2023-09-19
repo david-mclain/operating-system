@@ -119,12 +119,13 @@ void startProcesses(void) {
     init->priority = 6;
     strcpy(init->processName, "init");
     init->isAllocated = 1;
-    init->runState = RUNNABLE;
 
     // allocate stack, initialize context 
     void* stackMem = malloc(USLOSS_MIN_STACK);
     init->stackMem = stackMem;
-    USLOSS_ContextInit(&init->context, stackMem, USLOSS_MIN_STACK, NULL, &initMain); // maybe change to an int main() and use trampoline?
+    USLOSS_ContextInit(&init->context, stackMem, USLOSS_MIN_STACK, NULL, &initMain);
+    
+    init->runState = RUNNABLE;
     addToQueue(init);
     
     // restore interrupts and call dispatcher to switch to init
@@ -149,7 +150,7 @@ void startProcesses(void) {
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
     checkMode("fork1");
     int prevInt = disableInterrupts();
-
+    
     if (stacksize < USLOSS_MIN_STACK) {
         return -2;
     }
@@ -168,7 +169,6 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     // maybe do a memset here to ensure everything is good?
     new->pid = currentPID++;
     new->priority = priority;
-    new->runState = RUNNABLE;
     new->isAllocated = 1;
     strcpy(new->processName, name);
     new->parent = currentProc;
@@ -187,8 +187,8 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     new->stackMem = stackMem;
     USLOSS_ContextInit(&new->context, stackMem, stacksize, NULL, &trampoline);
 
+    new->runState = RUNNABLE;
     addToQueue(new);
-    printQueues();
 
     restoreInterrupts(prevInt);
     dispatch();
@@ -493,32 +493,43 @@ void trampoline() {
     // enable interrupts
     USLOSS_PsrSet(USLOSS_PsrGet() | USLOSS_PSR_CURRENT_INT);
     int status = (*currentProc->processMain)(currentProc->arg);
-    USLOSS_Console("Process %d's main function returned %d\n", currentProc->pid,
-            status);
+    //USLOSS_Console("Process %d's main function returned %d\n", currentProc->pid,
+    //        status);
     quit(status);
-    // do something (call quit? halt?) here
 }
 
 void dispatch() {
     int prevInt = disableInterrupts();
+
     // IF TIMESLICE >= 80 ADD TO QUEUE
+    
+    if (currentProc && currentProc->runState == RUNNING) { 
+        currentProc->runState = RUNNABLE;
+        addToQueue(currentProc);
+    }
+
+
     PCB* new;
-    // dispatch here ez pz lemon squeezy
     for (int i = 0; i < NUMPRIORITIES; i++) {
         Queue* q = &queues[i];
         if (q->head != NULL) {
             new = q->head;
-            q->head = q->head->nextInQueue;
+            removeFromQueue(new);
             break;
         }
     }
+
+    if (new == currentProc) { 
+        new->runState = RUNNING;
+        return;
+    }
+
     PCB* oldProc = currentProc;
     currentProc = new;
-    //dumpProcesses();
-    //printQueues();
     currentProc->runState = RUNNING;
+
     restoreInterrupts(prevInt);
-    USLOSS_Console("switching to process: %d\n", new->pid);
+    //USLOSS_Console("switching to process: %d\n", new->pid);
     if (oldProc) {
         USLOSS_ContextSwitch(&(oldProc->context), &(new->context));
     }
@@ -597,7 +608,6 @@ void initMain() {
     phase5_start_service_processes();
 
     // create sentinel and testcase_main
-    printQueues();
     int sentinelPid = fork1("sentinel", &sentinelMain, NULL, USLOSS_MIN_STACK, 7);
     int testcaseMainPid = fork1("testcase_main", &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
     // continuously clean up dead children

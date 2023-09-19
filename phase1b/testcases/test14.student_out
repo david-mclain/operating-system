@@ -1,6 +1,702 @@
-switching to process: 1
 phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
-switching to process: 2
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 5
+XXp1(): joining with first child
+testcase_main(): after fork of first child 4
+XXp2(): started
+XXp2(): zap'ing process with pid_z=4
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+   1     0  init              6         Runnable
+   2     1  sentinel          7         Runnable
+   3     1  testcase_main     3         Runnable
+   4     3  XXp1              1         
+   5     4  XXp3              3         Running
+   6     3  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 6
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 11
+XXp1(): joining with first child
+testcase_main(): after fork of first child 10
+XXp2(): started
+XXp2(): zap'ing process with pid_z=10
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+   7     0  init              6         Runnable
+   8     7  sentinel          7         Runnable
+   9     7  testcase_main     3         Runnable
+  10     9  XXp1              1         
+  11    10  XXp3              3         Running
+  12     9  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 12
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 17
+XXp1(): joining with first child
+testcase_main(): after fork of first child 16
+XXp2(): started
+XXp2(): zap'ing process with pid_z=16
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  13     0  init              6         Runnable
+  14    13  sentinel          7         Runnable
+  15    13  testcase_main     3         Runnable
+  16    15  XXp1              1         
+  17    16  XXp3              3         Running
+  18    15  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 18
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 23
+XXp1(): joining with first child
+testcase_main(): after fork of first child 22
+XXp2(): started
+XXp2(): zap'ing process with pid_z=22
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  19     0  init              6         Runnable
+  20    19  sentinel          7         Runnable
+  21    19  testcase_main     3         Runnable
+  22    21  XXp1              1         
+  23    22  XXp3              3         Running
+  24    21  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 24
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 29
+XXp1(): joining with first child
+testcase_main(): after fork of first child 28
+XXp2(): started
+XXp2(): zap'ing process with pid_z=28
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  25     0  init              6         Runnable
+  26    25  sentinel          7         Runnable
+  27    25  testcase_main     3         Runnable
+  28    27  XXp1              1         
+  29    28  XXp3              3         Running
+  30    27  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 30
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 35
+XXp1(): joining with first child
+testcase_main(): after fork of first child 34
+XXp2(): started
+XXp2(): zap'ing process with pid_z=34
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  31     0  init              6         Runnable
+  32    31  sentinel          7         Runnable
+  33    31  testcase_main     3         Runnable
+  34    33  XXp1              1         
+  35    34  XXp3              3         Running
+  36    33  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 36
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 41
+XXp1(): joining with first child
+testcase_main(): after fork of first child 40
+XXp2(): started
+XXp2(): zap'ing process with pid_z=40
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  37     0  init              6         Runnable
+  38    37  sentinel          7         Runnable
+  39    37  testcase_main     3         Runnable
+  40    39  XXp1              1         
+  41    40  XXp3              3         Running
+  42    39  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 42
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 47
+XXp1(): joining with first child
+testcase_main(): after fork of first child 46
+XXp2(): started
+XXp2(): zap'ing process with pid_z=46
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  43     0  init              6         Runnable
+  44    43  sentinel          7         Runnable
+  45    43  testcase_main     3         Runnable
+  46    45  XXp1              1         
+  47    46  XXp3              3         Running
+  48    45  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 48
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 53
+XXp1(): joining with first child
+testcase_main(): after fork of first child 52
+XXp2(): started
+XXp2(): zap'ing process with pid_z=52
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  50    49  sentinel          7         Runnable
+  51    49  testcase_main     3         Runnable
+  52    51  XXp1              1         
+  53    52  XXp3              3         Running
+  54    51  XXp2              2         
+  49     0  init              6         Runnable
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 54
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 59
+XXp1(): joining with first child
+testcase_main(): after fork of first child 58
+XXp2(): started
+XXp2(): zap'ing process with pid_z=58
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  55     0  init              6         Runnable
+  56    55  sentinel          7         Runnable
+  57    55  testcase_main     3         Runnable
+  58    57  XXp1              1         
+  59    58  XXp3              3         Running
+  60    57  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 60
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 65
+XXp1(): joining with first child
+testcase_main(): after fork of first child 64
+XXp2(): started
+XXp2(): zap'ing process with pid_z=64
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  61     0  init              6         Runnable
+  62    61  sentinel          7         Runnable
+  63    61  testcase_main     3         Runnable
+  64    63  XXp1              1         
+  65    64  XXp3              3         Running
+  66    63  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 66
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 71
+XXp1(): joining with first child
+testcase_main(): after fork of first child 70
+XXp2(): started
+XXp2(): zap'ing process with pid_z=70
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  67     0  init              6         Runnable
+  68    67  sentinel          7         Runnable
+  69    67  testcase_main     3         Runnable
+  70    69  XXp1              1         
+  71    70  XXp3              3         Running
+  72    69  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 72
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 77
+XXp1(): joining with first child
+testcase_main(): after fork of first child 76
+XXp2(): started
+XXp2(): zap'ing process with pid_z=76
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  73     0  init              6         Runnable
+  74    73  sentinel          7         Runnable
+  75    73  testcase_main     3         Runnable
+  76    75  XXp1              1         
+  77    76  XXp3              3         Running
+  78    75  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 78
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 83
+XXp1(): joining with first child
+testcase_main(): after fork of first child 82
+XXp2(): started
+XXp2(): zap'ing process with pid_z=82
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  79     0  init              6         Runnable
+  80    79  sentinel          7         Runnable
+  81    79  testcase_main     3         Runnable
+  82    81  XXp1              1         
+  83    82  XXp3              3         Running
+  84    81  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 84
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 89
+XXp1(): joining with first child
+testcase_main(): after fork of first child 88
+XXp2(): started
+XXp2(): zap'ing process with pid_z=88
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  85     0  init              6         Runnable
+  86    85  sentinel          7         Runnable
+  87    85  testcase_main     3         Runnable
+  88    87  XXp1              1         
+  89    88  XXp3              3         Running
+  90    87  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 90
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 95
+XXp1(): joining with first child
+testcase_main(): after fork of first child 94
+XXp2(): started
+XXp2(): zap'ing process with pid_z=94
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+  91     0  init              6         Runnable
+  92    91  sentinel          7         Runnable
+  93    91  testcase_main     3         Runnable
+  94    93  XXp1              1         
+  95    94  XXp3              3         Running
+  96    93  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 96
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 101
+XXp1(): joining with first child
+testcase_main(): after fork of first child 100
+XXp2(): started
+XXp2(): zap'ing process with pid_z=100
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 100    99  XXp1              1         
+ 101   100  XXp3              3         Running
+ 102    99  XXp2              2         
+  97     0  init              6         Runnable
+  98    97  sentinel          7         Runnable
+  99    97  testcase_main     3         Runnable
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 102
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 107
+XXp1(): joining with first child
+testcase_main(): after fork of first child 106
+XXp2(): started
+XXp2(): zap'ing process with pid_z=106
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 103     0  init              6         Runnable
+ 104   103  sentinel          7         Runnable
+ 105   103  testcase_main     3         Runnable
+ 106   105  XXp1              1         
+ 107   106  XXp3              3         Running
+ 108   105  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 108
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 113
+XXp1(): joining with first child
+testcase_main(): after fork of first child 112
+XXp2(): started
+XXp2(): zap'ing process with pid_z=112
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 109     0  init              6         Runnable
+ 110   109  sentinel          7         Runnable
+ 111   109  testcase_main     3         Runnable
+ 112   111  XXp1              1         
+ 113   112  XXp3              3         Running
+ 114   111  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 114
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 119
+XXp1(): joining with first child
+testcase_main(): after fork of first child 118
+XXp2(): started
+XXp2(): zap'ing process with pid_z=118
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 115     0  init              6         Runnable
+ 116   115  sentinel          7         Runnable
+ 117   115  testcase_main     3         Runnable
+ 118   117  XXp1              1         
+ 119   118  XXp3              3         Running
+ 120   117  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 120
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 125
+XXp1(): joining with first child
+testcase_main(): after fork of first child 124
+XXp2(): started
+XXp2(): zap'ing process with pid_z=124
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 121     0  init              6         Runnable
+ 122   121  sentinel          7         Runnable
+ 123   121  testcase_main     3         Runnable
+ 124   123  XXp1              1         
+ 125   124  XXp3              3         Running
+ 126   123  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 126
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 131
+XXp1(): joining with first child
+testcase_main(): after fork of first child 130
+XXp2(): started
+XXp2(): zap'ing process with pid_z=130
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 127     0  init              6         Runnable
+ 128   127  sentinel          7         Runnable
+ 129   127  testcase_main     3         Runnable
+ 130   129  XXp1              1         
+ 131   130  XXp3              3         Running
+ 132   129  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 132
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 137
+XXp1(): joining with first child
+testcase_main(): after fork of first child 136
+XXp2(): started
+XXp2(): zap'ing process with pid_z=136
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 133     0  init              6         Runnable
+ 134   133  sentinel          7         Runnable
+ 135   133  testcase_main     3         Runnable
+ 136   135  XXp1              1         
+ 137   136  XXp3              3         Running
+ 138   135  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 138
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 143
+XXp1(): joining with first child
+testcase_main(): after fork of first child 142
+XXp2(): started
+XXp2(): zap'ing process with pid_z=142
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 139     0  init              6         Runnable
+ 140   139  sentinel          7         Runnable
+ 141   139  testcase_main     3         Runnable
+ 142   141  XXp1              1         
+ 143   142  XXp3              3         Running
+ 144   141  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 144
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 149
+XXp1(): joining with first child
+testcase_main(): after fork of first child 148
+XXp2(): started
+XXp2(): zap'ing process with pid_z=148
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 150   147  XXp2              2         
+ 145     0  init              6         Runnable
+ 146   145  sentinel          7         Runnable
+ 147   145  testcase_main     3         Runnable
+ 148   147  XXp1              1         
+ 149   148  XXp3              3         Running
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 150
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 155
+XXp1(): joining with first child
+testcase_main(): after fork of first child 154
+XXp2(): started
+XXp2(): zap'ing process with pid_z=154
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 151     0  init              6         Runnable
+ 152   151  sentinel          7         Runnable
+ 153   151  testcase_main     3         Runnable
+ 154   153  XXp1              1         
+ 155   154  XXp3              3         Running
+ 156   153  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 156
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 161
+XXp1(): joining with first child
+testcase_main(): after fork of first child 160
+XXp2(): started
+XXp2(): zap'ing process with pid_z=160
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 157     0  init              6         Runnable
+ 158   157  sentinel          7         Runnable
+ 159   157  testcase_main     3         Runnable
+ 160   159  XXp1              1         
+ 161   160  XXp3              3         Running
+ 162   159  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 162
+testcase_main(): performing join
+phase2_start_service_processes() called -- currently a NOP
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+EXPECTATION: See test13.  This is the same, except that the PID that will be zap()ed is that of XXp1() - and thus the pid is stored by testcase_main() after the first fork().  This works much the same, except that when XXp3() terminates, only XXp1() wakes up (join) because XXp2() is trying to zap XXp1(), instead of XXp3() (as it did in test 13).
+XXp1(): started
+XXp1(): arg = 'XXp1'
+XXp1(): executing fork of first child
+XXp1(): fork1 of first child returned pid = 167
+XXp1(): joining with first child
+testcase_main(): after fork of first child 166
+XXp2(): started
+XXp2(): zap'ing process with pid_z=166
+XXp3(): started
+ PID  PPID  NAME              PRIORITY  STATE
+ 163     0  init              6         Runnable
+ 164   163  sentinel          7         Runnable
+ 165   163  testcase_main     3         Runnable
+ 166   165  XXp1              1         
+ 167   166  XXp3              3         Running
+ 168   165  XXp2              2         
+XXp3(): terminating -- quit() should wake up XXp1() but XXp2() will continue to block, since it is zapping XXp1() instead of XXp3(), as it did in test13.
+testcase_main(): after fork of second child 168
+testcase_main(): performing join
+SIMULATOR TRAP: USLOSS_IntVec[USLOSS_CLOCK_INT] is NULL!
+
