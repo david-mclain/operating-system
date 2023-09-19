@@ -13,3 +13,8 @@ testcase_main(): performing join -- The very next thing you should expect is a d
 * TESTCASE FAILURE *
 ********************
 If you ever see this error message, then it means that you did not hit deadlock as expected.
+********************
+* TESTCASE FAILURE *
+********************
+If you ever see this error message, then it means that you did not hit deadlock as expected.
+TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0

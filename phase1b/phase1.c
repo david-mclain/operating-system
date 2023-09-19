@@ -21,17 +21,22 @@
 #define BLOCKED     2
 #define DEAD        3
 
+#define ZAPPING     1
+#define JOINING     2
+
 typedef struct PCB {
     int currentTimeSlice;
+    int totalCpuTime;
     int pid;
     int priority;
     int status;
-    int totalCpuTime;
 
     char arg[MAXARG];
     char processName[MAXNAME];
+
     char isAllocated;
     char runState;
+    char blockReason;
 
     struct PCB* parent;
     struct PCB* child;
@@ -252,6 +257,7 @@ int join(int *status) {
 
     // no dead children found; block and wait for one to die
     currentProc->runState = BLOCKED;
+    currentProc->blockReason = JOINING;
     removeFromQueue(currentProc);
     restoreInterrupts(prevInt);
     dispatch();
@@ -287,6 +293,12 @@ void quit(int status) {
         cur->runState = RUNNABLE;
         addToQueue(cur);
         cur = cur->nextZapper;
+    }
+
+    PCB* parent = currentProc->parent;
+    if (parent->runState == BLOCKED && parent->blockReason == JOINING) {
+        parent->runState = RUNNABLE;
+        addToQueue(parent);
     }
 
     restoreInterrupts(prevInt);
@@ -346,6 +358,17 @@ void dumpProcesses(void) {
                 case RUNNING:
                     USLOSS_Console("Running");
                     break;
+                case BLOCKED:
+                    USLOSS_Console("Blocked");
+                    switch (cur->blockReason) {
+                        case ZAPPING:
+                            USLOSS_Console("(waiting for zap target to quit)");
+                            break;
+                        case JOINING:
+                            USLOSS_Console("(waiting for child to quit)");
+                            break;
+                    }
+                    break;
                 case DEAD:
                     USLOSS_Console("Terminated(%d)", cur->status);
                     break;
@@ -390,6 +413,7 @@ void zap(int pid) {
 
     // block and call dispatcher
     currentProc->runState = BLOCKED;
+    currentProc->blockReason = ZAPPING;
     removeFromQueue(currentProc);
     restoreInterrupts(prevInt); // ?
     dispatch();
@@ -510,12 +534,18 @@ void dispatch() {
     USLOSS_DeviceInput(USLOSS_CLOCK_DEV, 0, &x);
 
     // IF TIMESLICE >= 80 ADD TO QUEUE
+
+    // debug stuffs
+    //USLOSS_Console("\n");
+    //dumpProcesses();
     
     if (currentProc && currentProc->runState == RUNNING) { 
         currentProc->runState = RUNNABLE;
         addToQueue(currentProc);
     }
 
+    // debug
+    // printQueues();
 
     PCB* new;
     for (int i = 0; i < NUMPRIORITIES; i++) {
@@ -529,6 +559,11 @@ void dispatch() {
 
     if (new == currentProc) { 
         new->runState = RUNNING;
+
+        // debug
+        // USLOSS_Console("continuting to run: %d\n", new->pid);
+        // USLOSS_Console("\n");
+
         return;
     }
 
@@ -537,7 +572,11 @@ void dispatch() {
     currentProc->runState = RUNNING;
 
     restoreInterrupts(prevInt);
-    //USLOSS_Console("switching to process: %d\n", new->pid);
+
+    // debug
+    // USLOSS_Console("switching to process: %d\n", new->pid);
+    // USLOSS_Console("\n");
+
     if (oldProc) {
         USLOSS_ContextSwitch(&(oldProc->context), &(new->context));
     }

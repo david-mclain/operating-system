@@ -13,3 +13,5 @@ testcase_main(): exit status for child 4 is 3
 testcase_main(): performing second join -- you should see this before XXp2 runs.
 XXp2(): started
 XXp2(): arg = 'XXp2'
+testcase_main(): exit status for child 5 is 5
+TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0

@@ -19,12 +19,12 @@ XXp3(): started, pid = 8, calling zap on pid 5
  PID  PPID  NAME              PRIORITY  STATE
    1     0  init              6         Runnable
    2     1  sentinel          7         Runnable
-   3     1  testcase_main     3         
+   3     1  testcase_main     3         Blocked(waiting for child to quit)
    4     3  XXp1              5         Running
    5     4  XXp2              3         Terminated(0)
    6     4  XXp2              3         Terminated(0)
    7     4  XXp2              3         Terminated(0)
-   8     4  XXp3              4         
+   8     4  XXp3              4         Blocked(waiting for zap target to quit)
 XXp1(): unblocking children
 XXp3(): started, pid = 5, calling zap on pid 5
 ERROR: Attempt to zap() itself.

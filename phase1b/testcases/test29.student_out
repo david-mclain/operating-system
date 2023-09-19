@@ -10,9 +10,13 @@ XXp1(): after fork of child 5
 XXp1(): performing first join at this point.  But first, isZapped() returns: 0
 XXp3(): started
 XXp3(): arg = 'XXp3FromXXp1'
+XXp1(): exit status for child 5 is 3
+XXp1(): at this point isZapped() returns: 0
 testcase_main(): after fork of child 4
 XXp2(): started
 XXp2(): arg = 'XXp2'
 XXp2(): calling zap(4)
 testcase_main(): after fork of child 6
 testcase_main(): performing first join
+testcase_main(): exit status for child 4 is 1
+testcase_main(): performing second join

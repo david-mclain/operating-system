@@ -16,7 +16,7 @@ testcase_main(): after fork of child 4 -- you should not see this until XXp1() i
    1     0  init              6         Runnable
    2     1  sentinel          7         Runnable
    3     1  testcase_main     3         Running
-   4     3  XXp1              2         
+   4     3  XXp1              2         Blocked(waiting for zap target to quit)
    5     4  XXp2              5         Runnable
    6     4  XXp2              5         Runnable
 testcase_main(): performing join
@@ -33,3 +33,5 @@ XXp1(): performing join's
 XXp1(): first join returned kidpid = 6, status = 5
 XXp1(): second join returned kidpid = 5, status = 5
 XXp1(): terminating.
+testcase_main(): exit status for child 4 is 3
+TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0
