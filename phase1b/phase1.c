@@ -338,43 +338,41 @@ void dumpProcesses(void) {
     
     USLOSS_Console(" PID  PPID  NAME              PRIORITY  STATE\n");
     for (int i = 0; i < MAXPROC; i++) {
-        if (processes[i].isAllocated) {
-            PCB* cur = &processes[i];
+        if (!processes[i].isAllocated) { continue; }
 
-            USLOSS_Console("%4d  ", cur->pid);
+        PCB* cur = &processes[i];
 
-            if (cur->parent != NULL) { USLOSS_Console("%4d  ", cur->parent->pid); }
-            else { USLOSS_Console("   0  "); }
+        USLOSS_Console("%4d  ", cur->pid);
+        if (cur->parent != NULL) { USLOSS_Console("%4d  ", cur->parent->pid); }
+        else { USLOSS_Console("   0  "); }
+        USLOSS_Console("%-16s  ", cur->processName);
 
-            USLOSS_Console("%-16s  ", cur->processName);
+        //if (cur->child != NULL) { USLOSS_Console("%8d  ", cur->child->pid); }
 
-            //if (cur->child != NULL) { USLOSS_Console("%8d  ", cur->child->pid); }
-
-            USLOSS_Console("%-8d  ", cur->priority);
-            switch (cur->runState) {
-                case RUNNABLE:
-                    USLOSS_Console("Runnable");
-                    break;
-                case RUNNING:
-                    USLOSS_Console("Running");
-                    break;
-                case BLOCKED:
-                    USLOSS_Console("Blocked");
-                    switch (cur->blockReason) {
-                        case ZAPPING:
-                            USLOSS_Console("(waiting for zap target to quit)");
-                            break;
-                        case JOINING:
-                            USLOSS_Console("(waiting for child to quit)");
-                            break;
-                    }
-                    break;
-                case DEAD:
-                    USLOSS_Console("Terminated(%d)", cur->status);
-                    break;
-            }
-            USLOSS_Console("\n");
+        USLOSS_Console("%-8d  ", cur->priority);
+        switch (cur->runState) {
+            case RUNNABLE:
+                USLOSS_Console("Runnable");
+                break;
+            case RUNNING:
+                USLOSS_Console("Running");
+                break;
+            case BLOCKED:
+                USLOSS_Console("Blocked");
+                switch (cur->blockReason) {
+                    case ZAPPING:
+                        USLOSS_Console("(waiting for zap target to quit)");
+                        break;
+                    case JOINING:
+                        USLOSS_Console("(waiting for child to quit)");
+                        break;
+                }
+                break;
+            case DEAD:
+                USLOSS_Console("Terminated(%d)", cur->status);
+                break;
         }
+        USLOSS_Console("\n");
     }
     restoreInterrupts(prevInt);
 }

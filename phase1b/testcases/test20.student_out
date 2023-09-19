@@ -71,5 +71,4 @@ testcase_main(): join() failed: i=51, pid is -2.
    1     0  init              6         Runnable
    2     1  sentinel          7         Runnable
    3     1  testcase_main     3         Running
-SIMULATOR TRAP: USLOSS_IntVec[USLOSS_CLOCK_INT] is NULL!
-
+TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0

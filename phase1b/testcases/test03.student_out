@@ -222,35 +222,5 @@ testcase_main(): after fork of child 45 -- you will see this after the just-crea
   43     3  XXp1              2         Terminated(43)
   44     3  XXp1              2         Terminated(44)
   45     3  XXp1              2         Terminated(45)
-**************** end dumpProcesses() *******************
-
-testcase_main(): after join of child 45, status = 45
-testcase_main(): after join of child 44, status = 44
-testcase_main(): after join of child 43, status = 43
-testcase_main(): after join of child 42, status = 42
-testcase_main(): after join of child 41, status = 41
-testcase_main(): after join of child 40, status = 40
-testcase_main(): after join of child 39, status = 39
-testcase_main(): after join of child 38, status = 38
-testcase_main(): after join of child 37, status = 37
-testcase_main(): after join of child 36, status = 36
-testcase_main(): after join of child 35, status = 35
-testcase_main(): after join of child 34, status = 34
-testcase_main(): after join of child 33, status = 33
-testcase_main(): after join of child 32, status = 32
-testcase_main(): after join of child 31, status = 31
-testcase_main(): after join of child 30, status = 30
-testcase_main(): after join of child 29, status = 29
-testcase_main(): after join of child 28, status = 28
-testcase_main(): after join of child 27, status = 27
-testcase_main(): after join of child 26, status = 26
-testcase_main(): after join of child 25, status = 25
-testcase_main(): after join of child 24, status = 24
-testcase_main(): after join of child 23, status = 23
-testcase_main(): after join of child 22, status = 22
-testcase_main(): after join of child 21, status = 21
-testcase_main(): after join of child 20, status = 20
-testcase_main(): after join of child 19, status = 19
-testcase_main(): after join of child 18, status = 18
 SIMULATOR TRAP: USLOSS_IntVec[USLOSS_CLOCK_INT] is NULL!
 
