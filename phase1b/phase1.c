@@ -24,8 +24,8 @@
 
 // block reasons (ie, why is this process blocked?)
 #define UNBLOCKED   0
-#define ZAPPING     11
-#define JOINING     12
+#define ZAPPING     21
+#define JOINING     22
 
 typedef struct PCB {
     int pid;
@@ -369,6 +369,8 @@ void dumpProcesses(void) {
                     case JOINING:
                         USLOSS_Console("(waiting for child to quit)");
                         break;
+                    default:
+                        USLOSS_Console("(%d)", cur->blockReason);
                 }
                 break;
             case DEAD:
