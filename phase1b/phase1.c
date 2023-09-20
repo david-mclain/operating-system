@@ -91,7 +91,7 @@ void initMain();
 int sentinelMain();
 int testcaseMainMain();
 
-
+static void clockHandler(int,void*);
     /* ---------- Phase 1a Functions ---------- */
 
 /**
@@ -107,6 +107,7 @@ int testcaseMainMain();
 void phase1_init(void) {
     memset(processes, 0, sizeof(processes));
     memset(queues, 0, sizeof(queues));
+    USLOSS_IntVec[USLOSS_CLOCK_INT] = &clockHandler;
 }
 
 /**
@@ -649,7 +650,10 @@ void printQueues() {
     USLOSS_Console("----------\n");
 }
 
-
+static void clockHandler(int, void*) {
+    phase2_clockHandler();
+    timeSlice();
+}
     /* ---------- Process Functions ---------- */
 
 /**
