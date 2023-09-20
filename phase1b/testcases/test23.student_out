@@ -1542,5 +1542,22 @@ phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
+testcase_main(): started
+QUICK SUMMARY: Tests blockMe() and unblockProc().
+XXp1(): creating children
+XXp2(): started, pid = 495, calling blockMe with status 13
+XXp2(): pid = 495, after blockMe
+XXp2(): started, pid = 496, calling blockMe with status 14
+XXp2(): pid = 496, after blockMe
+XXp2(): started, pid = 497, calling blockMe with status 15
+XXp2(): pid = 497, after blockMe
+ PID  PPID  NAME              PRIORITY  STATE
+ 491     0  init              6         Runnable
+ 492   491  sentinel          7         Runnable
+ 493   491  testcase_main     3         Blocked(waiting for child to quit)
+ 494   493  XXp1              5         Running
+ 495   494  XXp2              2         Terminated(0)
+ 496   494  XXp2              2         Terminated(0)
+ 497   494  XXp2              2         Terminated(0)
 SIMULATOR TRAP: USLOSS_IntVec[USLOSS_CLOCK_INT] is NULL!
 

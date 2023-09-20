@@ -530,7 +530,6 @@ void dispatch() {
     int prevInt = disableInterrupts();
     int x;
     USLOSS_DeviceInput(USLOSS_CLOCK_DEV, 0, &x);
-    printf("new time slice: %d\n", x);
 
     // IF TIMESLICE >= 80 ADD TO QUEUE
 

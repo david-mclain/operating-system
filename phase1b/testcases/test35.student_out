@@ -18,4 +18,5 @@ testcase_main(): performing first join
 XXp3(): started
 XXp3(): arg = 'XXp3'
 XXp3(): calling zap(5)
+DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
 TESTCASE ENDED: Call counts:   check_io() <nonzero>   clockHandler() 0
