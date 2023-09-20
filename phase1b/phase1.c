@@ -162,7 +162,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     checkMode("fork1");
     int test;
     USLOSS_DeviceInput(USLOSS_CLOCK_INT, 0, &test);
-    printf("time: %d\n", test);
+    //printf("time: %d\n", test);
     int prevInt = disableInterrupts();
     
     if (stacksize < USLOSS_MIN_STACK) {
@@ -296,7 +296,10 @@ void quit(int status) {
     PCB* cur = currentProc->zappedBy;
     PCB* temp;
     while (cur) {
-        unblockProc(cur->pid);
+        cur->runState = RUNNABLE;
+        cur->blockReason = UNBLOCKED;
+        addToQueue(cur);
+
         temp = cur->nextZapper;
         cur->nextZapper = NULL;
         cur = temp;
@@ -304,7 +307,9 @@ void quit(int status) {
 
     PCB* parent = currentProc->parent;
     if (parent->runState == BLOCKED && parent->blockReason == JOINING) {
-        unblockProc(parent->pid);
+        parent->runState = RUNNABLE;
+        parent->blockReason = UNBLOCKED;
+        addToQueue(parent);
     }
 
     dispatch();
@@ -608,7 +613,7 @@ void dispatch() {
 // fixed your messy function :D
 void addToQueue(PCB* process) {
     Queue* addTo = &queues[(process->priority)-1];
-    if (addTo->head == NULL) {
+    if (addTo->head == NULL || addTo->tail == NULL) {
         addTo->head = process;
         addTo->tail = process;
     }
@@ -636,6 +641,10 @@ void removeFromQueue(PCB* process) {
     if (process->nextInQueue) {
         process->nextInQueue->prevInQueue = process->prevInQueue;
     }
+    
+    // clean up process's queue pointers
+    process->prevInQueue = NULL;
+    process->nextInQueue = NULL;
 }
 
 // TEMPORARY PRINT FUNCTION FOR DEBUGGING
