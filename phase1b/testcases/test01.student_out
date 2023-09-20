@@ -2,11 +2,15 @@ phase2_start_service_processes() called -- currently a NOP
 phase3_start_service_processes() called -- currently a NOP
 phase4_start_service_processes() called -- currently a NOP
 phase5_start_service_processes() called -- currently a NOP
+time: 14
+time: 26
 testcase_main(): started
 EXPECTATION: XXp1 should run promptly, as it is high priority; XXp2 should run only *after* we have started the second join(), because it is low priority.
+time: 39
 XXp1(): started
 XXp1(): arg = 'XXp1'
 testcase_main(): after fork of child 4 -- you should not see this until XXp1 has completed.
+time: 61
 testcase_main(): after fork of child 5 -- you should see this before XXp2 runs.
 testcase_main(): performing first join
 testcase_main(): exit status for child 4 is 3
