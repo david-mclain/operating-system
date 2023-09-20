@@ -9,12 +9,4 @@ XXp1(): arg = 'XXp1'
 XXp1(): about to zap parent--should result in deadlock.  But the deadlock won't be detected until a couple steps later, when testcase_main() blocks in join().
 testcase_main(): after fork of child 4
 testcase_main(): performing join -- The very next thing you should expect is a deadlock report.
-********************
-* TESTCASE FAILURE *
-********************
-If you ever see this error message, then it means that you did not hit deadlock as expected.
-********************
-* TESTCASE FAILURE *
-********************
-If you ever see this error message, then it means that you did not hit deadlock as expected.
-TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0
+TESTCASE ENDED: Call counts:   check_io() <nonzero>   clockHandler() 0

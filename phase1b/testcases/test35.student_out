@@ -18,3 +18,4 @@ testcase_main(): performing first join
 XXp3(): started
 XXp3(): arg = 'XXp3'
 XXp3(): calling zap(5)
+TESTCASE ENDED: Call counts:   check_io() <nonzero>   clockHandler() 0

@@ -20,3 +20,4 @@ testcase_main(): after fork of child 6
 testcase_main(): performing first join
 testcase_main(): exit status for child 4 is 1
 testcase_main(): performing second join
+TESTCASE ENDED: Call counts:   check_io() <nonzero>   clockHandler() 0

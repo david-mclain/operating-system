@@ -530,6 +530,7 @@ void dispatch() {
     int prevInt = disableInterrupts();
     int x;
     USLOSS_DeviceInput(USLOSS_CLOCK_DEV, 0, &x);
+    printf("new time slice: %d\n", x);
 
     // IF TIMESLICE >= 80 ADD TO QUEUE
 
@@ -674,6 +675,13 @@ void initMain() {
  * int - Return status of main function (should never return)
  */ 
 int sentinelMain(char* arg) {           // david
+    while (1) {
+        if (phase2_check_io() == 0) {
+            USLOSS_Console("DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.\n");
+            USLOSS_Halt(0);
+        }
+        USLOSS_WaitInt();
+    }
     return 0;
 }
 
