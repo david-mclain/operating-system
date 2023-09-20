@@ -160,6 +160,9 @@ void startProcesses(void) {
  */ 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
     checkMode("fork1");
+    int test;
+    USLOSS_DeviceInput(USLOSS_CLOCK_INT, 0, &test);
+    printf("time: %d\n", test);
     int prevInt = disableInterrupts();
     
     if (stacksize < USLOSS_MIN_STACK) {
@@ -471,7 +474,7 @@ int currentTime(void) {
 }
 
 void timeSlice(void) {
-    if (readCurStartTime() - currentTime() >= 80) {
+    if (currentTime() - readCurStartTime() >= 80000) {
         dispatch();
     }
 }
@@ -548,9 +551,6 @@ void trampoline() {
 
 void dispatch() {
     int prevInt = disableInterrupts();
-    int x;
-    USLOSS_DeviceInput(USLOSS_CLOCK_DEV, 0, &x);
-
     // IF TIMESLICE >= 80 ADD TO QUEUE
 
     // debug stuffs
@@ -588,7 +588,9 @@ void dispatch() {
     PCB* oldProc = currentProc;
     currentProc = new;
     currentProc->runState = RUNNING;
-
+    int x;
+    USLOSS_DeviceInput(USLOSS_CLOCK_DEV, 0, &x);
+    currentProc->currentTimeSlice = x;
     restoreInterrupts(prevInt);
 
     // debug
