@@ -6,5 +6,3 @@ testcase_main(): started
 QUICK SUMMARY: TODO
 XXp1(): creating children
 XXp2(): started, pid = 5, calling blockMe
-XXp2(): pid = 5, after blockMe
-XXp2(): pid = 5, isZapped() = 0

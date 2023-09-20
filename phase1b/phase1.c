@@ -16,17 +16,18 @@
 
 #define NUMPRIORITIES   7
 
+// run states
 #define RUNNABLE    0
 #define RUNNING     1
 #define BLOCKED     2
 #define DEAD        3
 
-#define ZAPPING     1
-#define JOINING     2
+// block reasons (ie, why is this process blocked?)
+#define UNBLOCKED   0
+#define ZAPPING     11
+#define JOINING     12
 
 typedef struct PCB {
-    int currentTimeSlice;
-    int totalCpuTime;
     int pid;
     int priority;
     int status;
@@ -34,9 +35,16 @@ typedef struct PCB {
     char arg[MAXARG];
     char processName[MAXNAME];
 
+    int (*processMain)(char*);
+    void* stackMem;
+    USLOSS_Context context;
+
     char isAllocated;
     char runState;
-    char blockReason;
+    int blockReason;
+    
+    int currentTimeSlice;
+    int totalCpuTime;
 
     struct PCB* parent;
     struct PCB* child;
@@ -49,10 +57,6 @@ typedef struct PCB {
     struct PCB* prevInQueue;    // Prev process in queue that has the same priority
     struct PCB* nextInQueue;    // Next process in queue that has the same priority
 
-    USLOSS_Context context;
-
-    int (*processMain)(char*);
-    void* stackMem;
 } PCB;
 
 typedef struct Queue {
@@ -134,9 +138,9 @@ void startProcesses(void) {
     init->runState = RUNNABLE;
     addToQueue(init);
     
-    // restore interrupts and call dispatcher to switch to init
-    restoreInterrupts(prevInt);
+    // call dispatcher to switch to init
     dispatch();
+    restoreInterrupts(prevInt);
 }
 
 /**
@@ -196,8 +200,8 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
     new->runState = RUNNABLE;
     addToQueue(new);
 
-    restoreInterrupts(prevInt);
     dispatch();
+    restoreInterrupts(prevInt);
     return new->pid;
 }
 
@@ -256,13 +260,10 @@ int join(int *status) {
     }
 
     // no dead children found; block and wait for one to die
-    currentProc->runState = BLOCKED;
-    currentProc->blockReason = JOINING;
-    removeFromQueue(currentProc);
-    restoreInterrupts(prevInt);
-    dispatch();
+    blockMe(JOINING);
 
     // now awakened, recursively call join() to collect status
+    restoreInterrupts(prevInt);
     return join(status);
 }
 
@@ -289,20 +290,21 @@ void quit(int status) {
     removeFromQueue(currentProc); // ?
 
     PCB* cur = currentProc->zappedBy;
+    PCB* temp;
     while (cur) {
-        cur->runState = RUNNABLE;
-        addToQueue(cur);
-        cur = cur->nextZapper;
+        unblockProc(cur->pid);
+        temp = cur->nextZapper;
+        cur->nextZapper = NULL;
+        cur = temp;
     }
 
     PCB* parent = currentProc->parent;
     if (parent->runState == BLOCKED && parent->blockReason == JOINING) {
-        parent->runState = RUNNABLE;
-        addToQueue(parent);
+        unblockProc(parent->pid);
     }
 
-    restoreInterrupts(prevInt);
     dispatch();
+    restoreInterrupts(prevInt);
 }
 
 /**
@@ -410,11 +412,9 @@ void zap(int pid) {
     toZap->zappedBy = currentProc;
 
     // block and call dispatcher
-    currentProc->runState = BLOCKED;
-    currentProc->blockReason = ZAPPING;
-    removeFromQueue(currentProc);
-    restoreInterrupts(prevInt); // ?
-    dispatch();
+    blockMe(ZAPPING);
+
+    restoreInterrupts(prevInt);
 }
 
 int isZapped(void) {
@@ -423,15 +423,32 @@ int isZapped(void) {
 }
 
 void blockMe(int block_status) {
+    checkMode("blockMe");
+    int prevInt = disableInterrupts();
 
+    if (block_status <= 10) {
+        USLOSS_Console("ERROR: invalid block_status\n");
+    }
+
+    currentProc->runState = BLOCKED;
+    currentProc->blockReason = block_status;
+    removeFromQueue(currentProc);
+    dispatch();
+
+    restoreInterrupts(prevInt);
 }
 
 int unblockProc(int pid) {
+    checkMode("unblockProc");
+    int prevInt = disableInterrupts();
 
-
-    // Adds newly unblocked process to its respective queue
-    addToQueue(&processes[pid % MAXPROC]);
+    PCB* proc = &processes[pid % MAXPROC];
+    proc->runState = RUNNABLE;
+    proc->blockReason = UNBLOCKED;
+    addToQueue(proc);
     dispatch();
+
+    restoreInterrupts(prevInt);
 }
 
 int readCurStartTime(void) {

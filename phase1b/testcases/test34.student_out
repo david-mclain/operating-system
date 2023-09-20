@@ -17,9 +17,9 @@ XXp3(): calling zap(5)
 XXp2(): started
 XXp2(): arg = 'XXp2'
 XXp2(): exiting by calling quit(2)
-XXp1(): exit status for first child 5 is 2
-XXp1(): performing second join
 XXp3(): zap(5) returned
-XXp1(): exit status for second child 6 is 3
+XXp1(): exit status for first child 6 is 3
+XXp1(): performing second join
+XXp1(): exit status for second child 5 is 2
 testcase_main(): exit status for child 4 is 1
 TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0
