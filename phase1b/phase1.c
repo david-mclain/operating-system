@@ -15,6 +15,7 @@
 #include "phase1.h"
 
 #define NUMPRIORITIES   7
+#define MAX_TIME_SLICE 80000
 
 // run states
 #define RUNNABLE    0
@@ -399,7 +400,7 @@ void zap(int pid) {
     // check for invalid pid
     char err[] = "ERROR: Attempt to zap()";
     if (pid <= 0) {
-        USLOSS_Console("%s a PID which is <=0. other_pid = %d\n", err, pid);
+        USLOSS_Console("%s a PID which is <=0.  other_pid = %d\n", err, pid);
         USLOSS_Halt(1);
     }
     if (pid == 1) {
@@ -412,6 +413,10 @@ void zap(int pid) {
     }
     if (!processes[pid % MAXPROC].isAllocated) {
         USLOSS_Console("%s a non-existent process.\n", err);
+        USLOSS_Halt(1);
+    }
+    if (processes[pid % MAXPROC].runState == 3) {
+        USLOSS_Console("%s a process that is already in the process of dying.\n", err);
         USLOSS_Halt(1);
     }
     // USLOSS_Console("%s a process that is already in the process of dying.\n", err);
@@ -479,7 +484,7 @@ int currentTime(void) {
 }
 
 void timeSlice(void) {
-    if (currentTime() - readCurStartTime() >= 80000) {
+    if (currentTime() - readCurStartTime() >= MAX_TIME_SLICE) {
         dispatch();
     }
 }

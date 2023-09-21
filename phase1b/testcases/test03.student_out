@@ -790,4 +790,4 @@ testcase_main(): after join of child 94, status = 94
 testcase_main(): after join of child 93, status = 93
 testcase_main(): after join of child 92, status = 92
 testcase_main(): after join of child 91, status = 91
-TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() <nonzero>
+TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0

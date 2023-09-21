@@ -15,5 +15,5 @@ XXp1(): exit status for child 5 is 4
 XXp2(): started
 XXp2(): arg = 'XXp2'
 XXp2(): calling zap(0)
-ERROR: Attempt to zap() a PID which is <=0. other_pid = 0
+ERROR: Attempt to zap() a PID which is <=0.  other_pid = 0
 TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0
