@@ -394,6 +394,16 @@ void dumpProcesses(void) {
 
     /* -------- Phase 1b Functions -------- */
 
+/**
+ * Purpose:
+ * 
+ * 
+ * Parameters:
+ *
+ *
+ * Return:
+ *
+ */ 
 void zap(int pid) {
     checkMode("zap");
     int prevInt = disableInterrupts();
@@ -434,11 +444,31 @@ void zap(int pid) {
     restoreInterrupts(prevInt);
 }
 
+/**
+ * Purpose:
+ * 
+ * 
+ * Parameters:
+ *
+ *
+ * Return:
+ *
+ */ 
 int isZapped(void) {
     checkMode("isZapped");
     return (currentProc->zappedBy != NULL);
 }
 
+/**
+ * Purpose:
+ * 
+ * 
+ * Parameters:
+ *
+ *
+ * Return:
+ *
+ */ 
 void blockMe(int block_status) {
     checkMode("blockMe");
     int prevInt = disableInterrupts();
@@ -455,6 +485,16 @@ void blockMe(int block_status) {
     restoreInterrupts(prevInt);
 }
 
+/**
+ * Purpose:
+ * 
+ * 
+ * Parameters:
+ *
+ *
+ * Return:
+ *
+ */ 
 int unblockProc(int pid) {
     checkMode("unblockProc");
     int prevInt = disableInterrupts();
@@ -468,22 +508,61 @@ int unblockProc(int pid) {
     restoreInterrupts(prevInt);
 }
 
+/**
+ * Purpose:
+ * Returns the time the current process began on the CPU in milliseconds
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * int  time the process started on the system
+ */ 
 int readCurStartTime(void) {
     return currentProc->currentTimeSlice;
 }
 
+/**
+ * Purpose:
+ * Returns the total time a process has taken on the CPU in microseconds
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * int  total time a process has been on the CPU
+ */ 
 int readtime(void) {
     return currentProc->totalCpuTime + (currentTime() - readCurStartTime());
 }
 
+/**
+ * Purpose:
+ * Returns the current time of the system in microseconds
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * int  current time of system in microseconds
+ */ 
 int currentTime(void) {
-    int prevInt = disableInterrupts();
     int ret;
     USLOSS_DeviceInput(USLOSS_CLOCK_DEV, 0, &ret);
-    restoreInterrupts(prevInt);
     return ret;
 }
 
+/**
+ * Purpose:
+ * Responsible for checking if the current processes time slice has expired.
+ * If time slice expired, calls the dispatcher
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * None
+ */ 
 void timeSlice(void) {
     if (currentTime() - readCurStartTime() >= MAX_TIME_SLICE) {
         dispatch();
@@ -560,37 +639,47 @@ void trampoline() {
     quit(status);
 }
 
+/**
+ * Purpose:
+ * Responsible for choosing which process to run next. Performs round robin with
+ * 80 millisecond quantum time slicing to choose which process to run next
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * None
+ */ 
 void dispatch() {
     int prevInt = disableInterrupts();
-    // IF TIMESLICE >= 80 ADD TO QUEUE
-
-    // debug stuffs
-    //USLOSS_Console("\n");
-    //dumpProcesses();
-    /*
-    if (currentProc && currentProc->runState == RUNNING) { 
-        currentProc->runState = RUNNABLE;
-        addToQueue(currentProc);
-    }
-    */
-    // debug
-    // printQueues();
 
     PCB* new;
+    int curCpuTime;
+    if (currentProc) {
+        curCpuTime = currentTime() - readCurStartTime();
+    }
+    else {
+        curCpuTime = 0;
+    }
     for (int i = 0; i < NUMPRIORITIES; i++) {
         Queue* q = &queues[i];
+        // Checking if a current process is running and if it's time slice is up add to queue
         if (currentProc && i == currentProc->priority - 1 && currentProc->runState == RUNNING) {
-            if (currentTime() - readCurStartTime() >= MAX_TIME_SLICE) {
+            if (curCpuTime >= MAX_TIME_SLICE) {
                 currentProc->runState = RUNNABLE;
+                currentProc->totalCpuTime = currentProc->totalCpuTime + curCpuTime;
                 addToQueue(currentProc);
             }
             else {
                 return;
             }
         }
+        // If current queue has a process available
         if (q->head != NULL) {
+            // If there is a process currently running, put it in run queue
             if (currentProc && currentProc->runState == RUNNING) {
                 currentProc->runState = RUNNABLE;
+                currentProc->totalCpuTime = currentProc->totalCpuTime + curCpuTime;
                 addToQueue(currentProc);
             }
             new = q->head;
@@ -598,17 +687,7 @@ void dispatch() {
             break;
         }
     }
-
-    if (new == currentProc) { 
-        new->runState = RUNNING;
-
-        // debug
-        // USLOSS_Console("continuting to run: %d\n", new->pid);
-        // USLOSS_Console("\n");
-
-        return;
-    }
-
+    // Set current proc to be dispatchers choice
     PCB* oldProc = currentProc;
     currentProc = new;
     currentProc->runState = RUNNING;
@@ -616,11 +695,6 @@ void dispatch() {
     USLOSS_DeviceInput(USLOSS_CLOCK_DEV, 0, &x);
     currentProc->currentTimeSlice = x;
     restoreInterrupts(prevInt);
-
-    // debug
-    // USLOSS_Console("switching to process: %d\n", new->pid);
-    // USLOSS_Console("\n");
-
     if (oldProc) {
         USLOSS_ContextSwitch(&(oldProc->context), &(new->context));
     }
@@ -629,7 +703,16 @@ void dispatch() {
     }
 }
 
-// fixed your messy function :D
+/**
+ * Purpose:
+ * Responsible for adding a process to its respective run queue
+ * 
+ * Parameters:
+ * PCB* process     process to add to run queue
+ *
+ * Return:
+ * None
+ */ 
 void addToQueue(PCB* process) {
     Queue* addTo = &queues[(process->priority)-1];
     if (addTo->head == NULL || addTo->tail == NULL) {
@@ -643,6 +726,16 @@ void addToQueue(PCB* process) {
     }
 }
 
+/**
+ * Purpose:
+ * Responsible for removing a process from its run queue
+ * 
+ * Parameters:
+ * PCB* process     process to remove from the run queue
+ *
+ * Return:
+ * None
+ */ 
 void removeFromQueue(PCB* process) {
     // change the queue's head and/or tail pointer(s) if applicable
     Queue* removeFrom = &queues[(process->priority)-1];
@@ -666,23 +759,18 @@ void removeFromQueue(PCB* process) {
     process->nextInQueue = NULL;
 }
 
-// TEMPORARY PRINT FUNCTION FOR DEBUGGING
-void printQueues() {
-    PCB* cur;
-    USLOSS_Console("----------\n");
-    for (int i = 0; i < NUMPRIORITIES; i++) {
-        cur = queues[i].head;
-        USLOSS_Console("Queue P%d:\n", i+1);
-        while (cur != NULL) {
-            USLOSS_Console("    process: %s, priority: %d\n", cur->processName,
-                    cur->priority);
-            cur = cur->nextInQueue;
-        }
-    }
-    USLOSS_Console("----------\n");
-}
-
-static void clockHandler(int, void*) {
+/**
+ * Purpose:
+ * Responsible for handling clock interrupts
+ * 
+ * Parameters:
+ * int dev      idk
+ * void* arg    idk
+ *
+ * Return:
+ * None
+ */ 
+static void clockHandler(int dev, void* arg) {
     phase2_clockHandler();
     timeSlice();
 }
@@ -721,10 +809,10 @@ void initMain() {
  * Main function for sentinel process, handles deadlocks
  * 
  * Parameters:
- * char* arg - Arguments for sentinel main function
+ * char* arg    Arguments for sentinel main function
  *
  * Return:
- * int - Return status of main function (should never return)
+ * int  Return status of main function (should never return)
  */ 
 int sentinelMain(char* arg) {           // david
     while (1) {
@@ -742,10 +830,10 @@ int sentinelMain(char* arg) {           // david
  * Main function for testcase_main process
  * 
  * Parameters:
- * char* arg - Arguments for testcase_main main function
+ * char* arg    Arguments for testcase_main main function
  *
  * Return:
- * int - Return status of main function
+ * int  Return status of main function
  */ 
 int testcaseMainMain(char* arg) {
     int test_return = testcase_main();
