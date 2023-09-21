@@ -222,6 +222,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
  */ 
 int join(int *status) {
     checkMode("join");
+    //printQueues();
     int prevInt = disableInterrupts();
     
     if (currentProc->child == NULL) { return -2; } // current proc. has no unjoined children
@@ -566,19 +567,32 @@ void dispatch() {
     // debug stuffs
     //USLOSS_Console("\n");
     //dumpProcesses();
-    
+    /*
     if (currentProc && currentProc->runState == RUNNING) { 
         currentProc->runState = RUNNABLE;
         addToQueue(currentProc);
     }
-
+    */
     // debug
     // printQueues();
 
     PCB* new;
     for (int i = 0; i < NUMPRIORITIES; i++) {
         Queue* q = &queues[i];
+        if (currentProc && i == currentProc->priority - 1 && currentProc->runState == RUNNING) {
+            if (currentTime() - readCurStartTime() >= MAX_TIME_SLICE) {
+                currentProc->runState = RUNNABLE;
+                addToQueue(currentProc);
+            }
+            else {
+                return;
+            }
+        }
         if (q->head != NULL) {
+            if (currentProc && currentProc->runState == RUNNING) {
+                currentProc->runState = RUNNABLE;
+                addToQueue(currentProc);
+            }
             new = q->head;
             removeFromQueue(new);
             break;
