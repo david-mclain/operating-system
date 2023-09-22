@@ -422,7 +422,7 @@ void zap(int pid) {
         USLOSS_Console("%s itself.\n", err);
         USLOSS_Halt(1);
     }
-    if (!processes[pid % MAXPROC].isAllocated) {
+    if (!processes[pid % MAXPROC].isAllocated || processes[pid % MAXPROC].pid != pid) {
         USLOSS_Console("%s a non-existent process.\n", err);
         USLOSS_Halt(1);
     }
