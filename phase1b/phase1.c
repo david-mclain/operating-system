@@ -258,6 +258,10 @@ int join(int *status) {
             // free up child's stack and empty spot in process table
             free(currChild->stackMem);
             currChild->isAllocated = 0;
+            currChild->parent = NULL;
+            currChild->prevSibling = NULL;
+            currChild->nextSibling = NULL;
+            currChild->child = NULL;
             restoreInterrupts(prevInt);
             return currChild->pid;
         }
