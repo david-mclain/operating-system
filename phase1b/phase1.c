@@ -15,7 +15,7 @@
 #include "phase1.h"
 
 #define NUMPRIORITIES   7
-#define MAX_TIME_SLICE 80000
+#define MAX_TIME_SLICE  80000
 
 // run states
 #define RUNNABLE    0
@@ -25,7 +25,7 @@
 
 // block reasons (ie, why is this process blocked?)
 #define UNBLOCKED   0
-#define ZAPPING     21 // probably fix this?
+#define ZAPPING     21
 #define JOINING     22
 
 typedef struct PCB {
@@ -42,9 +42,9 @@ typedef struct PCB {
 
     char isAllocated;
     char runState;
-    int blockReason;
+    int blockStatus;
     
-    int currentTimeSlice;
+    int currentStartTime;
     int totalCpuTime;
 
     struct PCB* parent;
@@ -295,9 +295,9 @@ void quit(int status) {
 
     // wake up this process's parent if it is blocked in join()
     PCB* parent = currentProc->parent;
-    if (parent->runState == BLOCKED && parent->blockReason == JOINING) {
+    if (parent->runState == BLOCKED && parent->blockStatus == JOINING) {
         parent->runState = RUNNABLE;
-        parent->blockReason = UNBLOCKED;
+        parent->blockStatus = UNBLOCKED;
         addToQueue(parent);
     }
 
@@ -306,7 +306,7 @@ void quit(int status) {
     PCB* temp;
     while (cur) {
         cur->runState = RUNNABLE;
-        cur->blockReason = UNBLOCKED;
+        cur->blockStatus = UNBLOCKED;
         addToQueue(cur);
 
         temp = cur->nextZapper;
@@ -370,7 +370,7 @@ void dumpProcesses(void) {
                 break;
             case BLOCKED:
                 USLOSS_Console("Blocked");
-                switch (cur->blockReason) {
+                switch (cur->blockStatus) {
                     case ZAPPING:
                         USLOSS_Console("(waiting for zap target to quit)");
                         break;
@@ -378,7 +378,7 @@ void dumpProcesses(void) {
                         USLOSS_Console("(waiting for child to quit)");
                         break;
                     default:
-                        USLOSS_Console("(%d)", cur->blockReason);
+                        USLOSS_Console("(%d)", cur->blockStatus);
                 }
                 break;
             case DEAD:
@@ -475,7 +475,7 @@ void blockMe(int blockStatus) {
     }
 
     currentProc->runState = BLOCKED;
-    currentProc->blockReason = blockStatus;
+    currentProc->blockStatus = blockStatus;
     removeFromQueue(currentProc);
     dispatch();
 
@@ -502,7 +502,7 @@ int unblockProc(int pid) {
         return -2;
     }
     proc->runState = RUNNABLE;
-    proc->blockReason = UNBLOCKED;
+    proc->blockStatus = UNBLOCKED;
     addToQueue(proc);
     dispatch();
 
@@ -522,7 +522,7 @@ int unblockProc(int pid) {
  */ 
 int readCurStartTime(void) {
     checkMode("readCurStartTime");
-    return currentProc->currentTimeSlice;
+    return currentProc->currentStartTime;
 }
 
 /**
@@ -703,7 +703,7 @@ void dispatch() {
     if (new == currentProc) { 
         if (curCpuTime > MAX_TIME_SLICE) {
             currentProc->totalCpuTime = currentProc->totalCpuTime + curCpuTime;
-            currentProc->currentTimeSlice = currentTime();
+            currentProc->currentStartTime = currentTime();
         }
         return;
     }
@@ -714,7 +714,7 @@ void dispatch() {
 
     // set new as the new currentProc, then context switch to it
     PCB* oldProc = currentProc;
-    new->currentTimeSlice = currentTime();
+    new->currentStartTime = currentTime();
     new->runState = RUNNING;
     currentProc = new;
 
@@ -822,11 +822,12 @@ void initMain() {
     // create sentinel and testcase_main
     int sentinelPid = fork1("sentinel", &sentinelMain, NULL, USLOSS_MIN_STACK, 7);
     int testcaseMainPid = fork1("testcase_main", &testcaseMainMain, NULL, USLOSS_MIN_STACK, 3);
+
     // continuously clean up dead children
     int childPid, childStatus;
     while (1) {
         childPid = join(&childStatus);
-        // maybe do something with status here?
+        // do something with status here
     }
 }
 
@@ -840,7 +841,7 @@ void initMain() {
  * Return:
  * int  Return status of main function (should never return)
  */ 
-int sentinelMain(char* arg) {           // david
+int sentinelMain(char* arg) {
     while (1) {
         if (phase2_check_io() == 0) {
             USLOSS_Console("DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.\n");
