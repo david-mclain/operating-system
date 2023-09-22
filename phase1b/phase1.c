@@ -57,7 +57,6 @@ typedef struct PCB {
 
     struct PCB* prevInQueue;    // Prev process in queue that has the same priority
     struct PCB* nextInQueue;    // Next process in queue that has the same priority
-
 } PCB;
 
 typedef struct Queue {
@@ -77,20 +76,17 @@ Queue queues[NUMPRIORITIES]; // queues for dispatcher
 
     /* ---------- Prototypes ---------- */
 
-void trampoline();
-
-void checkMode();
 int disableInterrupts();
-void restoreInterrupts();
-
-void addToQueue();
-void removeFromQueue();
-void printQueues();
-void dispatch();
-
-void initMain();
 int sentinelMain();
 int testcaseMainMain();
+
+void addToQueue();
+void checkMode();
+void dispatch();
+void initMain();
+void trampoline();
+void removeFromQueue();
+void restoreInterrupts();
 
 static void clockHandler(int,void*);
     /* ---------- Phase 1a Functions ---------- */
@@ -161,11 +157,8 @@ void startProcesses(void) {
  */ 
 int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority) {
     checkMode("fork1");
-    int test;
-    USLOSS_DeviceInput(USLOSS_CLOCK_INT, 0, &test);
-    //printf("time: %d\n", test);
     int prevInt = disableInterrupts();
-    
+
     if (stacksize < USLOSS_MIN_STACK) {
         return -2;
     }
@@ -181,7 +174,7 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
         return -1;
     }
     PCB* new = &processes[currentPID % MAXPROC];
-    // maybe do a memset here to ensure everything is good?
+    // set values in struct for new process
     new->pid = currentPID++;
     new->priority = priority;
     new->isAllocated = 1;
@@ -293,7 +286,7 @@ void quit(int status) {
     }
     currentProc->status = status;
     currentProc->runState = DEAD;
-    removeFromQueue(currentProc); // ?
+    removeFromQueue(currentProc);
 
     PCB* cur = currentProc->zappedBy;
     PCB* temp;
@@ -330,9 +323,7 @@ void quit(int status) {
  */ 
 int getpid(void) {
     checkMode("getpid");
-
-    if (currentProc) { return currentProc->pid; }
-    else { return -1; }  // is this good? return something else? ask
+    return currentProc->pid;
 }
 
 /**
@@ -396,13 +387,13 @@ void dumpProcesses(void) {
 
 /**
  * Purpose:
- * 
+ * Tells a process that it should quit as soon as possible; similar to UNIX kill
  * 
  * Parameters:
- *
+ * int pid  process pid that we want to zap
  *
  * Return:
- *
+ * None
  */ 
 void zap(int pid) {
     checkMode("zap");
@@ -430,8 +421,6 @@ void zap(int pid) {
         USLOSS_Console("%s a process that is already in the process of dying.\n", err);
         USLOSS_Halt(1);
     }
-    // USLOSS_Console("%s a process that is already in the process of dying.\n", err);
-    // not sure what conditions would apply for this one, but saw it in testcases
 
     // add self to list of processes currently zap()-ing process pid
     PCB* toZap = &processes[pid % MAXPROC]; // do this for every ref. to processes?
@@ -446,13 +435,13 @@ void zap(int pid) {
 
 /**
  * Purpose:
- * 
+ * Checks to see if the current process is being zapped
  * 
  * Parameters:
- *
+ * None
  *
  * Return:
- *
+ * int  1 if process is being zapped and 0 otherwise
  */ 
 int isZapped(void) {
     checkMode("isZapped");
@@ -461,24 +450,24 @@ int isZapped(void) {
 
 /**
  * Purpose:
- * 
+ * Puts the current process into the blocked state
  * 
  * Parameters:
- *
+ * int blockStatus  status as to why process is being blocked
  *
  * Return:
- *
+ * None
  */ 
-void blockMe(int block_status) {
+void blockMe(int blockStatus) {
     checkMode("blockMe");
     int prevInt = disableInterrupts();
 
-    if (block_status <= 10) {
+    if (blockStatus <= 10) {
         USLOSS_Console("ERROR: invalid block_status\n");
     }
 
     currentProc->runState = BLOCKED;
-    currentProc->blockReason = block_status;
+    currentProc->blockReason = blockStatus;
     removeFromQueue(currentProc);
     dispatch();
 
@@ -487,25 +476,30 @@ void blockMe(int block_status) {
 
 /**
  * Purpose:
- * 
+ * Puts a specified process back into the runnable state
  * 
  * Parameters:
- *
+ * int pid  pid of process to put back into runnable state
  *
  * Return:
- *
+ * int  0 if there were no issues, -2 if there were any issues with unblocking
  */ 
 int unblockProc(int pid) {
     checkMode("unblockProc");
     int prevInt = disableInterrupts();
 
     PCB* proc = &processes[pid % MAXPROC];
+    if (proc == NULL || proc->pid != pid) {
+        restoreInterrupts(prevInt);
+        return -2;
+    }
     proc->runState = RUNNABLE;
     proc->blockReason = UNBLOCKED;
     addToQueue(proc);
     dispatch();
 
     restoreInterrupts(prevInt);
+    return 0;
 }
 
 /**
