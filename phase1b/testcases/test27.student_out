@@ -32,8 +32,8 @@ XXp3(): performing first join
 XXp3(): exit status for child 9 is 4
 XXp3(): performing second join
 XXp3(): exit status for child 8 is 4
-XXp2(): zap(6) returned
 testcase_main(): exit status for child 6 is 3
 testcase_main(): performing third join
+XXp2(): zap(6) returned
 testcase_main(): exit status for child 5 is 2
 TESTCASE ENDED: Call counts:   check_io() 0   clockHandler() 0

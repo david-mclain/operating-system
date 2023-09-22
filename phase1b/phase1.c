@@ -25,7 +25,7 @@
 
 // block reasons (ie, why is this process blocked?)
 #define UNBLOCKED   0
-#define ZAPPING     21
+#define ZAPPING     21 // probably fix this?
 #define JOINING     22
 
 typedef struct PCB {
@@ -77,18 +77,20 @@ Queue queues[NUMPRIORITIES]; // queues for dispatcher
     /* ---------- Prototypes ---------- */
 
 int disableInterrupts();
-int sentinelMain();
-int testcaseMainMain();
+int sentinelMain(char*);
+int testcaseMainMain(char*);
 
-void addToQueue();
-void checkMode();
+void addToQueue(PCB*);
+void checkMode(char*);
 void dispatch();
 void initMain();
 void trampoline();
-void removeFromQueue();
-void restoreInterrupts();
+void removeFromQueue(PCB*);
+void restoreInterrupts(int);
 
 static void clockHandler(int,void*);
+
+
     /* ---------- Phase 1a Functions ---------- */
 
 /**
@@ -215,7 +217,6 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
  */ 
 int join(int *status) {
     checkMode("join");
-    //printQueues();
     int prevInt = disableInterrupts();
     
     if (currentProc->child == NULL) { return -2; } // current proc. has no unjoined children
@@ -284,10 +285,23 @@ void quit(int status) {
         USLOSS_Console("ERROR: Process pid %d called quit() while it still had children.\n", currentProc->pid);
         USLOSS_Halt(1);
     }
+
     currentProc->status = status;
     currentProc->runState = DEAD;
     removeFromQueue(currentProc);
 
+    // USLOSS_Console("Process %d calling quit()\n", currentProc->pid);
+    // dumpProcesses();
+
+    // wake up this process's parent if it is blocked in join()
+    PCB* parent = currentProc->parent;
+    if (parent->runState == BLOCKED && parent->blockReason == JOINING) {
+        parent->runState = RUNNABLE;
+        parent->blockReason = UNBLOCKED;
+        addToQueue(parent);
+    }
+
+    // wake up any & all process currently zap()-ing this process
     PCB* cur = currentProc->zappedBy;
     PCB* temp;
     while (cur) {
@@ -298,13 +312,6 @@ void quit(int status) {
         temp = cur->nextZapper;
         cur->nextZapper = NULL;
         cur = temp;
-    }
-
-    PCB* parent = currentProc->parent;
-    if (parent->runState == BLOCKED && parent->blockReason == JOINING) {
-        parent->runState = RUNNABLE;
-        parent->blockReason = UNBLOCKED;
-        addToQueue(parent);
     }
 
     dispatch();
@@ -382,6 +389,7 @@ void dumpProcesses(void) {
     }
     restoreInterrupts(prevInt);
 }
+
 
     /* -------- Phase 1b Functions -------- */
 
@@ -513,6 +521,7 @@ int unblockProc(int pid) {
  * int  time the process started on the system
  */ 
 int readCurStartTime(void) {
+    checkMode("readCurStartTime");
     return currentProc->currentTimeSlice;
 }
 
@@ -527,6 +536,7 @@ int readCurStartTime(void) {
  * int  total time a process has been on the CPU
  */ 
 int readtime(void) {
+    checkMode("readtime");
     return currentProc->totalCpuTime + (currentTime() - readCurStartTime());
 }
 
@@ -541,8 +551,13 @@ int readtime(void) {
  * int  current time of system in microseconds
  */ 
 int currentTime(void) {
+    checkMode("currentTime");
+    int prevInt = disableInterrupts();
+
     int ret;
     USLOSS_DeviceInput(USLOSS_CLOCK_DEV, 0, &ret);
+
+    restoreInterrupts(prevInt);
     return ret;
 }
 
@@ -558,10 +573,17 @@ int currentTime(void) {
  * None
  */ 
 void timeSlice(void) {
+    checkMode("timeSlice");
+    int prevInt = disableInterrupts();
+
     if (currentTime() - readCurStartTime() >= MAX_TIME_SLICE) {
         dispatch();
     }
+
+    restoreInterrupts(prevInt);
 }
+
+
     /* ---------- Helper Functions ---------- */
 
 /**
@@ -647,47 +669,55 @@ void trampoline() {
 void dispatch() {
     int prevInt = disableInterrupts();
 
-    PCB* new;
-    int curCpuTime;
+    // calculate currentProc's time on the cpu this slice
+    // if currentProc is still running (ie, not blocked) add it to the queue
+    int curCpuTime = 0;
     if (currentProc) {
-        curCpuTime = currentTime() - readCurStartTime();
+        curCpuTime = currentTime()-readCurStartTime();
+        if (currentProc->runState == RUNNING) { addToQueue(currentProc); }
     }
-    else {
-        curCpuTime = 0;
-    }
+
+    // select a new process (or the current one) to run
+    PCB* new;
     for (int i = 0; i < NUMPRIORITIES; i++) {
         Queue* q = &queues[i];
-        // Checking if a current process is running and if it's time slice is up add to queue
-        if (currentProc && i == currentProc->priority - 1 && currentProc->runState == RUNNING) {
-            if (curCpuTime >= MAX_TIME_SLICE) {
-                currentProc->runState = RUNNABLE;
-                currentProc->totalCpuTime = currentProc->totalCpuTime + curCpuTime;
-                addToQueue(currentProc);
-            }
-            else {
-                return;
-            }
-        }
-        // If current queue has a process available
-        if (q->head != NULL) {
-            // If there is a process currently running, put it in run queue
-            if (currentProc && currentProc->runState == RUNNING) {
-                currentProc->runState = RUNNABLE;
-                currentProc->totalCpuTime = currentProc->totalCpuTime + curCpuTime;
-                addToQueue(currentProc);
-            }
-            new = q->head;
+
+        // if we reach the currently running process's priority and it has not exceeded
+        // MAX_TIME_SLICE on the cpu, select it to keep running
+        if (currentProc && i+1 == currentProc->priority && currentProc->runState == RUNNING && !(curCpuTime > MAX_TIME_SLICE)) {
+            new = currentProc;
             removeFromQueue(new);
             break;
         }
+
+        if (q->head == NULL) { continue; } // nothing available at this priority
+
+        // choose the first process in queue to run next
+        new = q->head;
+        removeFromQueue(new);
+        break;
     }
-    // Set current proc to be dispatchers choice
+
+    // if we've selected the currently running process, simply return and continue running
+    // if not, change its state to runnable and update its totalCpuTime field.
+    if (new == currentProc) { 
+        if (curCpuTime > MAX_TIME_SLICE) {
+            currentProc->totalCpuTime = currentProc->totalCpuTime + curCpuTime;
+            currentProc->currentTimeSlice = currentTime();
+        }
+        return;
+    }
+    else if (currentProc) {
+        if (currentProc->runState == RUNNING) { currentProc->runState = RUNNABLE; }
+        currentProc->totalCpuTime = currentProc->totalCpuTime + curCpuTime;
+    }
+
+    // set new as the new currentProc, then context switch to it
     PCB* oldProc = currentProc;
+    new->currentTimeSlice = currentTime();
+    new->runState = RUNNING;
     currentProc = new;
-    currentProc->runState = RUNNING;
-    int x;
-    USLOSS_DeviceInput(USLOSS_CLOCK_DEV, 0, &x);
-    currentProc->currentTimeSlice = x;
+
     restoreInterrupts(prevInt);
     if (oldProc) {
         USLOSS_ContextSwitch(&(oldProc->context), &(new->context));
@@ -768,6 +798,8 @@ static void clockHandler(int dev, void* arg) {
     phase2_clockHandler();
     timeSlice();
 }
+
+
     /* ---------- Process Functions ---------- */
 
 /**
