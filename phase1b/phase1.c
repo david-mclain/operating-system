@@ -669,8 +669,6 @@ void trampoline() {
 void dispatch() {
     int prevInt = disableInterrupts();
 
-    // calculate currentProc's time on the cpu this slice
-    // if currentProc is still running (ie, not blocked) add it to the queue
     int curCpuTime = 0;
     if (currentProc) {
         curCpuTime = currentTime()-readCurStartTime();
@@ -682,8 +680,6 @@ void dispatch() {
     for (int i = 0; i < NUMPRIORITIES; i++) {
         Queue* q = &queues[i];
 
-        // if we reach the currently running process's priority and it has not exceeded
-        // MAX_TIME_SLICE on the cpu, select it to keep running
         if (currentProc && i+1 == currentProc->priority && currentProc->runState == RUNNING && !(curCpuTime > MAX_TIME_SLICE)) {
             new = currentProc;
             removeFromQueue(new);
@@ -692,14 +688,12 @@ void dispatch() {
 
         if (q->head == NULL) { continue; } // nothing available at this priority
 
-        // choose the first process in queue to run next
         new = q->head;
         removeFromQueue(new);
         break;
     }
 
     // if we've selected the currently running process, simply return and continue running
-    // if not, change its state to runnable and update its totalCpuTime field.
     if (new == currentProc) { 
         if (curCpuTime > MAX_TIME_SLICE) {
             currentProc->totalCpuTime = currentProc->totalCpuTime + curCpuTime;
