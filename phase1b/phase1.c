@@ -7,8 +7,10 @@
  * Creates process table and PCB data types and manages starting
  * different types of processes, joining and quitting them.
  * Implements dispatcher for decision making on next process to run,
- * with time slicing at 80 ms, and other functions such as zap
- * which is similar to a UNIX kill command
+ * with time slicing at 80 ms, and other functionality such as zapping
+ * which is similar to a UNIX kill command, blocking and unblocking
+ * processes and telling how long a process has been taking up CPU time
+ * in both its current time slice and total time on CPU.
  */
 
 #include <stddef.h>
@@ -70,7 +72,7 @@ typedef struct Queue {
 
     /* ---------- Globals ---------- */
 
-PCB processes[MAXPROC];
+PCB processes[MAXPROC]; // process table
 PCB* currentProc;       // currently running process
 int currentPID = 1;     // next available PID
 
@@ -292,9 +294,6 @@ void quit(int status) {
     currentProc->status = status;
     currentProc->runState = DEAD;
     removeFromQueue(currentProc);
-
-    // USLOSS_Console("Process %d calling quit()\n", currentProc->pid);
-    // dumpProcesses();
 
     // wake up this process's parent if it is blocked in join()
     PCB* parent = currentProc->parent;
@@ -785,8 +784,8 @@ void removeFromQueue(PCB* process) {
  * Responsible for handling clock interrupts
  * 
  * Parameters:
- * int dev      idk
- * void* arg    idk
+ * int dev      Device requested from interrupt
+ * void* arg    Arguments for device (if needed)
  *
  * Return:
  * None
