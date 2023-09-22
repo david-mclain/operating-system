@@ -6,6 +6,9 @@
  * the very first steps of simulating an operating system.
  * Creates process table and PCB data types and manages starting
  * different types of processes, joining and quitting them.
+ * Implements dispatcher for decision making on next process to run,
+ * with time slicing at 80 ms, and other functions such as zap
+ * which is similar to a UNIX kill command
  */
 
 #include <stddef.h>
@@ -55,8 +58,8 @@ typedef struct PCB {
     struct PCB* zappedBy;       // head of list of procs currently zap()-ing this proc
     struct PCB* nextZapper;     // next (after this) in list of procs zap()-ing some OTHER proc
 
-    struct PCB* prevInQueue;    // Prev process in queue that has the same priority
-    struct PCB* nextInQueue;    // Next process in queue that has the same priority
+    struct PCB* prevInQueue;    // Prev process in PCBs run queue 
+    struct PCB* nextInQueue;    // Next process in PCBs run queue
 } PCB;
 
 typedef struct Queue {
@@ -210,10 +213,10 @@ int fork1(char *name, int (*func)(char*), char *arg, int stacksize, int priority
  * Cleans up zombie children processes
  * 
  * Parameters:
- * int* status - status of the child process being joined
+ * int* status  Status of the child process being joined
  *
  * Return:
- * int - PID of child process that was joined
+ * int  PID of child process that was joined
  */ 
 int join(int *status) {
     checkMode("join");
@@ -272,7 +275,7 @@ int join(int *status) {
  * Makes a process a zombie
  * 
  * Parameters:
- * int status - status of process to make zombie
+ * int status   Status of process to make zombie
  *
  * Return:
  * None
@@ -326,7 +329,7 @@ void quit(int status) {
  * None
  *
  * Return:
- * int - PID of current running process
+ * int  PID of current running process
  */ 
 int getpid(void) {
     checkMode("getpid");
@@ -398,7 +401,7 @@ void dumpProcesses(void) {
  * Tells a process that it should quit as soon as possible; similar to UNIX kill
  * 
  * Parameters:
- * int pid  process pid that we want to zap
+ * int pid  Process pid that we want to zap
  *
  * Return:
  * None
@@ -461,7 +464,7 @@ int isZapped(void) {
  * Puts the current process into the blocked state
  * 
  * Parameters:
- * int blockStatus  status as to why process is being blocked
+ * int blockStatus  Status as to why process is being blocked
  *
  * Return:
  * None
@@ -487,7 +490,7 @@ void blockMe(int blockStatus) {
  * Puts a specified process back into the runnable state
  * 
  * Parameters:
- * int pid  pid of process to put back into runnable state
+ * int pid  PID of process to put back into runnable state
  *
  * Return:
  * int  0 if there were no issues, -2 if there were any issues with unblocking
@@ -518,7 +521,7 @@ int unblockProc(int pid) {
  * None
  *
  * Return:
- * int  time the process started on the system
+ * int  Time the process started on the system
  */ 
 int readCurStartTime(void) {
     checkMode("readCurStartTime");
@@ -533,7 +536,7 @@ int readCurStartTime(void) {
  * None
  *
  * Return:
- * int  total time a process has been on the CPU
+ * int  Total time a process has been on the CPU
  */ 
 int readtime(void) {
     checkMode("readtime");
@@ -548,7 +551,7 @@ int readtime(void) {
  * None
  *
  * Return:
- * int  current time of system in microseconds
+ * int  Current time of system in microseconds
  */ 
 int currentTime(void) {
     checkMode("currentTime");
@@ -592,7 +595,7 @@ void timeSlice(void) {
  * execute kernel functions
  * 
  * Parameters:
- * char* fnName - Name of function that user mode process attempted to execute
+ * char* fnName     Name of function that user mode process attempted to execute
  *
  * Return:
  * None
@@ -613,7 +616,7 @@ void checkMode(char* fnName) {
  * None
  *
  * Return:
- * int - State that interrupts were in before function call
+ * int  State that interrupts were in before function call
  */ 
 int disableInterrupts() {
     int prevInt = USLOSS_PsrGet() & USLOSS_PSR_CURRENT_INT; // previous interrupt status
@@ -626,7 +629,7 @@ int disableInterrupts() {
  * Restores interrupts after kernel function has finished executing
  * 
  * Parameters:
- * int prevInt - State that interrupts were in before function call
+ * int prevInt  State that interrupts were in before function call
  *
  * Return:
  * None
@@ -726,7 +729,7 @@ void dispatch() {
  * Responsible for adding a process to its respective run queue
  * 
  * Parameters:
- * PCB* process     process to add to run queue
+ * PCB* process     Process to add to run queue
  *
  * Return:
  * None
@@ -749,7 +752,7 @@ void addToQueue(PCB* process) {
  * Responsible for removing a process from its run queue
  * 
  * Parameters:
- * PCB* process     process to remove from the run queue
+ * PCB* process     Process to remove from the run queue
  *
  * Return:
  * None
