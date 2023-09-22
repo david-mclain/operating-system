@@ -33,6 +33,9 @@
 #define ZAPPING     21
 #define JOINING     22
 
+/**
+ * Data structure used for maintaining PCB information
+ */
 typedef struct PCB {
     int pid;
     int priority;
@@ -64,6 +67,9 @@ typedef struct PCB {
     struct PCB* nextInQueue;    // Next process in PCBs run queue
 } PCB;
 
+/**
+ * Data structure used for maintaining run queues for dispatcher
+ */
 typedef struct Queue {
     PCB* head;
     PCB* tail;
@@ -249,15 +255,9 @@ int join(int *status) {
                 currChild->nextSibling->prevSibling = currChild->prevSibling;
             } 
 
-            // free up child's stack and clear pointers
+            // free up child's stack and empty spot in process table
             free(currChild->stackMem);
             currChild->isAllocated = 0;
-            // might not need to do this, test and see l8r
-            currChild->parent = NULL;
-            currChild->prevSibling = NULL;
-            currChild->nextSibling = NULL;
-            currChild->child = NULL;
-
             restoreInterrupts(prevInt);
             return currChild->pid;
         }
@@ -359,8 +359,6 @@ void dumpProcesses(void) {
         if (cur->parent != NULL) { USLOSS_Console("%4d  ", cur->parent->pid); }
         else { USLOSS_Console("   0  "); }
         USLOSS_Console("%-16s  ", cur->processName);
-
-        //if (cur->child != NULL) { USLOSS_Console("%8d  ", cur->child->pid); }
 
         USLOSS_Console("%-8d  ", cur->priority);
         switch (cur->runState) {
