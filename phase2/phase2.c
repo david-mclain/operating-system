@@ -36,6 +36,4 @@ void wakeupByDevice(int type, int unit, int status) {
 
 }
 
-void (*systemCallVec[])(USLOSS_Sysargs *args) {
-
-}
+void (*systemCallVec[])(USLOSS_Sysargs *args);
