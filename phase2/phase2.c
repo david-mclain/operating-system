@@ -63,6 +63,7 @@ int MboxCreate(int slots, int slot_size) {
     cur->slotSize = slot_size;
     cur->isUsed = 1;
 
+    // mailbox id = index of array? what about when it circles around??
     Mailbox* temp = &mailboxes[curMailboxID];
     for (int i = 0; i < MAXMBOX; i++) {
         curMailboxID = (curMailboxID + 1) % MAXMBOX;
