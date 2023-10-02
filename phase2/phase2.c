@@ -8,6 +8,11 @@
 #define TERM_INDEX USLOSS_CLOCK_UNITS
 #define DISK_INDEX TERM_INDEX + USLOSS_CLOCK_UNITS
 
+void checkMode(char*);
+void restoreInterrupts(int);
+int disableInterrupts();
+static void syscallHandler(int dev, void* arg);
+
 typedef struct PCB {
     int pid;    
 } PCB;
@@ -35,7 +40,7 @@ int mboxID = 0;
 Message messageSlots[MAXSLOTS];
 
 void (*systemCallVec[MAXSYSCALLS])(USLOSS_Sysargs *args);
-void nullsys(void);
+void nullsys(USLOSS_Sysargs*);
 
 void phase2_init(void) {
     memset(mailboxes, 0, sizeof(mailboxes));
@@ -46,6 +51,7 @@ void phase2_init(void) {
     for (int i = 0; i < USLOSS_CLOCK_UNITS + USLOSS_DISK_UNITS + USLOSS_TERM_UNITS; i++) {
         MboxCreate(1, sizeof(int));
     }
+    USLOSS_IntVec[USLOSS_SYSCALL_INT] = &syscallHandler;
 }
 
 void phase2_start_service_processes() {
@@ -53,7 +59,9 @@ void phase2_start_service_processes() {
 }
 
 int MboxCreate(int slots, int slot_size) {
-    if (slots < 0 || slot_size < 0 || slot_size > MAXSLOTS || mailboxes[mboxID].isUsed) {
+    checkMode("MboxCreate");
+    int prevInt = disableInterrupts();
+    if (slots < 0 || slot_size < 0 || slots > MAXSLOTS || mailboxes[mboxID].isUsed || slot_size >= MAX_MESSAGE) {
         return -1;
     }
     Mailbox* cur = &mailboxes[mboxID];
@@ -70,6 +78,7 @@ int MboxCreate(int slots, int slot_size) {
         if (!temp->isUsed) { break; }
     }
 
+    restoreInterrupts(prevInt);
     return cur->id;
 }
 
@@ -78,6 +87,7 @@ int MboxRelease(int mbox_id) {
 }
 
 int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
+    
     return 0;
 }
 
@@ -107,6 +117,73 @@ void phase2_clockHandler() {
 
 }
 
-void nullsys() {
-    USLOSS_Console("nullsys(): Program called an unimplemented syscall.  syscall no: %d   PSR: 0x%X", 0, USLOSS_PsrGet()); //fill with proper vals later 
+void nullsys(USLOSS_Sysargs* args) {
+    USLOSS_Console("nullsys(): Program called an unimplemented syscall.  syscall no: %d   PSR: 0x%02x\n", args->number, USLOSS_PsrGet());
+    USLOSS_Halt(1);
+}
+
+    /* ---------- Helper Functions ---------- */
+
+/**
+ * Purpose:
+ * Responsible for handling clock interrupts
+ * 
+ * Parameters:
+ * int dev      Device requested from interrupt
+ * void* arg    Arguments for device (if needed)
+ *
+ * Return:
+ * None
+ */ 
+static void syscallHandler(int dev, void* arg) {
+    (*systemCallVec)((USLOSS_Sysargs*)arg);
+}
+
+/**
+ * Purpose:
+ * Checks the current mode of the operating system, halts if user mode attempts to
+ * execute kernel functions
+ * 
+ * Parameters:
+ * char* fnName     Name of function that user mode process attempted to execute
+ *
+ * Return:
+ * None
+ */ 
+void checkMode(char* fnName) {
+    if (!(USLOSS_PsrGet() & USLOSS_PSR_CURRENT_MODE)) {
+        USLOSS_Console("ERROR: Someone attempted to call %s while in user mode!\n",
+                fnName);
+        USLOSS_Halt(1);
+    }
+}
+
+/**
+ * Purpose:
+ * Disables interrupts for when executing kernel mode functions
+ * 
+ * Parameters:
+ * None
+ *
+ * Return:
+ * int  State that interrupts were in before function call
+ */ 
+int disableInterrupts() {
+    int prevInt = USLOSS_PsrGet() & USLOSS_PSR_CURRENT_INT; // previous interrupt status
+    USLOSS_PsrSet(prevInt & ~USLOSS_PSR_CURRENT_INT);
+    return prevInt;
+}
+
+/**
+ * Purpose:
+ * Restores interrupts after kernel function has finished executing
+ * 
+ * Parameters:
+ * int prevInt  State that interrupts were in before function call
+ *
+ * Return:
+ * None
+ */ 
+void restoreInterrupts(int prevInt) {
+    USLOSS_PsrSet(USLOSS_PsrGet() | prevInt);
 }
