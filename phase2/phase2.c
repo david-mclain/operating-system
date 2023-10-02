@@ -48,7 +48,4 @@ void phase2_clockHandler() {
 
 }
 
-
-
-
 void (*systemCallVec[])(USLOSS_Sysargs *args);
