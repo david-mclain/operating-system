@@ -30,7 +30,7 @@ typedef struct Mailbox {
 } Mailbox;
 
 static Mailbox mailboxes[MAXMBOX];
-int curMailboxID = 0;
+int mboxID = 0;
 
 Message messageSlots[MAXSLOTS];
 
@@ -53,44 +53,23 @@ void phase2_start_service_processes() {
 }
 
 int MboxCreate(int slots, int slot_size) {
-    if (slots < 0 || slot_size < 0 || slot_size > MAXSLOTS ||
-        mailboxes[curMailboxID].isUsed) {
+    if (slots < 0 || slot_size < 0 || slot_size > MAXSLOTS || mailboxes[mboxID].isUsed) {
         return -1;
     }
-    Mailbox* cur = &mailboxes[curMailboxID];
-    cur->id = curMailboxID;
+    Mailbox* cur = &mailboxes[mboxID];
+    cur->id = mboxID;
     cur->slots = slots;
     cur->slotSize = slot_size;
     cur->isUsed = 1;
 
-    // mailbox id = index of array? what about when it circles around??
-    Mailbox* temp = &mailboxes[curMailboxID];
+    // move mboxID to next available index in mailboxes array
+    Mailbox* temp = &mailboxes[mboxID];
     for (int i = 0; i < MAXMBOX; i++) {
-        curMailboxID = (curMailboxID + 1) % MAXMBOX;
-        temp = &mailboxes[curMailboxID];
+        mboxID = (mboxID + 1) % MAXMBOX;
+        temp = &mailboxes[mboxID];
         if (!temp->isUsed) { break; }
     }
-    /*
-    for (int i = 0; i < slots; i++) {
-        int j = 0;
-        Message* slot = &messageSlots[j];
-        while (slot->isUsed) {
-            slot = &messageSlots[++j];
-            
-            if (j >= MAXSLOTS) {
-                printf("erororroror %d\n", j);
-                return -1;
-            }
-            
-        }
-        slot->nextSlot = cur->firstSlot;
-        if (cur->firstSlot) {
-            cur->firstSlot->prevSlot = slot;
-        }
-        cur->firstSlot = slot;
-        slot->isUsed = 1;
-    }
-    */
+
     return cur->id;
 }
 
