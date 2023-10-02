@@ -24,19 +24,17 @@ typedef struct Mailbox {
     int slots;
     int slotSize;
 
-    char isReleased;
+    char isUsed;
 
     Message* firstSlot;
 } Mailbox;
 
-Message messageSlots[MAXSLOTS];
-
+static Mailbox mailboxes[MAXMBOX];
 int curMailboxID = 0;
 
-static Mailbox mailboxes[MAXMBOX];
+Message messageSlots[MAXSLOTS];
 
 void (*systemCallVec[MAXSYSCALLS])(USLOSS_Sysargs *args);
-
 void nullsys(void);
 
 void phase2_init(void) {
@@ -55,24 +53,34 @@ void phase2_start_service_processes() {
 }
 
 int MboxCreate(int slots, int slot_size) {
-    if (slots < 0 || slot_size < 0 || slot_size > MAXSLOTS) {
+    if (slots < 0 || slot_size < 0 || slot_size > MAXSLOTS ||
+        mailboxes[curMailboxID].isUsed) {
         return -1;
     }
     Mailbox* cur = &mailboxes[curMailboxID];
-    cur->id = curMailboxID++;
+    cur->id = curMailboxID;
     cur->slots = slots;
     cur->slotSize = slot_size;
+    cur->isUsed = 1;
+
+    Mailbox* temp = &mailboxes[curMailboxID];
+    for (int i = 0; i < MAXMBOX; i++) {
+        curMailboxID = (curMailboxID + 1) % MAXMBOX;
+        temp = &mailboxes[curMailboxID];
+        if (!temp->isUsed) { break; }
+    }
+    /*
     for (int i = 0; i < slots; i++) {
-        int j = i;
+        int j = 0;
         Message* slot = &messageSlots[j];
         while (slot->isUsed) {
             slot = &messageSlots[++j];
+            
             if (j >= MAXSLOTS) {
-                printf("erororroror\n");
+                printf("erororroror %d\n", j);
                 return -1;
-                //USLOSS_Console("errororororo\n");
-                //USLOSS_Halt(1);
             }
+            
         }
         slot->nextSlot = cur->firstSlot;
         if (cur->firstSlot) {
@@ -81,6 +89,7 @@ int MboxCreate(int slots, int slot_size) {
         cur->firstSlot = slot;
         slot->isUsed = 1;
     }
+    */
     return cur->id;
 }
 
