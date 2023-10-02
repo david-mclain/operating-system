@@ -1,0 +1,5 @@
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+start2(): started, trying to create too many mailboxes.  Exactly 10 should fail, since you should have auto-allocated 7 mailboxes for the various interrupts.
+finish(): The simulation is now terminating.

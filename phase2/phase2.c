@@ -58,9 +58,7 @@ void waitDevice(int type, int unit, int *status) {
     
 }
 
-void wakeupByDevice(int type, int unit, int status) {
-    
-}
+void wakeupByDevice(int type, int unit, int status) {}
 
 int phase2_check_io() {
     return 0;
