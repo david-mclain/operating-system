@@ -12,10 +12,6 @@ void checkMode(char*);
 void restoreInterrupts(int);
 int disableInterrupts();
 static void syscallHandler(int dev, void* arg);
-static void termHandler(int dev, void* arg);
-static void diskHandler(int dev, void* arg);
-
-void (*systemCallVec[])(USLOSS_Sysargs *args);
 
 typedef struct PCB {
     int pid;    
@@ -43,6 +39,7 @@ int mboxID = 0;
 
 Message messageSlots[MAXSLOTS];
 
+void (*systemCallVec[MAXSYSCALLS])(USLOSS_Sysargs *args);
 void nullsys(USLOSS_Sysargs*);
 
 void phase2_init(void) {
@@ -55,8 +52,6 @@ void phase2_init(void) {
         MboxCreate(1, sizeof(int));
     }
     USLOSS_IntVec[USLOSS_SYSCALL_INT] = &syscallHandler;
-    USLOSS_IntVec[USLOSS_TERM_INT] = &termHandler;
-    USLOSS_IntVec[USLOSS_DISK_INT] = &diskHandler;
 }
 
 void phase2_start_service_processes() {
@@ -92,6 +87,7 @@ int MboxRelease(int mbox_id) {
 }
 
 int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
+    
     return 0;
 }
 
@@ -121,11 +117,16 @@ void phase2_clockHandler() {
 
 }
 
+void nullsys(USLOSS_Sysargs* args) {
+    USLOSS_Console("nullsys(): Program called an unimplemented syscall.  syscall no: %d   PSR: 0x%02x\n", args->number, USLOSS_PsrGet());
+    USLOSS_Halt(1);
+}
+
     /* ---------- Helper Functions ---------- */
 
 /**
  * Purpose:
- * Responsible for handling syscall interrupts
+ * Responsible for handling clock interrupts
  * 
  * Parameters:
  * int dev      Device requested from interrupt
@@ -136,15 +137,6 @@ void phase2_clockHandler() {
  */ 
 static void syscallHandler(int dev, void* arg) {
     (*systemCallVec)((USLOSS_Sysargs*)arg);
-}
-
-static void termHandler(int dev, void* arg) {
-    int time = currentTime();
-    MboxSend(dev + TERM_INDEX, &time, sizeof(int));
-}
-
-static void diskHandler(int dev, void* arg) {
-
 }
 
 /**
@@ -194,19 +186,4 @@ int disableInterrupts() {
  */ 
 void restoreInterrupts(int prevInt) {
     USLOSS_PsrSet(USLOSS_PsrGet() | prevInt);
-}
-
-/**
- * Purpose:
- * Used for handling syscalls that have yet to be implemented
- * 
- * Parameters:
- * USLOSS_Sysargs* args     arguments for syscall
- *
- * Return:
- * None
- */ 
-void nullsys(USLOSS_Sysargs* args) {
-    USLOSS_Console("nullsys(): Program called an unimplemented syscall.  syscall no: %d   PSR: 0x%02x\n", args->number, USLOSS_PsrGet());
-    USLOSS_Halt(1);
 }
