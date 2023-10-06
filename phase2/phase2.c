@@ -8,17 +8,12 @@
 #define TERM_INDEX USLOSS_CLOCK_UNITS
 #define DISK_INDEX TERM_INDEX + USLOSS_CLOCK_UNITS
 
-void checkMode(char*);
-void restoreInterrupts(int);
-int disableInterrupts();
-static void syscallHandler(int dev, void* arg);
-
 typedef struct PCB {
     int pid;    
 } PCB;
 
 typedef struct Message {
-    char isUsed;
+    char inUse;
     char message[MAX_MESSAGE];
     struct Message* nextSlot;
     struct Message* prevSlot;
@@ -29,13 +24,22 @@ typedef struct Mailbox {
     int slots;
     int slotSize;
 
-    char isUsed;
+    char inUse;
+    char isReleased;
 
     Message* firstSlot;
 } Mailbox;
 
+Message* nextOpenSlot();
+void checkMode(char*);
+void restoreInterrupts(int);
+int disableInterrupts();
+static void syscallHandler(int dev, void* arg);
+int validateSend(int, void*, int);
+
 static Mailbox mailboxes[MAXMBOX];
 int mboxID = 0;
+int slotsInUse = 0;
 
 Message messageSlots[MAXSLOTS];
 
@@ -61,33 +65,43 @@ void phase2_start_service_processes() {
 int MboxCreate(int slots, int slot_size) {
     checkMode("MboxCreate");
     int prevInt = disableInterrupts();
-    if (slots < 0 || slot_size < 0 || slots > MAXSLOTS || mailboxes[mboxID].isUsed || slot_size >= MAX_MESSAGE) {
+    if (slots < 0 || slot_size < 0 || slots > MAXSLOTS || mailboxes[mboxID].inUse || slot_size >= MAX_MESSAGE) {
         return -1;
     }
     Mailbox* cur = &mailboxes[mboxID];
     cur->id = mboxID;
     cur->slots = slots;
     cur->slotSize = slot_size;
-    cur->isUsed = 1;
+    cur->inUse = 1;
 
     // move mboxID to next available index in mailboxes array
     Mailbox* temp = &mailboxes[mboxID];
     for (int i = 0; i < MAXMBOX; i++) {
         mboxID = (mboxID + 1) % MAXMBOX;
         temp = &mailboxes[mboxID];
-        if (!temp->isUsed) { break; }
+        if (!temp->inUse) { break; }
     }
-
     restoreInterrupts(prevInt);
     return cur->id;
 }
 
 int MboxRelease(int mbox_id) {
+    if (!mailboxes[mbox_id].inUse || mailboxes[mbox_id].isReleased) {
+        return -1;
+    }
     return 0;
 }
 
 int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
-    
+    checkMode("MboxSend");
+    int prevInt = disableInterrupts();
+    int valid = validateSend(mbox_id, msg_ptr, msg_size);
+    if (!valid) {
+        return valid;
+    }
+    Message* msg = nextOpenSlot();
+    memcpy(msg->message, msg_ptr, msg_size);
+    restoreInterrupts(prevInt);
     return 0;
 }
 
@@ -96,6 +110,14 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 }
 
 int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
+    checkMode("MboxSend");
+    int prevInt = disableInterrupts();
+    int valid = validateSend(mbox_id, msg_ptr, msg_size);
+    if (!valid) {
+        return valid;
+    }
+    Message* msg = nextOpenSlot();
+    restoreInterrupts(prevInt);
     return 0;
 }
 
@@ -124,6 +146,27 @@ void nullsys(USLOSS_Sysargs* args) {
 
     /* ---------- Helper Functions ---------- */
 
+int validateSend(int id, void* msg, int size) {
+    if (mailboxes[id].isReleased) {
+        return -3;
+    }
+    if (slotsInUse >= MAXSLOTS) {
+        return -2;
+    }
+    if (id >= MAXMBOX || !mailboxes[id].inUse || size > mailboxes[id].slotSize) {
+        return -1;
+    }
+    return 0;
+}
+
+Message* nextOpenSlot() {
+    for (int i = 0; i < MAXSLOTS; i++) {
+        if (!messageSlots[i].inUse) {
+            return &messageSlots[i];
+        }
+    }
+    return NULL;
+}
 /**
  * Purpose:
  * Responsible for handling clock interrupts
