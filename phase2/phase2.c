@@ -8,6 +8,7 @@
 #define TERM_INDEX USLOSS_CLOCK_UNITS
 #define DISK_INDEX TERM_INDEX + USLOSS_CLOCK_UNITS
 
+// MAYBE USE FOR CONSUMER/PRODUCER QUEUES? IDK
 typedef struct PCB {
     int pid;    
 } PCB;
@@ -23,6 +24,7 @@ typedef struct Mailbox {
     int id;
     int slots;
     int slotSize;
+    int slotsInUse;
 
     char inUse;
     char isReleased;
@@ -95,12 +97,17 @@ int MboxRelease(int mbox_id) {
 int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
     int prevInt = disableInterrupts();
-    int valid = validateSend(mbox_id, msg_ptr, msg_size);
-    if (!valid) {
-        return valid;
+    int invalid = validateSend(mbox_id, msg_ptr, msg_size);
+    if (invalid) {
+        return invalid;
+    }
+    Mailbox* curMbox = &mailboxes[mbox_id];
+    if (curMbox->slotsInUse == curMbox->slots) {
+        blockMe(20); //idk what val to put here yet
     }
     Message* msg = nextOpenSlot();
     memcpy(msg->message, msg_ptr, msg_size);
+    USLOSS_Console("msg: %s\n", msg->message);
     restoreInterrupts(prevInt);
     return 0;
 }
