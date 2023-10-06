@@ -35,7 +35,8 @@ typedef struct Mailbox {
     char inUse;
     char isReleased;
 
-    Message* firstSlot;
+    Message* messageHead;
+    Message* messageTail;
 
     PCB* consumerHead;
     PCB* consumerTail;
@@ -65,13 +66,14 @@ int validateSend(int, void*, int);
 void checkMode(char*);
 void restoreInterrupts(int);
 void addToConsumer(Mailbox*);
+void addToProducer(Mailbox*);
 void printQueues();
 void removeConsumerHead(Mailbox*);
+void nullsys(USLOSS_Sysargs*);
 
 Message* nextOpenSlot();
 
-static void syscallHandler(int dev, void* arg);
-void nullsys(USLOSS_Sysargs*);
+static void syscallHandler(int, void*);
 
 
 /* ---------- Phase 2 Functions ----------*/
@@ -131,14 +133,22 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
 
     Mailbox* curMbox = &mailboxes[mbox_id];
     if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
+        addToProducer(curMbox);
         blockMe(20); //idk what val to put here yet
     }
     Message* msg = nextOpenSlot();
     memcpy(msg->message, msg_ptr, msg_size);
     msg->size = msg_size;
 
-    msg->nextSlot = curMbox->firstSlot;
-    curMbox->firstSlot = msg;
+    if (!curMbox->messageHead) {
+        curMbox->messageHead = msg;
+        curMbox->messageTail = msg;
+    }
+    else {
+        curMbox->messageTail->nextSlot = msg;
+        curMbox->messageTail = msg;
+    }
+    curMbox->messageHead = msg;
 
     if (curMbox->consumerHead) {
         PCB* toUnblock = curMbox->consumerHead;
@@ -157,12 +167,13 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     int prevInt = disableInterrupts();
 
     Mailbox* curMbox = &mailboxes[mbox_id];
-    Message* msg = curMbox->firstSlot;
+    Message* msg = curMbox->messageHead;
     if (msg == NULL) {
         addToConsumer(curMbox);
         blockMe(20);
     }
-    msg = curMbox->firstSlot;
+    msg = curMbox->messageHead;
+    curMbox->messageHead = curMbox->messageHead->nextSlot;
     memcpy(msg_ptr, msg->message, msg_max_size > msg->size ? msg->size : msg_max_size);
 
     restoreInterrupts(prevInt);
@@ -188,7 +199,21 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
 }
 
 int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
-    return 0;
+    checkMode("MboxRecv");
+    int prevInt = disableInterrupts();
+
+    Mailbox* curMbox = &mailboxes[mbox_id];
+    Message* msg = curMbox->messageHead;
+    if (msg == NULL) {
+        addToConsumer(curMbox);
+        return -2;
+        //blockMe(20);
+    }
+    msg = curMbox->messageHead;
+    memcpy(msg_ptr, msg->message, msg_max_size > msg->size ? msg->size : msg_max_size);
+
+    restoreInterrupts(prevInt);
+    return msg->size;
 }
 
 void waitDevice(int type, int unit, int *status) {
@@ -236,6 +261,19 @@ Message* nextOpenSlot() {
 }
 
 void addToConsumer(Mailbox* mbox) {
+    PCB* proc = &processes[getpid() % MAXPROC];
+    proc->pid = getpid();
+    if (!mbox->consumerHead) {
+        mbox->consumerHead = proc;
+        mbox->consumerTail = proc;
+    }
+    else {
+        mbox->consumerTail->nextConsumer = proc;
+        mbox->consumerTail = proc;
+    }
+}
+
+void addToProducer(Mailbox* mbox) {
     PCB* proc = &processes[getpid() % MAXPROC];
     proc->pid = getpid();
     if (!mbox->consumerHead) {
