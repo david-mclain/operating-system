@@ -11,6 +11,8 @@
 // MAYBE USE FOR CONSUMER/PRODUCER QUEUES? IDK
 typedef struct PCB {
     int pid;    
+    struct PCB* nextConsumer;
+    struct PCB* nextProducer;
 } PCB;
 
 typedef struct Message {
@@ -31,24 +33,37 @@ typedef struct Mailbox {
     char isReleased;
 
     Message* firstSlot;
+
+    PCB* consumerHead;
+    PCB* consumerTail;
+
+    PCB* producerHead;
+    PCB* producerTail;
 } Mailbox;
 
+int disableInterrupts();
+int validateSend(int, void*, int);
+
 Message* nextOpenSlot();
+
 void checkMode(char*);
 void restoreInterrupts(int);
-int disableInterrupts();
-static void syscallHandler(int dev, void* arg);
-int validateSend(int, void*, int);
 void placeInMailbox(Mailbox*, Message*);
+void nullsys(USLOSS_Sysargs*);
+void addToConsumer(Mailbox*);
+void printQueues();
+void removeConsumerHead(Mailbox*);
 
-static Mailbox mailboxes[MAXMBOX];
+static void syscallHandler(int dev, void* arg);
+
+PCB processes[MAXPROC];
+Mailbox mailboxes[MAXMBOX];
+Message messageSlots[MAXSLOTS];
+
 int mboxID = 0;
 int slotsInUse = 0;
 
-Message messageSlots[MAXSLOTS];
-
 void (*systemCallVec[MAXSYSCALLS])(USLOSS_Sysargs *args);
-void nullsys(USLOSS_Sysargs*);
 
 void phase2_init(void) {
     memset(mailboxes, 0, sizeof(mailboxes));
@@ -104,13 +119,18 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
         return invalid;
     }
     Mailbox* curMbox = &mailboxes[mbox_id];
-    if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerList == NULL) {
+    if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
         blockMe(20); //idk what val to put here yet
     }
     Message* msg = nextOpenSlot();
     memcpy(msg->message, msg_ptr, msg_size);
     msg->size = msg_size;
     placeInMailbox(curMbox, msg);
+    if (curMbox->consumerHead) {
+        PCB* toUnblock = curMbox->consumerHead;
+        removeConsumerHead(curMbox);
+        unblockProc(toUnblock->pid);
+    }
     restoreInterrupts(prevInt);
     return 0;
 }
@@ -123,9 +143,11 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     Mailbox* curMbox = &mailboxes[mbox_id];
     Message* msg = curMbox->firstSlot;
     if (msg == NULL) {
+        addToConsumer(curMbox);
         blockMe(20);
     }
-    memcpy(msg_ptr, msg->message, msg_max_size);
+    msg = curMbox->firstSlot;
+    memcpy(msg_ptr, msg->message, msg_max_size > msg->size ? msg->size : msg_max_size);
     restoreInterrupts(prevInt);
     return msg->size;
 }
@@ -138,7 +160,7 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
         return valid;
     }
     Mailbox* curMbox = &mailboxes[mbox_id];
-    if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerList == NULL) {
+    if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
         restoreInterrupts(prevInt);
         return -2;
     }
@@ -202,6 +224,54 @@ void placeInMailbox(Mailbox* mbox, Message* msg) {
     else {
         msg->nextSlot = mbox->firstSlot;
         mbox->firstSlot = msg;
+    }
+}
+
+void addToConsumer(Mailbox* mbox) {
+    PCB* proc = &processes[getpid() % MAXPROC];
+    proc->pid = getpid();
+    if (!mbox->consumerHead) {
+        mbox->consumerHead = proc;
+        mbox->consumerTail = proc;
+    }
+    else {
+        mbox->consumerTail->nextConsumer = proc;
+        mbox->consumerTail = proc;
+    }
+}
+
+void removeConsumerHead(Mailbox* mbox) {
+    PCB* curHead;
+    if (curHead->nextConsumer) {
+        mbox->consumerHead = curHead->nextConsumer;
+    }
+    else {
+        mbox->consumerHead = NULL;
+        mbox->consumerTail = NULL;
+    }
+}
+
+void printQueues() {
+    Mailbox* mbox;
+    for (int i = 0; i < MAXMBOX; i++) {
+        mbox = &mailboxes[i];
+        if (mbox->inUse) {
+            printf("mbox id: %d\n", i);
+            PCB* cur = mbox->consumerHead;
+            printf("Consumer Queue: ");
+            while (cur) {
+                printf("%d -> ", cur->pid);
+                cur = cur->nextConsumer;
+            }
+            printf("NULL\n");
+            cur = mbox->producerHead;
+            printf("Producer Queue: ");
+            while (cur) {
+                printf("%d -> ", cur->pid);
+                cur = cur->nextProducer;
+            }
+            printf("NULL\n");
+        }
     }
 }
 /**
