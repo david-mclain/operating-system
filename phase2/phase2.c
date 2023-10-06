@@ -16,8 +16,9 @@ typedef struct PCB {
 typedef struct Message {
     char inUse;
     char message[MAX_MESSAGE];
+    int size;
     struct Message* nextSlot;
-    struct Message* prevSlot;
+    //struct Message* prevSlot;  // I dont think this is needed
 } Message;
 
 typedef struct Mailbox {
@@ -38,6 +39,7 @@ void restoreInterrupts(int);
 int disableInterrupts();
 static void syscallHandler(int dev, void* arg);
 int validateSend(int, void*, int);
+void placeInMailbox(Mailbox*, Message*);
 
 static Mailbox mailboxes[MAXMBOX];
 int mboxID = 0;
@@ -102,18 +104,30 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
         return invalid;
     }
     Mailbox* curMbox = &mailboxes[mbox_id];
-    if (curMbox->slotsInUse == curMbox->slots) {
+    if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerList == NULL) {
         blockMe(20); //idk what val to put here yet
     }
     Message* msg = nextOpenSlot();
     memcpy(msg->message, msg_ptr, msg_size);
-    USLOSS_Console("msg: %s\n", msg->message);
+    msg->size = msg_size;
+    placeInMailbox(curMbox, msg);
     restoreInterrupts(prevInt);
     return 0;
 }
 
+
+// just to test my send, no error checking or anything just raw dogging recv
 int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
-    return 0;
+    checkMode("MboxRecv");
+    int prevInt = disableInterrupts();
+    Mailbox* curMbox = &mailboxes[mbox_id];
+    Message* msg = curMbox->firstSlot;
+    if (msg == NULL) {
+        blockMe(20);
+    }
+    memcpy(msg_ptr, msg->message, msg_max_size);
+    restoreInterrupts(prevInt);
+    return msg->size;
 }
 
 int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
@@ -123,7 +137,13 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
     if (!valid) {
         return valid;
     }
+    Mailbox* curMbox = &mailboxes[mbox_id];
+    if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerList == NULL) {
+        restoreInterrupts(prevInt);
+        return -2;
+    }
     Message* msg = nextOpenSlot();
+    memcpy(msg->message, msg_ptr, msg_size);
     restoreInterrupts(prevInt);
     return 0;
 }
@@ -173,6 +193,16 @@ Message* nextOpenSlot() {
         }
     }
     return NULL;
+}
+
+void placeInMailbox(Mailbox* mbox, Message* msg) {
+    if (mbox->firstSlot == NULL) {
+        mbox->firstSlot = msg;
+    }
+    else {
+        msg->nextSlot = mbox->firstSlot;
+        mbox->firstSlot = msg;
+    }
 }
 /**
  * Purpose:
