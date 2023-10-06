@@ -8,6 +8,9 @@
 #define TERM_INDEX USLOSS_CLOCK_UNITS
 #define DISK_INDEX TERM_INDEX + USLOSS_CLOCK_UNITS
 
+
+/* ---------- Data Structures ----------*/
+
 // MAYBE USE FOR CONSUMER/PRODUCER QUEUES? IDK
 typedef struct PCB {
     int pid;    
@@ -41,20 +44,8 @@ typedef struct Mailbox {
     PCB* producerTail;
 } Mailbox;
 
-int disableInterrupts();
-int validateSend(int, void*, int);
 
-Message* nextOpenSlot();
-
-void checkMode(char*);
-void restoreInterrupts(int);
-void placeInMailbox(Mailbox*, Message*);
-void nullsys(USLOSS_Sysargs*);
-void addToConsumer(Mailbox*);
-void printQueues();
-void removeConsumerHead(Mailbox*);
-
-static void syscallHandler(int dev, void* arg);
+/* ---------- Globals ---------- */
 
 PCB processes[MAXPROC];
 Mailbox mailboxes[MAXMBOX];
@@ -64,6 +55,26 @@ int mboxID = 0;
 int slotsInUse = 0;
 
 void (*systemCallVec[MAXSYSCALLS])(USLOSS_Sysargs *args);
+
+
+/* ---------- Prototypes ----------*/
+
+int disableInterrupts();
+int validateSend(int, void*, int);
+
+void checkMode(char*);
+void restoreInterrupts(int);
+void addToConsumer(Mailbox*);
+void printQueues();
+void removeConsumerHead(Mailbox*);
+
+Message* nextOpenSlot();
+
+static void syscallHandler(int dev, void* arg);
+void nullsys(USLOSS_Sysargs*);
+
+
+/* ---------- Phase 2 Functions ----------*/
 
 void phase2_init(void) {
     memset(mailboxes, 0, sizeof(mailboxes));
@@ -114,10 +125,10 @@ int MboxRelease(int mbox_id) {
 int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
     int prevInt = disableInterrupts();
+
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
-    if (invalid) {
-        return invalid;
-    }
+    if (invalid) { return invalid; }
+
     Mailbox* curMbox = &mailboxes[mbox_id];
     if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
         blockMe(20); //idk what val to put here yet
@@ -125,12 +136,16 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     Message* msg = nextOpenSlot();
     memcpy(msg->message, msg_ptr, msg_size);
     msg->size = msg_size;
-    placeInMailbox(curMbox, msg);
+
+    msg->nextSlot = curMbox->firstSlot;
+    curMbox->firstSlot = msg;
+
     if (curMbox->consumerHead) {
         PCB* toUnblock = curMbox->consumerHead;
         removeConsumerHead(curMbox);
         unblockProc(toUnblock->pid);
     }
+
     restoreInterrupts(prevInt);
     return 0;
 }
@@ -140,6 +155,7 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
 int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     checkMode("MboxRecv");
     int prevInt = disableInterrupts();
+
     Mailbox* curMbox = &mailboxes[mbox_id];
     Message* msg = curMbox->firstSlot;
     if (msg == NULL) {
@@ -148,6 +164,7 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     }
     msg = curMbox->firstSlot;
     memcpy(msg_ptr, msg->message, msg_max_size > msg->size ? msg->size : msg_max_size);
+
     restoreInterrupts(prevInt);
     return msg->size;
 }
@@ -193,6 +210,7 @@ void nullsys(USLOSS_Sysargs* args) {
     USLOSS_Halt(1);
 }
 
+
     /* ---------- Helper Functions ---------- */
 
 int validateSend(int id, void* msg, int size) {
@@ -215,16 +233,6 @@ Message* nextOpenSlot() {
         }
     }
     return NULL;
-}
-
-void placeInMailbox(Mailbox* mbox, Message* msg) {
-    if (mbox->firstSlot == NULL) {
-        mbox->firstSlot = msg;
-    }
-    else {
-        msg->nextSlot = mbox->firstSlot;
-        mbox->firstSlot = msg;
-    }
 }
 
 void addToConsumer(Mailbox* mbox) {
