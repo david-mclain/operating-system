@@ -67,9 +67,10 @@ void checkMode(char*);
 void restoreInterrupts(int);
 void addToConsumer(Mailbox*);
 void addToProducer(Mailbox*);
-void printQueues();
+void printMailboxes();
 void removeConsumerHead(Mailbox*);
 void nullsys(USLOSS_Sysargs*);
+void putInMailbox(Mailbox*, Message*);
 
 Message* nextOpenSlot();
 
@@ -81,6 +82,7 @@ static void syscallHandler(int, void*);
 void phase2_init(void) {
     memset(mailboxes, 0, sizeof(mailboxes));
     memset(messageSlots, 0, sizeof(messageSlots));
+    memset(processes, 0, sizeof(processes));
     for (int i = 0; i < MAXSYSCALLS; i++) {
         systemCallVec[i] = &nullsys;
     }
@@ -139,23 +141,14 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     Message* msg = nextOpenSlot();
     memcpy(msg->message, msg_ptr, msg_size);
     msg->size = msg_size;
-
-    if (!curMbox->messageHead) {
-        curMbox->messageHead = msg;
-        curMbox->messageTail = msg;
-    }
-    else {
-        curMbox->messageTail->nextSlot = msg;
-        curMbox->messageTail = msg;
-    }
-    curMbox->messageHead = msg;
+    msg->inUse = 1;
+    putInMailbox(curMbox, msg);
 
     if (curMbox->consumerHead) {
         PCB* toUnblock = curMbox->consumerHead;
         removeConsumerHead(curMbox);
         unblockProc(toUnblock->pid);
     }
-
     restoreInterrupts(prevInt);
     return 0;
 }
@@ -260,6 +253,17 @@ Message* nextOpenSlot() {
     return NULL;
 }
 
+void putInMailbox(Mailbox* mbox, Message* msg) {
+    if (!mbox->messageHead) {
+        mbox->messageHead = msg;
+        mbox->messageTail = msg;
+    }
+    else {
+        mbox->messageTail->nextSlot = msg;
+        mbox->messageTail = msg;
+    }
+}
+
 void addToConsumer(Mailbox* mbox) {
     PCB* proc = &processes[getpid() % MAXPROC];
     proc->pid = getpid();
@@ -297,12 +301,21 @@ void removeConsumerHead(Mailbox* mbox) {
     }
 }
 
-void printQueues() {
+void printMailboxes() {
     Mailbox* mbox;
     for (int i = 0; i < MAXMBOX; i++) {
         mbox = &mailboxes[i];
         if (mbox->inUse) {
             printf("mbox id: %d\n", i);
+            
+            printf("Message List: ");
+            Message* curMsg = mbox->messageHead;
+            while (curMsg) {
+                printf("%s -> ", curMsg->message);
+                curMsg = curMsg->nextSlot;
+            }
+            printf("NULL\n");
+
             PCB* cur = mbox->consumerHead;
             printf("Consumer Queue: ");
             while (cur) {
@@ -310,6 +323,7 @@ void printQueues() {
                 cur = cur->nextConsumer;
             }
             printf("NULL\n");
+            
             cur = mbox->producerHead;
             printf("Producer Queue: ");
             while (cur) {
