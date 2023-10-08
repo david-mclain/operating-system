@@ -72,6 +72,7 @@ void addToQueue(Mailbox*, char);
 void printMailboxes();
 void nullsys(USLOSS_Sysargs*);
 void putInMailbox(Mailbox*, Message*);
+void sendMessage(Mailbox*, char*, int);
 
 Message* nextOpenSlot();
 
@@ -138,8 +139,6 @@ int MboxRelease(int mbox_id) {
     return 0;
 }
 
-// something doesnt work with checking slots in use and causes deadlock as of rn
-// NOT BEING ADDED TO PRODUCER QUEUE PROPERLY
 int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
     int prevInt = disableInterrupts();
@@ -157,18 +156,7 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
         return -3;
     }
 
-    Message* msg = nextOpenSlot();
-    memcpy(msg->message, msg_ptr, msg_size);
-    msg->size = msg_size;
-    msg->inUse = 1;
-    putInMailbox(curMbox, msg);
-    curMbox->slotsInUse++;
-
-    if (curMbox->consumerHead) {
-        PCB* toUnblock = curMbox->consumerHead;
-        curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
-        unblockProc(toUnblock->pid);
-    }
+    sendMessage(curMbox, msg_ptr, msg_size);
 
     restoreInterrupts(prevInt);
     return 0;
@@ -213,7 +201,7 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
     int prevInt = disableInterrupts();
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
-    if (!invalid) {
+    if (invalid) {
         return invalid;
     }
     Mailbox* curMbox = &mailboxes[mbox_id];
@@ -221,17 +209,9 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
         restoreInterrupts(prevInt);
         return -2;
     }
-    Message* msg = nextOpenSlot();
-    memcpy(msg->message, msg_ptr, msg_size);
-    msg->size = msg_size;
-    msg->inUse = 1;
-    putInMailbox(curMbox, msg);
 
-    if (curMbox->consumerHead) {
-        PCB* toUnblock = curMbox->consumerHead;
-        curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
-        unblockProc(toUnblock->pid);
-    }
+    sendMessage(curMbox, msg_ptr, msg_size);
+
     restoreInterrupts(prevInt);
     return 0;
 }
@@ -322,6 +302,21 @@ void nullsys(USLOSS_Sysargs* args) {
 
 
     /* ---------- Helper Functions ---------- */
+
+void sendMessage(Mailbox* curMbox, char* msg_ptr, int msg_size) {
+    Message* msg = nextOpenSlot();
+    memcpy(msg->message, msg_ptr, msg_size);
+    msg->size = msg_size;
+    msg->inUse = 1;
+    putInMailbox(curMbox, msg);
+    curMbox->slotsInUse++;
+
+    if (curMbox->consumerHead) {
+        PCB* toUnblock = curMbox->consumerHead;
+        curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
+        unblockProc(toUnblock->pid);
+    }
+}
 
 int validateSend(int id, void* msg, int size) {
     if (mailboxes[id].isReleased) {
