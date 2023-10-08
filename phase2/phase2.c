@@ -69,6 +69,7 @@ void addToConsumer(Mailbox*);
 void addToProducer(Mailbox*);
 void printMailboxes();
 void removeConsumerHead(Mailbox*);
+void removeProducerHead(Mailbox*);
 void nullsys(USLOSS_Sysargs*);
 void putInMailbox(Mailbox*, Message*);
 
@@ -126,6 +127,7 @@ int MboxRelease(int mbox_id) {
     return 0;
 }
 
+// something doesnt work with checking slots in use and causes deadlock as of rn
 int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
     int prevInt = disableInterrupts();
@@ -138,11 +140,13 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
         addToProducer(curMbox);
         blockMe(20); //idk what val to put here yet
     }
+    // potentially check here again if mailbox released? since unblocks here?
     Message* msg = nextOpenSlot();
     memcpy(msg->message, msg_ptr, msg_size);
     msg->size = msg_size;
     msg->inUse = 1;
     putInMailbox(curMbox, msg);
+    curMbox->slotsInUse++;
 
     if (curMbox->consumerHead) {
         PCB* toUnblock = curMbox->consumerHead;
@@ -173,7 +177,15 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     if (msg->size > msg_max_size) { return -1; } // message is too large
 
     curMbox->messageHead = curMbox->messageHead->nextSlot;
+    msg->inUse = 0;
     memcpy(msg_ptr, msg->message, msg->size);
+    curMbox->slotsInUse--;
+
+    if (curMbox->producerHead) {
+        PCB* toUnblock = curMbox->consumerHead;
+        removeProducerHead(curMbox);
+        unblockProc(toUnblock->pid);
+    }
 
     restoreInterrupts(prevInt);
     return msg->size;
@@ -193,6 +205,15 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
     }
     Message* msg = nextOpenSlot();
     memcpy(msg->message, msg_ptr, msg_size);
+    msg->size = msg_size;
+    msg->inUse = 1;
+    putInMailbox(curMbox, msg);
+
+    if (curMbox->producerHead) {
+        PCB* toUnblock = curMbox->consumerHead;
+        removeConsumerHead(curMbox);
+        unblockProc(toUnblock->pid);
+    }
     restoreInterrupts(prevInt);
     return 0;
 }
@@ -298,12 +319,29 @@ void addToProducer(Mailbox* mbox) {
 
 void removeConsumerHead(Mailbox* mbox) {
     PCB* curHead;
+    if (!curHead) {
+        return;
+    }
     if (curHead->nextConsumer) {
         mbox->consumerHead = curHead->nextConsumer;
     }
     else {
         mbox->consumerHead = NULL;
         mbox->consumerTail = NULL;
+    }
+}
+
+void removeProducerHead(Mailbox* mbox) {
+    PCB* curHead;
+    if (!curHead) {
+        return;
+    }
+    if (curHead->nextProducer) {
+        mbox->producerHead = curHead->nextProducer;
+    }
+    else {
+        mbox->producerHead = NULL;
+        mbox->producerTail = NULL;
     }
 }
 
