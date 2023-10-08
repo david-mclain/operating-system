@@ -13,7 +13,9 @@
 
 // MAYBE USE FOR CONSUMER/PRODUCER QUEUES? IDK
 typedef struct PCB {
-    int pid;    
+    int pid;
+    char awaitingDevice;
+
     struct PCB* nextConsumer;
     struct PCB* nextProducer;
 } PCB;
@@ -54,6 +56,7 @@ Message messageSlots[MAXSLOTS];
 
 int mboxID = 0;
 int slotsInUse = 0;
+int prevClockMsgTime = 0; // last time a message was sent to the clock mailbox
 
 void (*systemCallVec[MAXSYSCALLS])(USLOSS_Sysargs *args);
 
@@ -90,9 +93,7 @@ void phase2_init(void) {
     USLOSS_IntVec[USLOSS_SYSCALL_INT] = &syscallHandler;
 }
 
-void phase2_start_service_processes() {
-
-}
+void phase2_start_service_processes() {} // no-op, don't need any service procs here
 
 int MboxCreate(int slots, int slot_size) {
     checkMode("MboxCreate");
@@ -245,17 +246,66 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 }
 
 void waitDevice(int type, int unit, int *status) {
+    // find the correct mailbox
+    int curMboxID = -1; 
+    int devUnitErr = 0;
+    switch(type) {
+        case USLOSS_CLOCK_DEV:
+            curMboxID = CLOCK_INDEX;
+            if (unit >= USLOSS_CLOCK_UNITS) { devUnitErr = 1; }
+            break;
+        case USLOSS_TERM_DEV:
+            curMboxID = TERM_INDEX;
+            if (unit >= USLOSS_TERM_UNITS) { devUnitErr = 1; }
+            break;
+        case USLOSS_DISK_DEV:
+            curMboxID = DISK_INDEX;
+            if (unit >= USLOSS_DISK_UNITS) { devUnitErr = 1; }
+            break;
+    }
     
+    // error checking
+    if (curMboxID == -1) { 
+        USLOSS_Console("ERROR: Invalid devide type\n");
+        USLOSS_Halt(1);
+    }
+    if (devUnitErr) {
+        USLOSS_Console("ERROR: Invalid device unit\n");
+        USLOSS_Halt(1);
+    }
+
+    // set current proc's awaitingDevice flag
+    PCB* proc = &processes[getpid() % MAXPROC];
+    proc->pid = getpid();
+    proc->awaitingDevice = 1;
+
+    // call recv()
+    int msg;
+    MboxRecv(curMboxID, &msg, sizeof(int));
+    proc->awaitingDevice = 0;
+
+    // message is recieved, store it into status
+    *status = msg;
 }
 
 void wakeupByDevice(int type, int unit, int status) {}
 
 int phase2_check_io() {
+    for (int i = 0; i < MAXPROC; i++) {
+        if (processes[i].awaitingDevice) {
+            return 1; // not sure what to return here... spec just says "nonzero"
+        }
+    }
     return 0;
 }
 
 void phase2_clockHandler() {
+    // only send a new message if 100 ms have passed since the last was sent
+    if (currentTime() < prevClockMsgTime + 100000) { return; }
 
+    int msg = currentTime();
+    MboxSend(CLOCK_INDEX, &msg, sizeof(int)); // use condSend??
+    prevClockMsgTime = currentTime();
 }
 
 void nullsys(USLOSS_Sysargs* args) {
