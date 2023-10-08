@@ -1,0 +1,11 @@
+phase3_start_service_processes() called -- currently a NOP
+phase4_start_service_processes() called -- currently a NOP
+phase5_start_service_processes() called -- currently a NOP
+start2(): started
+
+start2(): MboxCreate returned id = 7
+XXp2a(): receiving message from mailbox 7
+XXp2b(): receiving message from mailbox 7
+XXp2c(): receiving message from mailbox 7
+
+XXp3(): started, releasing mailbox 7
