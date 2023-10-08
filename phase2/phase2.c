@@ -190,6 +190,7 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     memset(msg, 0, sizeof(Message));
     //msg->inUse = 0;
     curMbox->slotsInUse--;
+    slotsInUse--;
 
     if (curMbox->producerHead) {
         PCB* toUnblock = curMbox->producerHead;
@@ -239,6 +240,7 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     memset(msg, 0, sizeof(Message));
     //msg->inUse = 0;
     curMbox->slotsInUse--;
+    slotsInUse--;
 
     if (curMbox->producerHead) {
         PCB* toUnblock = curMbox->producerHead;
@@ -246,7 +248,7 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
         unblockProc(toUnblock->pid);
     }
     restoreInterrupts(prevInt);
-    return msg->size;
+    return ret;
 }
 
 void waitDevice(int type, int unit, int *status) {
@@ -306,8 +308,7 @@ void phase2_clockHandler() {
     int curTime = currentTime();
     if (curTime < prevClockMsgTime + 100000) { return; }
 
-    int msg = curTime;
-    MboxSend(CLOCK_INDEX, &msg, sizeof(int)); // TODO use condSend
+    MboxCondSend(CLOCK_INDEX, &curTime, sizeof(int)); // TODO use condSend
     prevClockMsgTime = curTime;
 }
 
@@ -346,6 +347,7 @@ void sendMessage(Mailbox* curMbox, char* msg_ptr, int msg_size) {
     msg->inUse = 1;
     putInMailbox(curMbox, msg);
     curMbox->slotsInUse++;
+    slotsInUse++;
 
     if (curMbox->consumerHead) {
         PCB* toUnblock = curMbox->consumerHead;
