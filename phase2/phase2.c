@@ -100,6 +100,7 @@ void phase2_start_service_processes() {
 int MboxCreate(int slots, int slot_size) {
     checkMode("MboxCreate");
     int prevInt = disableInterrupts();
+
     if (slots < 0 || slot_size < 0 || slots > MAXSLOTS || mailboxes[mboxID].inUse || slot_size >= MAX_MESSAGE) {
         return -1;
     }
@@ -134,6 +135,11 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
 
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
     if (invalid) { return invalid; }
+
+    USLOSS_Console("\n");
+    dumpProcesses();
+    printMailboxes();
+    USLOSS_Console("\n");
 
     Mailbox* curMbox = &mailboxes[mbox_id];
     if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
@@ -177,8 +183,8 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     if (msg->size > msg_max_size) { return -1; } // message is too large
 
     curMbox->messageHead = curMbox->messageHead->nextSlot;
-    msg->inUse = 0;
     memcpy(msg_ptr, msg->message, msg->size);
+    msg->inUse = 0;
     curMbox->slotsInUse--;
 
     if (curMbox->producerHead) {
