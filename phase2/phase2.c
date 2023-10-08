@@ -67,8 +67,6 @@ void checkMode(char*);
 void restoreInterrupts(int);
 void addToQueue(Mailbox*, char);
 void printMailboxes();
-void removeConsumerHead(Mailbox*);
-void removeProducerHead(Mailbox*);
 void nullsys(USLOSS_Sysargs*);
 void putInMailbox(Mailbox*, Message*);
 
@@ -208,9 +206,9 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
     msg->inUse = 1;
     putInMailbox(curMbox, msg);
 
-    if (curMbox->producerHead) {
+    if (curMbox->consumerHead) {
         PCB* toUnblock = curMbox->consumerHead;
-        removeProducerHead(curMbox);
+        curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
         unblockProc(toUnblock->pid);
     }
     restoreInterrupts(prevInt);
@@ -310,34 +308,6 @@ void addToQueue(Mailbox* mbox, char isConsumer) {
             mbox->producerTail->nextConsumer = proc;
             mbox->producerTail = proc;
         }
-    }
-}
-
-void removeConsumerHead(Mailbox* mbox) {
-    PCB* curHead;
-    if (!curHead) {
-        return;
-    }
-    if (curHead->nextConsumer) {
-        mbox->consumerHead = curHead->nextConsumer;
-    }
-    else {
-        mbox->consumerHead = NULL;
-        mbox->consumerTail = NULL;
-    }
-}
-
-void removeProducerHead(Mailbox* mbox) {
-    PCB* curHead;
-    if (!curHead) {
-        return;
-    }
-    if (curHead->nextProducer) {
-        mbox->producerHead = curHead->nextProducer;
-    }
-    else {
-        mbox->producerHead = NULL;
-        mbox->producerTail = NULL;
     }
 }
 
