@@ -123,6 +123,18 @@ int MboxRelease(int mbox_id) {
     if (!mailboxes[mbox_id].inUse || mailboxes[mbox_id].isReleased) {
         return -1;
     }
+    Mailbox* mbox = &mailboxes[mbox_id];
+    mbox->isReleased = 1;
+    PCB* cur = mbox->consumerHead;
+    while (cur) {
+        unblockProc(cur->pid);
+        cur = cur->nextConsumer;
+    }
+    cur = mbox->producerHead;
+    while (cur) {
+        unblockProc(cur->pid);
+        cur = cur->nextProducer;
+    }
     return 0;
 }
 
@@ -142,9 +154,9 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     }
 
     if (curMbox->isReleased) {
-        return -2;
+        return -3;
     }
-    // potentially check here again if mailbox released? since unblocks here?
+
     Message* msg = nextOpenSlot();
     memcpy(msg->message, msg_ptr, msg_size);
     msg->size = msg_size;
@@ -157,11 +169,6 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
         curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
         unblockProc(toUnblock->pid);
     }
-
-    //USLOSS_Console("\n");
-    //dumpProcesses();
-    //printMailboxes();
-    //USLOSS_Console("\n");
 
     restoreInterrupts(prevInt);
     return 0;

@@ -1,0 +1,842 @@
+TESTCASE test00
+gcc -Wall -g -I../include -I.   -c -o phase2_common_testcase_code.o testcases/phase2_common_testcase_code.c
+gcc -Wall -g -I../include -I.   -c -o phase2.o phase2.c
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test00.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test00
+
+TESTCASE test01
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test01.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test01
+
+TESTCASE test02
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test02.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test02
+
+TESTCASE test03
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test03.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test03
+
+TESTCASE test04
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test04.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test04
+
+TESTCASE test05
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test05.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test05
+
+TESTCASE test06
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test06.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test06
+
+TESTCASE test07
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test07.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test07
+
+TESTCASE test08
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test08.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test08
+22,30d21
+< XXp2a(): after send of message 'hello from XXp2a', result = -3
+< XXp2a(): mailbox destroyed by MboxSend() call
+< XXp2b(): after send of message 'hello from XXp2b', result = -3
+< XXp2b(): mailbox destroyed by MboxSend() call
+< start2(): joined with kid 7, status = 4
+< start2(): joined with kid 6, status = 4
+< XXp2c(): after send of message 'hello from XXp2c', result = -3
+< XXp2c(): mailbox destroyed by MboxSend() call
+< start2(): joined with kid 8, status = 4
+32a24
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test09
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test09.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test09
+25,33c25
+< XXp2a(): after send of message 'hello from XXp2a', result = -3
+< XXp2a(): mailbox destroyed by MboxSend() call
+< start2(): joined with kid 6, status = 4
+< XXp2b(): after send of message 'hello from XXp2b', result = -3
+< XXp2b(): mailbox destroyed by MboxSend() call
+< start2(): joined with kid 7, status = 4
+< XXp2c(): after send of message 'hello from XXp2c', result = -3
+< XXp2c(): mailbox destroyed by MboxSend() call
+< start2(): joined with kid 8, status = 4
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test10
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test10.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test10
+19c19
+< XXp2a(): after conditional send of message 'hello from XXp2a', result = -2
+---
+> XXp2a(): after conditional send of message 'hello from XXp2a', result = 0
+23c23
+< XXp2c(): after conditional send of message 'hello from XXp2c', result = -2
+---
+> XXp2c(): after conditional send of message 'hello from XXp2c', result = 0
+
+TESTCASE test11
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test11.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test11
+19c19
+< XXp1(): after conditional send of message #5, result = -2
+---
+> XXp1(): after conditional send of message #5, result = 0
+21c21
+< XXp1(): after conditional send of message #6, result = -2
+---
+> XXp1(): after conditional send of message #6, result = 0
+23c23
+< XXp1(): after conditional send of message #7, result = -2
+---
+> XXp1(): after conditional send of message #7, result = 0
+26,62c26
+< XXp3(): after receipt of message #0, result = 16   message = 'hello there, #0'
+< XXp3(): receiving message #1 from mailbox 7
+< XXp3(): after receipt of message #1, result = 16   message = 'hello there, #1'
+< XXp3(): receiving message #2 from mailbox 7
+< XXp3(): after receipt of message #2, result = 16   message = 'hello there, #2'
+< XXp3(): receiving message #3 from mailbox 7
+< XXp3(): after receipt of message #3, result = 16   message = 'hello there, #3'
+< XXp3(): receiving message #4 from mailbox 7
+< XXp3(): after receipt of message #4, result = 16   message = 'hello there, #4'
+< XXp1(): conditionally sending message #0 to mailbox 7
+< XXp1(): after conditional send of message #0, result = 0
+< XXp1(): conditionally sending message #1 to mailbox 7
+< XXp1(): after conditional send of message #1, result = 0
+< XXp1(): conditionally sending message #2 to mailbox 7
+< XXp1(): after conditional send of message #2, result = 0
+< XXp1(): conditionally sending message #3 to mailbox 7
+< XXp1(): after conditional send of message #3, result = 0
+< XXp1(): conditionally sending message #4 to mailbox 7
+< XXp1(): after conditional send of message #4, result = 0
+< XXp1(): conditionally sending message #5 to mailbox 7
+< XXp1(): after conditional send of message #5, result = -2
+< XXp1(): conditionally sending message #6 to mailbox 7
+< XXp1(): after conditional send of message #6, result = -2
+< XXp1(): conditionally sending message #7 to mailbox 7
+< XXp1(): after conditional send of message #7, result = -2
+< start2(): joined with kid 5, status = 3
+< XXp3(): receiving message #0 from mailbox 7
+< XXp3(): after receipt of message #0, result = 13   message = 'good-bye, #0'
+< XXp3(): receiving message #1 from mailbox 7
+< XXp3(): after receipt of message #1, result = 13   message = 'good-bye, #1'
+< XXp3(): receiving message #2 from mailbox 7
+< XXp3(): after receipt of message #2, result = 13   message = 'good-bye, #2'
+< XXp3(): receiving message #3 from mailbox 7
+< XXp3(): after receipt of message #3, result = 13   message = 'good-bye, #3'
+< XXp3(): receiving message #4 from mailbox 7
+< XXp3(): after receipt of message #4, result = 13   message = 'good-bye, #4'
+< start2(): joined with kid 6, status = 4
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test12
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test12.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test12
+20c20
+< XXp1(): after conditional send of message #5, result = -2
+---
+> XXp1(): after conditional send of message #5, result = 0
+22c22
+< XXp1(): after conditional send of message #6, result = -2
+---
+> XXp1(): after conditional send of message #6, result = 0
+24c24
+< XXp1(): after conditional send of message #7, result = -2
+---
+> XXp1(): after conditional send of message #7, result = 0
+27,57c27,28
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'hello there, #0'
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'hello there, #1'
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'hello there, #2'
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'hello there, #3'
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'hello there, #4'
+< XXp3(): received 5 hello messages from mailbox 7
+< XXp1(): conditionally sending message #0 to mailbox 7
+< XXp1(): after conditional send of message #0, result = 0
+< XXp1(): conditionally sending message #1 to mailbox 7
+< XXp1(): after conditional send of message #1, result = 0
+< XXp1(): conditionally sending message #2 to mailbox 7
+< XXp1(): after conditional send of message #2, result = 0
+< XXp1(): conditionally sending message #3 to mailbox 7
+< XXp1(): after conditional send of message #3, result = 0
+< XXp1(): conditionally sending message #4 to mailbox 7
+< XXp1(): after conditional send of message #4, result = 0
+< XXp1(): conditionally sending message #5 to mailbox 7
+< XXp1(): after conditional send of message #5, result = -2
+< XXp1(): conditionally sending message #6 to mailbox 7
+< XXp1(): after conditional send of message #6, result = -2
+< XXp1(): conditionally sending message #7 to mailbox 7
+< XXp1(): after conditional send of message #7, result = -2
+< start2(): joined with kid 5, status = 3
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'good-bye, #0', result = 13
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'good-bye, #1', result = 13
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'good-bye, #2', result = 13
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'good-bye, #3', result = 13
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'good-bye, #4', result = 13
+< XXp3(): After loop, result is negative; result = -2
+< XXp3(): received 5 good-bye messages from mailbox 7
+< start2(): joined with kid 6, status = 4
+---
+> XXp3(): received 0 hello messages from mailbox 7
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test13
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test13.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test13
+12c12
+< XXp1(): status = 210015   -- Should be roughly 100k more than the previous report.
+---
+> XXp1(): status = 230013   -- Should be roughly 100k more than the previous report.
+
+TESTCASE test14
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test14.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test14
+7,12c7,8
+< XXp1(): after waitDevice call
+< XXp1(): status = 24833
+< XXp1(): receive status for terminal 1 = 1
+< XXp1(): character received = a
+< start2(): joined with kid 5, status = 3
+< finish(): The simulation is now terminating.
+---
+> SIMULATOR TRAP: USLOSS_IntVec contains NULL handle for interrupt.
+> 
+
+TESTCASE test15
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test15.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test15
+
+TESTCASE test16
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test16.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test16
+5,7d4
+< MboxSend_helper: Could not send, the system is out of mailbox slots.
+< No slots available: mailbox 45 and slot 25
+< finish(): The simulation is now terminating.
+
+TESTCASE test17
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test17.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test17
+5,6c5,6
+< MboxSend_helper: Could not send, the system is out of mailbox slots.
+< No slots available: mailbox 45 and slot 25
+---
+> ERROR: You should not get here!!!
+> ERROR: testcase_main() returned nonzero: status=100
+
+TESTCASE test18
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test18.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test18
+5,49d4
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 0 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 1 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 2 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 3 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 4 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 5 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 6 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 7 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 8 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 9 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 10 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 11 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 12 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 13 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 14 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 15 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 16 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 17 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 18 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 19 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 20 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 21 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 22 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 23 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 24 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 25 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 26 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 27 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 28 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 29 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 30 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 31 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 32 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 33 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 34 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 35 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 36 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 37 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 38 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 39 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 40 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 41 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 42 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 43 and slot 55
+< Mailbox has no more slots available, and so CondSend() returned -2: mailbox 44 and slot 55
+
+TESTCASE test19
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test19.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test19
+15,26c15
+< XXp2a(): after send of message, result = -3
+< XXp2a(): mailbox destroyed by MboxSend() call
+< 
+< start2(): joined with kid 5, status = 3
+< XXp2b(): after send of message, result = -3
+< XXp2b(): mailbox destroyed by MboxSend() call
+< 
+< start2(): joined with kid 6, status = 3
+< XXp2c(): after send of message, result = -3
+< XXp2c(): mailbox destroyed by MboxSend() call
+< 
+< start2(): joined with kid 7, status = 3
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test20
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test20.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test20
+12,23c12
+< XXp2a(): after recv of message, result = -3
+< XXp2a(): mailbox was destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 5, status = 3
+< XXp2b(): after recv of message, result = -3
+< XXp2b(): mailbox was destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 6, status = 3
+< XXp2c(): after recv of message, result = -3
+< XXp2c(): mailbox was destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 7, status = 3
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test21
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test21.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test21
+15,27c15
+< XXp2a(): after send of message, result = -3
+< XXp2a(): mailbox destroyed by MboxRelase() call
+< 
+< start2(): joined with kid 5, status = 3
+< XXp2b(): after send of message, result = -3
+< XXp2b(): mailbox destroyed by MboxRelase() call
+< 
+< start2(): joined with kid 6, status = 3
+< XXp2c(): after send of message, result = -3
+< XXp2c(): mailbox destroyed by MboxRelase() call
+< 
+< start2(): joined with kid 7, status = 3
+< failed to send to released mailbox ... success
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test22
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test22.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test22
+15,27c15
+< XXp2a(): after receive of message, result = -3
+< XXp2a(): mailbox destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 5, status = 3
+< XXp2b(): after receive of message, result = -3
+< XXp2b(): mailbox destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 6, status = 3
+< XXp2c(): after receive of message, result = -3
+< XXp2c(): mailbox destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 7, status = 3
+< failed to recv from released mailbox ... success
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test23
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test23.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test23
+11,20c11
+< XXp1(): after send of message, result = 0
+< XXp1(): sending message to mailbox 7
+< XXp2(): after receipt of message, result = 0
+< XXp2(): receiving message from mailbox 7
+< XXp1(): after send of message, result = 0
+< 
+< start2(): joined with kid 5, status = 3
+< XXp2(): after receipt of message, result = 0
+< 
+< start2(): joined with kid 6, status = 4
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test24
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test24.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test24
+11,20c11
+< XXp2(): after receipt of message, result = 0
+< XXp2(): receiving message from mailbox 7
+< XXp1(): after send of message, result = 0
+< XXp1(): sending message to mailbox 7
+< XXp2(): after receipt of message, result = 0
+< 
+< start2(): joined with kid 6, status = 4
+< XXp1(): after send of message, result = 0
+< 
+< start2(): joined with kid 5, status = 3
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test25
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test25.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test25
+6c6
+< start2(): MboxCreate returned id = 7
+---
+> start2(): MboxCreate returned id = -1
+14c14,15
+< XXp2(): priority 3, receiving message from mailbox 7
+---
+> XXp2(): priority 3, receiving message from mailbox -1
+> XXp2(): priority 3, after receipt of message, result = -1   message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+16c17,18
+< XXp2(): priority 4, receiving message from mailbox 7
+---
+> XXp2(): priority 4, receiving message from mailbox -1
+> XXp2(): priority 4, after receipt of message, result = -1   message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+20c22,23
+< XXp2(): priority 2, receiving message from mailbox 7
+---
+> XXp2(): priority 2, receiving message from mailbox -1
+> XXp2(): priority 2, after receipt of message, result = -1   message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+24,30c27,32
+< XXp1(): sending message #1 to mailbox 7
+< XXp1(): MboxSend() rc 0
+< XXp1(): sending message #2 to mailbox 7
+< XXp1(): MboxSend() rc 0
+< XXp1(): sending message #3 to mailbox 7
+< XXp1(): MboxSend() rc 0
+< XXp2(): priority 3, after receipt of message, result = 14   message = 'First message'
+---
+> XXp1(): sending message #1 to mailbox -1
+> XXp1(): MboxSend() rc -1
+> XXp1(): sending message #2 to mailbox -1
+> XXp1(): MboxSend() rc -1
+> XXp1(): sending message #3 to mailbox -1
+> XXp1(): MboxSend() rc -1
+32,34d33
+< XXp3(): join'd with child 7 whose status is 3
+< XXp2(): priority 2, after receipt of message, result = 14   message = 'Third message'
+< XXp2(): priority 4, after receipt of message, result = 15   message = 'Second message'
+35a35
+> XXp3(): join'd with child 7 whose status is 3
+
+TESTCASE test26
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test26.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test26
+5c5
+< start2(): MboxCreate returned id = 7
+---
+> start2(): MboxCreate returned id = -1
+8,17c8,17
+< XXp3(): sending message #1 to mailbox 7
+< XXp3(): MboxSend rc 0
+< XXp3(): sending message #2 to mailbox 7
+< XXp3(): MboxSend rc 0
+< XXp3(): sending message #3 to mailbox 7
+< XXp3(): MboxSend rc 0
+< XXp3(): sending message #4 to mailbox 7
+< XXp3(): MboxSend rc 0
+< XXp3(): sending message #5 to mailbox 7
+< XXp3(): MboxSend rc 0
+---
+> XXp3(): sending message #1 to mailbox -1
+> XXp3(): MboxSend rc -1
+> XXp3(): sending message #2 to mailbox -1
+> XXp3(): MboxSend rc -1
+> XXp3(): sending message #3 to mailbox -1
+> XXp3(): MboxSend rc -1
+> XXp3(): sending message #4 to mailbox -1
+> XXp3(): MboxSend rc -1
+> XXp3(): sending message #5 to mailbox -1
+> XXp3(): MboxSend rc -1
+23c23,24
+< XXp2(): priority 3, sending message to mailbox 7
+---
+> XXp2(): priority 3, sending message to mailbox -1
+> XXp2(): priority 3, after sending message, result = -1
+25c26,27
+< XXp2(): priority 4, sending message to mailbox 7
+---
+> XXp2(): priority 4, sending message to mailbox -1
+> XXp2(): priority 4, after sending message, result = -1
+29c31,32
+< XXp2(): priority 2, sending message to mailbox 7
+---
+> XXp2(): priority 2, sending message to mailbox -1
+> XXp2(): priority 2, after sending message, result = -1
+33,42c36,43
+< XXp1(): received message #1 rc 14   message 'First message'
+< XXp1(): received message #2 rc 15   message 'Second message'
+< XXp1(): received message #3 rc 14   message 'Third message'
+< XXp1(): received message #4 rc 15   message 'Fourth message'
+< XXp1(): received message #5 rc 14   message 'Fifth message'
+< XXp1(): received message #6 rc 16   message 'Seventh message'
+< XXp2(): priority 3, after sending message, result = 0
+< XXp3(): join'd with child 7 whose status is 3
+< XXp1(): received message #7 rc 14   message 'Sixth message'
+< XXp1(): received message #8 rc 15   message 'Eighth message'
+---
+> XXp1(): received message #1 rc -1   message 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+> XXp1(): received message #2 rc -1   message 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+> XXp1(): received message #3 rc -1   message 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+> XXp1(): received message #4 rc -1   message 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+> XXp1(): received message #5 rc -1   message 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+> XXp1(): received message #6 rc -1   message 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+> XXp1(): received message #7 rc -1   message 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+> XXp1(): received message #8 rc -1   message 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+45,46d45
+< XXp2(): priority 2, after sending message, result = 0
+< XXp2(): priority 4, after sending message, result = 0
+48a48
+> XXp3(): join'd with child 7 whose status is 3
+
+TESTCASE test27
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test27.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test27
+17,22c17,22
+< start2(): MailBoxCreate for i = 0 returned id = 7
+< start2(): MailBoxCreate for i = 1 returned id = 8
+< start2(): MailBoxCreate for i = 2 returned id = 9
+< start2(): MailBoxCreate for i = 3 returned id = 10
+< start2(): MailBoxCreate for i = 4 returned id = 11
+< start2(): MailBoxCreate for i = 5 returned id = 12
+---
+> start2(): MailBoxCreate for i = 0 returned id less than zero, id = -1
+> start2(): MailBoxCreate for i = 1 returned id less than zero, id = -1
+> start2(): MailBoxCreate for i = 2 returned id less than zero, id = -1
+> start2(): MailBoxCreate for i = 3 returned id less than zero, id = -1
+> start2(): MailBoxCreate for i = 4 returned id less than zero, id = -1
+> start2(): MailBoxCreate for i = 5 returned id less than zero, id = -1
+
+TESTCASE test28
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test28.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test28
+14,46d13
+< XXp1(): after receive of message #0, result = -3
+< XXp1(): receiving message #1 from mailbox 7
+< XXp1(): after receive of message #1, result = -1
+< XXp1(): receiving message #2 from mailbox 7
+< XXp1(): after receive of message #2, result = -1
+< XXp1(): receiving message #3 from mailbox 7
+< XXp1(): after receive of message #3, result = -1
+< XXp1(): receiving message #4 from mailbox 7
+< XXp1(): after receive of message #4, result = -1
+< XXp1(): sending message #0 to mailbox 7
+< XXp1(): after send of message #0, result = -1
+< XXp1(): sending message #1 to mailbox 7
+< XXp1(): after send of message #1, result = -1
+< XXp1(): sending message #2 to mailbox 7
+< XXp1(): after send of message #2, result = -1
+< XXp1(): sending message #3 to mailbox 7
+< XXp1(): after send of message #3, result = -1
+< XXp1(): sending message #4 to mailbox 7
+< XXp1(): after send of message #4, result = -1
+< 
+< start2(): joined with kid 5, status = 3
+< XXp2a(): after receive of message result = -3
+< XXp2a(): mailbox destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 6, status = 4
+< XXp2c(): after receive of message result = -3
+< XXp2c(): mailbox destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 8, status = 4
+< XXp2b(): after receive of message result = -3
+< XXp2b(): mailbox destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 7, status = 4
+49a17
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test29
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test29.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test29
+17,18d16
+< XXp2c(): after receive of message result = -3
+< XXp2c(): mailbox destroyed by MboxRecv() call
+21,51c19
+< 
+< start2(): joined with kid 8, status = 4
+< XXp2b(): after receive of message result = -3
+< XXp2b(): mailbox destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 7, status = 4
+< XXp2a(): after receive of message result = -3
+< XXp2a(): mailbox destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 6, status = 4
+< XXp1(): after receive of message #0, result = -3
+< XXp1(): receiving message #1 from mailbox 7
+< XXp1(): after receive of message #1, result = -1
+< XXp1(): receiving message #2 from mailbox 7
+< XXp1(): after receive of message #2, result = -1
+< XXp1(): receiving message #3 from mailbox 7
+< XXp1(): after receive of message #3, result = -1
+< XXp1(): receiving message #4 from mailbox 7
+< XXp1(): after receive of message #4, result = -1
+< XXp1(): sending message #0 to mailbox 7
+< XXp1(): after send of message #0, result = -1
+< XXp1(): sending message #1 to mailbox 7
+< XXp1(): after send of message #1, result = -1
+< XXp1(): sending message #2 to mailbox 7
+< XXp1(): after send of message #2, result = -1
+< XXp1(): sending message #3 to mailbox 7
+< XXp1(): after send of message #3, result = -1
+< XXp1(): sending message #4 to mailbox 7
+< XXp1(): after send of message #4, result = -1
+< 
+< start2(): joined with kid 5, status = 3
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test30
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test30.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test30
+12,23d11
+< XXp2a(): after receive of message, result = -3
+< XXp2a(): mailbox destroyed by MboxRecv() call
+< XXp2b(): after receive of message, result = -3
+< XXp2b(): mailbox destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 6, status = 3
+< 
+< start2(): joined with kid 5, status = 3
+< XXp2c(): after receive of message, result = -3
+< XXp2c(): mailbox destroyed by MboxRecv() call
+< 
+< start2(): joined with kid 7, status = 3
+27c15
+< failed to recv from released mailbox ... success
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test31
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test31.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test31
+14,25d13
+< XXp2a(): after send of message, result = -3
+< XXp2a(): mailbox destroyed by MboxSend() call
+< XXp2b(): after send of message, result = -3
+< XXp2b(): mailbox destroyed by MboxSend() call
+< start2(): joined with kid 6, status = 3
+< 
+< start2(): joined with kid 5, status = 3
+< 
+< XXp2c(): after send of message, result = -3
+< XXp2c(): mailbox destroyed by MboxSend() call
+< start2(): joined with kid 7, status = 3
+< 
+30c18
+< failed to send to released mailbox ... success
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test32
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test32.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test32
+14,15d13
+< XXp3(): after send of message, result = -3
+< XXp2(): after send of message, result = -3
+18c16
+< XXp1(): after send of message, result = -3
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test33
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test33.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test33
+11,13d10
+< start2(): after send of message, result = -3
+< XXp3(): after send of message, result = -3
+< XXp2(): after send of message, result = -3
+15c12
+< XXp1(): after send of message, result = -3
+---
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
+TESTCASE test34
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test34.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test34
+10,14c10
+< XXp0(): after waitDevice call
+< XXp0(): status = 0x00006101
+< XXp0(): receive status for terminal 0 = 1
+< XXp0(): character received = a
+< start2(): joined with kid 5, status = 3
+---
+> SIMULATOR TRAP: USLOSS_IntVec contains NULL handle for interrupt.
+16,34d11
+< XXp1(): after waitDevice call
+< XXp1(): status = 0x00006101
+< XXp1(): receive status for terminal 1 = 1
+< XXp1(): character received = a
+< start2(): joined with kid 6, status = 3
+< 
+< XXp2(): after waitDevice call
+< XXp2(): status = 0x00006101
+< XXp2(): receive status for terminal 2 = 1
+< XXp2(): character received = a
+< start2(): joined with kid 7, status = 3
+< 
+< XXp3(): after waitDevice call
+< XXp3(): status = 0x00003301
+< XXp3(): receive status for terminal 3 = 1
+< XXp3(): character received = 3
+< start2(): joined with kid 8, status = 3
+< 
+< finish(): The simulation is now terminating.
+
+TESTCASE test35
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test35.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test35
+
+TESTCASE test36
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test36.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test36
+
+TESTCASE test37
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test37.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test37
+
+TESTCASE test38
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test38.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test38
+
+TESTCASE test39
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test39.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test39
+
+TESTCASE test40
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test40.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test40
+
+TESTCASE test41
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test41.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test41
+
+TESTCASE test42
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test42.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test42
+
+TESTCASE test43
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test43.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test43
+26c26
+< XXp1(): after conditional send of message #5, result = -2
+---
+> XXp1(): after conditional send of message #5, result = 0
+29c29
+< XXp1(): after conditional send of message #6, result = -2
+---
+> XXp1(): after conditional send of message #6, result = 0
+32c32
+< XXp1(): after conditional send of message #7, result = -2
+---
+> XXp1(): after conditional send of message #7, result = 0
+35,39d34
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'hello there, #0'
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'hello there, #1'
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'hello there, #2'
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'hello there, #3'
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'hello there, #4'
+41c36
+< XXp3(): received 5 hello messages from mailbox 7
+---
+> XXp3(): received 0 hello messages from mailbox 7
+59c54
+< XXp1(): after conditional send of message #13, result = -2
+---
+> XXp1(): after conditional send of message #13, result = 0
+62c57
+< XXp1(): after conditional send of message #14, result = -2
+---
+> XXp1(): after conditional send of message #14, result = 0
+65c60
+< XXp1(): after conditional send of message #15, result = -2
+---
+> XXp1(): after conditional send of message #15, result = 0
+68,72d62
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'good-bye, #0', result = 13
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'good-bye, #1', result = 13
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'good-bye, #2', result = 13
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'good-bye, #3', result = 13
+< XXp3(): conditionally received message #0 from mailbox 7   message = 'good-bye, #4', result = 13
+74c64
+< XXp3(): received 5 good-bye messages from mailbox 7
+---
+> XXp3(): received 0 good-bye messages from mailbox 7
+
+TESTCASE test44
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test44.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test44
+201,202c201,202
+< start2(): result = 24
+< start2(): message = 'XXp1(): hello there, #0'
+---
+> start2(): result = -2
+> start2(): message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+204,205c204,205
+< start2(): result = 24
+< start2(): message = 'XXp1(): hello there, #1'
+---
+> start2(): result = -2
+> start2(): message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+207,208c207,208
+< start2(): result = 24
+< start2(): message = 'XXp1(): hello there, #2'
+---
+> start2(): result = -2
+> start2(): message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+210,211c210,211
+< start2(): result = 24
+< start2(): message = 'XXp1(): hello there, #3'
+---
+> start2(): result = -2
+> start2(): message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+213,214c213,214
+< start2(): result = 24
+< start2(): message = 'XXp1(): hello there, #4'
+---
+> start2(): result = -2
+> start2(): message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+216,217c216,217
+< start2(): result = 24
+< start2(): message = 'XXp1(): hello there, #5'
+---
+> start2(): result = -2
+> start2(): message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+219,220c219,220
+< start2(): result = 24
+< start2(): message = 'XXp1(): hello there, #6'
+---
+> start2(): result = -2
+> start2(): message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+222,223c222,223
+< start2(): result = 24
+< start2(): message = 'XXp1(): hello there, #7'
+---
+> start2(): result = -2
+> start2(): message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+225,226c225,226
+< start2(): result = 24
+< start2(): message = 'XXp1(): hello there, #8'
+---
+> start2(): result = -2
+> start2(): message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+228,229c228,229
+< start2(): result = 24
+< start2(): message = 'XXp1(): hello there, #9'
+---
+> start2(): result = -2
+> start2(): message = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+270c270
+< start2(): after send of message #19, result = -2
+---
+> start2(): after send of message #19, result = 0
+273c273
+< start2(): after send of message #20, result = -2
+---
+> start2(): after send of message #20, result = 0
+276c276
+< start2(): after send of message #21, result = -2
+---
+> start2(): after send of message #21, result = 0
+279c279
+< start2(): after send of message #22, result = -2
+---
+> start2(): after send of message #22, result = 0
+282c282
+< start2(): after send of message #23, result = -2
+---
+> start2(): after send of message #23, result = 0
+285c285
+< start2(): after send of message #24, result = -2
+---
+> start2(): after send of message #24, result = 0
+
+TESTCASE test45
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test45.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test45
+
+TESTCASE test46
+gcc -Wall -g -I../include -I.  -Wl,--start-group -L../lib -L. -lusloss4.7 -lphase1 -Wl,--end-group  testcases/test46.c phase2_common_testcase_code.o phase2.o libphase1.a   -o test46
+21,29d20
+< Child1a(): result = -3
+< Child1b(): result = -3
+< Process 6 joined with status: 1
+< 
+< Process 5 joined with status: 1
+< 
+< Child1c(): result = -3
+< Process 7 joined with status: 1
+< 
+32a24
+> DEADLOCK DETECTED!  All of the processes have blocked, but I/O is not ongoing.
+
