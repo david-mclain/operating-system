@@ -133,10 +133,12 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
     if (invalid) { return invalid; }
 
+    /*
     USLOSS_Console("\n");
     dumpProcesses();
     printMailboxes();
     USLOSS_Console("\n");
+    */
 
     Mailbox* curMbox = &mailboxes[mbox_id];
     if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
@@ -350,6 +352,7 @@ void printMailboxes() {
         }
     }
 }
+
 /**
  * Purpose:
  * Responsible for handling clock interrupts
@@ -367,7 +370,7 @@ static void syscallHandler(int dev, void* arg) {
         USLOSS_Console("syscallHandler(): Invalid syscall number %d\n", args->number);
         USLOSS_Halt(1);
     }
-    (*systemCallVec)((USLOSS_Sysargs*)arg);
+    (*systemCallVec)(args);
 }
 
 /**
