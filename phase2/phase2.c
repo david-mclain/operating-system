@@ -201,7 +201,7 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 }
 
 int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
-    checkMode("MboxSend");
+    checkMode("MboxCondSend");
     int prevInt = disableInterrupts();
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
     if (invalid) {
@@ -230,7 +230,21 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
         return -2;
         //blockMe(20);
     }
-    memcpy(msg_ptr, msg->message, msg_max_size > msg->size ? msg->size : msg_max_size);
+    msg = curMbox->messageHead;
+    if (msg->size > msg_max_size) { return -1; } // message is too large
+
+    curMbox->messageHead = curMbox->messageHead->nextSlot;
+    memcpy(msg_ptr, msg->message, msg->size);
+    int ret = msg->size;
+    memset(msg, 0, sizeof(Message));
+    //msg->inUse = 0;
+    curMbox->slotsInUse--;
+
+    if (curMbox->producerHead) {
+        PCB* toUnblock = curMbox->producerHead;
+        curMbox->producerHead = curMbox->producerHead->nextProducer;
+        unblockProc(toUnblock->pid);
+    }
     restoreInterrupts(prevInt);
     return msg->size;
 }
@@ -289,11 +303,12 @@ int phase2_check_io() {
 
 void phase2_clockHandler() {
     // only send a new message if 100 ms have passed since the last was sent
-    if (currentTime() < prevClockMsgTime + 100000) { return; }
+    int curTime = currentTime();
+    if (curTime < prevClockMsgTime + 100000) { return; }
 
-    int msg = currentTime();
+    int msg = curTime;
     MboxSend(CLOCK_INDEX, &msg, sizeof(int)); // TODO use condSend
-    prevClockMsgTime = currentTime();
+    prevClockMsgTime = curTime;
 }
 
 void nullsys(USLOSS_Sysargs* args) {
