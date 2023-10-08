@@ -154,20 +154,26 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
 }
 
 
-// just to test my send, no error checking or anything just raw dogging recv
 int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     checkMode("MboxRecv");
     int prevInt = disableInterrupts();
 
+    if (mbox_id < 0 || mbox_id >= MAXMBOX) { return -1; } // invalid mailbox
+
     Mailbox* curMbox = &mailboxes[mbox_id];
+    if (curMbox->isReleased) { return -3; } // mailbox is released
+
+    // maybe change this? use varible or smth
     Message* msg = curMbox->messageHead;
     if (msg == NULL) {
         addToConsumer(curMbox);
         blockMe(20);
     }
     msg = curMbox->messageHead;
+    if (msg->size > msg_max_size) { return -1; } // message is too large
+
     curMbox->messageHead = curMbox->messageHead->nextSlot;
-    memcpy(msg_ptr, msg->message, msg_max_size > msg->size ? msg->size : msg_max_size);
+    memcpy(msg_ptr, msg->message, msg->size);
 
     restoreInterrupts(prevInt);
     return msg->size;
