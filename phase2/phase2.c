@@ -65,11 +65,8 @@ int validateSend(int, void*, int);
 
 void checkMode(char*);
 void restoreInterrupts(int);
-void addToConsumer(Mailbox*);
-void addToProducer(Mailbox*);
+void addToQueue(Mailbox*, char);
 void printMailboxes();
-void removeConsumerHead(Mailbox*);
-void removeProducerHead(Mailbox*);
 void nullsys(USLOSS_Sysargs*);
 void putInMailbox(Mailbox*, Message*);
 
@@ -143,7 +140,7 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
 
     Mailbox* curMbox = &mailboxes[mbox_id];
     if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
-        addToProducer(curMbox);
+        addToQueue(curMbox, 0);
         blockMe(20); //idk what val to put here yet
     }
     // potentially check here again if mailbox released? since unblocks here?
@@ -156,7 +153,7 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
 
     if (curMbox->consumerHead) {
         PCB* toUnblock = curMbox->consumerHead;
-        removeConsumerHead(curMbox);
+        curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
         unblockProc(toUnblock->pid);
     }
     restoreInterrupts(prevInt);
@@ -176,7 +173,7 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     // maybe change this? use varible or smth
     Message* msg = curMbox->messageHead;
     if (msg == NULL) {
-        addToConsumer(curMbox);
+        addToQueue(curMbox, 1);
         blockMe(20);
     }
     msg = curMbox->messageHead;
@@ -188,8 +185,8 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     curMbox->slotsInUse--;
 
     if (curMbox->producerHead) {
-        PCB* toUnblock = curMbox->consumerHead;
-        removeProducerHead(curMbox);
+        PCB* toUnblock = curMbox->producerHead;
+        curMbox->producerHead = curMbox->producerHead->nextProducer;
         unblockProc(toUnblock->pid);
     }
 
@@ -200,9 +197,9 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
     int prevInt = disableInterrupts();
-    int valid = validateSend(mbox_id, msg_ptr, msg_size);
-    if (!valid) {
-        return valid;
+    int invalid = validateSend(mbox_id, msg_ptr, msg_size);
+    if (!invalid) {
+        return invalid;
     }
     Mailbox* curMbox = &mailboxes[mbox_id];
     if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
@@ -215,9 +212,9 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
     msg->inUse = 1;
     putInMailbox(curMbox, msg);
 
-    if (curMbox->producerHead) {
+    if (curMbox->consumerHead) {
         PCB* toUnblock = curMbox->consumerHead;
-        removeConsumerHead(curMbox);
+        curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
         unblockProc(toUnblock->pid);
     }
     restoreInterrupts(prevInt);
@@ -230,14 +227,12 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 
     Mailbox* curMbox = &mailboxes[mbox_id];
     Message* msg = curMbox->messageHead;
-    if (msg == NULL) {
-        addToConsumer(curMbox);
+    if (!msg) {
+        //addToConsumer(curMbox);
         return -2;
         //blockMe(20);
     }
-    msg = curMbox->messageHead;
     memcpy(msg_ptr, msg->message, msg_max_size > msg->size ? msg->size : msg_max_size);
-
     restoreInterrupts(prevInt);
     return msg->size;
 }
@@ -297,57 +292,28 @@ void putInMailbox(Mailbox* mbox, Message* msg) {
     }
 }
 
-void addToConsumer(Mailbox* mbox) {
+void addToQueue(Mailbox* mbox, char isConsumer) {
     PCB* proc = &processes[getpid() % MAXPROC];
     proc->pid = getpid();
-    if (!mbox->consumerHead) {
-        mbox->consumerHead = proc;
-        mbox->consumerTail = proc;
+    if (isConsumer) {
+        if (!mbox->consumerHead) {
+            mbox->consumerHead = proc;
+            mbox->consumerTail = proc;
+        }
+        else {
+            mbox->consumerTail->nextConsumer = proc;
+            mbox->consumerTail = proc;
+        }
     }
     else {
-        mbox->consumerTail->nextConsumer = proc;
-        mbox->consumerTail = proc;
-    }
-}
-
-void addToProducer(Mailbox* mbox) {
-    PCB* proc = &processes[getpid() % MAXPROC];
-    proc->pid = getpid();
-    if (!mbox->consumerHead) {
-        mbox->consumerHead = proc;
-        mbox->consumerTail = proc;
-    }
-    else {
-        mbox->consumerTail->nextConsumer = proc;
-        mbox->consumerTail = proc;
-    }
-}
-
-void removeConsumerHead(Mailbox* mbox) {
-    PCB* curHead;
-    if (!curHead) {
-        return;
-    }
-    if (curHead->nextConsumer) {
-        mbox->consumerHead = curHead->nextConsumer;
-    }
-    else {
-        mbox->consumerHead = NULL;
-        mbox->consumerTail = NULL;
-    }
-}
-
-void removeProducerHead(Mailbox* mbox) {
-    PCB* curHead;
-    if (!curHead) {
-        return;
-    }
-    if (curHead->nextProducer) {
-        mbox->producerHead = curHead->nextProducer;
-    }
-    else {
-        mbox->producerHead = NULL;
-        mbox->producerTail = NULL;
+        if (!mbox->producerHead) {
+            mbox->producerHead = proc;
+            mbox->producerTail = proc;
+        }
+        else {
+            mbox->producerTail->nextConsumer = proc;
+            mbox->producerTail = proc;
+        }
     }
 }
 
@@ -396,6 +362,11 @@ void printMailboxes() {
  * None
  */ 
 static void syscallHandler(int dev, void* arg) {
+    USLOSS_Sysargs* args = (USLOSS_Sysargs*)arg;
+    if (args->number < 0 || args->number >= MAXSYSCALLS) {
+        USLOSS_Console("syscallHandler(): Invalid syscall number %d\n", args->number);
+        USLOSS_Halt(1);
+    }
     (*systemCallVec)((USLOSS_Sysargs*)arg);
 }
 
