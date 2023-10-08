@@ -69,9 +69,10 @@ int validateSend(int, void*, int);
 void checkMode(char*);
 void restoreInterrupts(int);
 void addToQueue(Mailbox*, char);
+void putInMailbox(Mailbox*, Message*);
 void printMailboxes();
 void nullsys(USLOSS_Sysargs*);
-void putInMailbox(Mailbox*, Message*);
+void diskAndTermHandler(int, void*);
 
 Message* nextOpenSlot();
 
@@ -91,6 +92,8 @@ void phase2_init(void) {
         MboxCreate(1, sizeof(int));
     }
     USLOSS_IntVec[USLOSS_SYSCALL_INT] = &syscallHandler;
+    USLOSS_IntVec[USLOSS_DISK_INT] = &diskAndTermHandler;
+    USLOSS_IntVec[USLOSS_TERM_INT] = &diskAndTermHandler;
 }
 
 void phase2_start_service_processes() {} // no-op, don't need any service procs here
@@ -247,28 +250,26 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 
 void waitDevice(int type, int unit, int *status) {
     // find the correct mailbox
-    int curMboxID = -1; 
+    int devMboxID = -1; 
     int devUnitErr = 0;
-    switch(type) {
+    switch (type) {
         case USLOSS_CLOCK_DEV:
-            curMboxID = CLOCK_INDEX;
+            devMboxID = CLOCK_INDEX;
             if (unit >= USLOSS_CLOCK_UNITS) { devUnitErr = 1; }
             break;
         case USLOSS_TERM_DEV:
-            curMboxID = TERM_INDEX;
+            devMboxID = TERM_INDEX;
             if (unit >= USLOSS_TERM_UNITS) { devUnitErr = 1; }
             break;
         case USLOSS_DISK_DEV:
-            curMboxID = DISK_INDEX;
+            devMboxID = DISK_INDEX;
             if (unit >= USLOSS_DISK_UNITS) { devUnitErr = 1; }
             break;
+        default:
+            USLOSS_Console("ERROR: Invalid devide type\n");
+            USLOSS_Halt(1);
     }
     
-    // error checking
-    if (curMboxID == -1) { 
-        USLOSS_Console("ERROR: Invalid devide type\n");
-        USLOSS_Halt(1);
-    }
     if (devUnitErr) {
         USLOSS_Console("ERROR: Invalid device unit\n");
         USLOSS_Halt(1);
@@ -281,7 +282,7 @@ void waitDevice(int type, int unit, int *status) {
 
     // call recv()
     int msg;
-    MboxRecv(curMboxID, &msg, sizeof(int));
+    MboxRecv(devMboxID + unit, &msg, sizeof(int));
     proc->awaitingDevice = 0;
 
     // message is recieved, store it into status
@@ -304,7 +305,7 @@ void phase2_clockHandler() {
     if (currentTime() < prevClockMsgTime + 100000) { return; }
 
     int msg = currentTime();
-    MboxSend(CLOCK_INDEX, &msg, sizeof(int)); // use condSend??
+    MboxSend(CLOCK_INDEX, &msg, sizeof(int)); // TODO use condSend
     prevClockMsgTime = currentTime();
 }
 
@@ -315,6 +316,26 @@ void nullsys(USLOSS_Sysargs* args) {
 
 
     /* ---------- Helper Functions ---------- */
+
+void diskAndTermHandler(int intType, void* payload) {
+    int devMboxID = -1; 
+    switch (intType) {
+        case USLOSS_DISK_INT:
+            devMboxID = DISK_INDEX;
+            break;
+        case USLOSS_TERM_INT:
+            devMboxID = TERM_INDEX;
+            break;
+        default:
+            USLOSS_Console("ERROR: invalid interrupt type (Shouldn't ever get here)\n");
+            USLOSS_Halt(1);
+    }
+    int unit = (int)(long)payload;
+
+    int status;
+    USLOSS_DeviceInput(intType, unit, &status);
+    MboxSend(devMboxID + unit, &status, sizeof(int)); // TODO change to condSend
+}
 
 int validateSend(int id, void* msg, int size) {
     if (mailboxes[id].isReleased) {
