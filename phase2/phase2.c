@@ -139,27 +139,24 @@ int MboxRelease(int mbox_id) {
         unblockProc(cur->pid);
         cur = cur->nextProducer;
     }
-    memset(mbox, 0, sizeof(Mailbox));
+    //memset(mbox, 0, sizeof(Mailbox));
     return 0;
 }
 
 int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
     int prevInt = disableInterrupts();
-    // validate parameters
+
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
     if (invalid) { return invalid; }
 
     Mailbox* curMbox = &mailboxes[mbox_id];
-
-    if (curMbox->slotsInUse == curMbox->slots) {
+    if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
         addToQueue(curMbox, 0);
         blockMe(20); //idk what val to put here yet
     }
 
-    if (curMbox->isReleased) {
-        return -3;
-    }
+    if (curMbox->isReleased) { return -3; }
 
     sendMessage(curMbox, msg_ptr, msg_size);
 
@@ -183,11 +180,8 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
         addToQueue(curMbox, 1);
         blockMe(20);
     }
-    if (curMbox->isReleased) { return -3; }
+    if (curMbox->isReleased) { return -3; } // mailbox is released
     msg = curMbox->messageHead;
-    if (!msg) {
-        return 0;
-    }
     if (msg->size > msg_max_size) { return -1; } // message is too large
 
     curMbox->messageHead = curMbox->messageHead->nextSlot;
@@ -208,7 +202,7 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 }
 
 int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
-    checkMode("MboxCondSend");
+    checkMode("MboxSend");
     int prevInt = disableInterrupts();
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
     if (invalid) {
@@ -232,11 +226,9 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 
     Mailbox* curMbox = &mailboxes[mbox_id];
     Message* msg = curMbox->messageHead;
-    if (!msg) {
-        //addToConsumer(curMbox);
-        return -2;
-        //blockMe(20);
-    }
+    
+    if (!msg) { return -2; }
+
     msg = curMbox->messageHead;
     if (msg->size > msg_max_size) { return -1; } // message is too large
 
@@ -348,8 +340,7 @@ void diskAndTermHandler(int intType, void* payload) {
 
 void sendMessage(Mailbox* curMbox, char* msg_ptr, int msg_size) {
     Message* msg = nextOpenSlot();
-    if (!msg_ptr)
-        memcpy(msg->message, msg_ptr, msg_size);
+    memcpy(msg->message, msg_ptr, msg_size);
     msg->size = msg_size;
     msg->inUse = 1;
     putInMailbox(curMbox, msg);
