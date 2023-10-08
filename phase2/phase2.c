@@ -126,6 +126,7 @@ int MboxRelease(int mbox_id) {
 }
 
 // something doesnt work with checking slots in use and causes deadlock as of rn
+// NOT BEING ADDED TO PRODUCER QUEUE PROPERLY
 int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
     int prevInt = disableInterrupts();
@@ -133,17 +134,14 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
     if (invalid) { return invalid; }
 
-    /*
-    USLOSS_Console("\n");
-    dumpProcesses();
-    printMailboxes();
-    USLOSS_Console("\n");
-    */
-
     Mailbox* curMbox = &mailboxes[mbox_id];
     if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
         addToQueue(curMbox, 0);
         blockMe(20); //idk what val to put here yet
+    }
+
+    if (curMbox->isReleased) {
+        return -2;
     }
     // potentially check here again if mailbox released? since unblocks here?
     Message* msg = nextOpenSlot();
@@ -158,6 +156,12 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
         curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
         unblockProc(toUnblock->pid);
     }
+
+    //USLOSS_Console("\n");
+    //dumpProcesses();
+    //printMailboxes();
+    //USLOSS_Console("\n");
+
     restoreInterrupts(prevInt);
     return 0;
 }
@@ -183,7 +187,9 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 
     curMbox->messageHead = curMbox->messageHead->nextSlot;
     memcpy(msg_ptr, msg->message, msg->size);
-    msg->inUse = 0;
+    int ret = msg->size;
+    memset(msg, 0, sizeof(Message));
+    //msg->inUse = 0;
     curMbox->slotsInUse--;
 
     if (curMbox->producerHead) {
@@ -191,9 +197,8 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
         curMbox->producerHead = curMbox->producerHead->nextProducer;
         unblockProc(toUnblock->pid);
     }
-
     restoreInterrupts(prevInt);
-    return msg->size;
+    return ret;
 }
 
 int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
@@ -313,7 +318,7 @@ void addToQueue(Mailbox* mbox, char isConsumer) {
             mbox->producerTail = proc;
         }
         else {
-            mbox->producerTail->nextConsumer = proc;
+            mbox->producerTail->nextProducer = proc;
             mbox->producerTail = proc;
         }
     }
