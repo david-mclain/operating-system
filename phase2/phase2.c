@@ -152,7 +152,20 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     Mailbox* curMbox = &mailboxes[mbox_id];
     if (curMbox->isReleased) { return -1; }
 
-    if (curMbox->slotsInUse == curMbox->slots && curMbox->slots != 0) {//&& curMbox->consumerHead == NULL) {
+    if (!curMbox->slots) {
+        if (curMbox->consumerHead) {
+            PCB* proc = curMbox->consumerHead;
+            curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
+            unblockProc(proc->pid);
+        }
+        else {
+            addToQueue(curMbox, 0);
+            blockMe(20);
+        }
+        return curMbox->isReleased ? -3 : 0;
+    }
+
+    if (curMbox->slotsInUse == curMbox->slots && curMbox->slots) {//&& curMbox->consumerHead == NULL) {
         addToQueue(curMbox, 0);
         blockMe(20); //idk what val to put here yet
     }
@@ -175,6 +188,18 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     Mailbox* curMbox = &mailboxes[mbox_id];
     if (curMbox->isReleased) { return -1; } // mailbox is released
 
+    if (!curMbox->slots) {
+        if (curMbox->producerHead) {
+            PCB* proc = curMbox->producerHead;
+            curMbox->producerHead = curMbox->producerHead->nextProducer;
+            unblockProc(proc->pid);
+        }
+        else {
+            addToQueue(curMbox, 1);
+            blockMe(20);
+        }
+        return curMbox->isReleased ? -3 : 0;
+    }
     // maybe change this? use varible or smth
     Message* msg = curMbox->messageHead;
     if (msg == NULL) {
@@ -199,6 +224,19 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
         return invalid;
     }
     Mailbox* curMbox = &mailboxes[mbox_id];
+    if (!curMbox->slots) {
+        if (curMbox->consumerHead) {
+            PCB* proc = curMbox->consumerHead;
+            curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
+            unblockProc(proc->pid);
+        }
+        else {
+            return -2;
+            //addToQueue(curMbox, 0);
+            //blockMe(20);
+        }
+        return curMbox->isReleased ? -3 : 0;
+    }
     if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
         restoreInterrupts(prevInt);
         return -2;
@@ -219,6 +257,19 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 
     if (curMbox->isReleased) { return -1; } // mailbox is released
     
+    if (!curMbox->slots) {
+        if (curMbox->producerHead) {
+            PCB* proc = curMbox->producerHead;
+            curMbox->producerHead = curMbox->producerHead->nextProducer;
+            unblockProc(proc->pid);
+        }
+        else {
+            return -2;
+            //addToQueue(curMbox, 1);
+            //blockMe(20);
+        }
+        return curMbox->isReleased ? -3 : 0;
+    }
     if (!msg) { return -2; }
 
     msg = curMbox->messageHead;

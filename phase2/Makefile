@@ -22,8 +22,6 @@ TESTS = test00 test01 test02 test03 test04 test05 test06 test07 test08 test09 \
         test30 test31 test32 test33 test34 test35 test36 test37 test38 test39 \
         test40 test41 test42 test43 test44 test45 test46
 
-
-
 all: ${TESTS}
 
 ${TESTS}: phase2_common_testcase_code.o $(COBJS) libphase1.a
