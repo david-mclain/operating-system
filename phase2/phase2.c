@@ -114,12 +114,7 @@ int MboxCreate(int slots, int slot_size) {
     cur->inUse = 1;
 
     // move mboxID to next available index in mailboxes array
-    Mailbox* temp = &mailboxes[mboxID];
-    for (int i = 0; i < MAXMBOX; i++) {
-        mboxID = (mboxID + 1) % MAXMBOX;
-        temp = &mailboxes[mboxID];
-        if (!temp->inUse) { break; }
-    }
+    setMboxID();
     restoreInterrupts(prevInt);
     return cur->id;
 }
@@ -130,6 +125,10 @@ int MboxRelease(int mbox_id) {
     }
     Mailbox* mbox = &mailboxes[mbox_id];
     mbox->isReleased = 1;
+    if (!mbox->consumerHead && !mbox->producerHead) {
+        memset(mbox, 0, sizeof(Mailbox));
+        setMboxID();
+    }
     PCB* cur = mbox->consumerHead;
     while (cur) {
         unblockProc(cur->pid);
@@ -218,7 +217,6 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     Mailbox* curMbox = &mailboxes[mbox_id];
     Message* msg = curMbox->messageHead;
 
-    // idk why it needs to return -1 here for it to work with test22
     if (curMbox->isReleased) { return -1; } // mailbox is released
     
     if (!msg) { return -2; }
@@ -273,8 +271,6 @@ void waitDevice(int type, int unit, int *status) {
     *status = msg;
 }
 
-void wakeupByDevice(int type, int unit, int status) {}
-
 int phase2_check_io() {
     for (int i = 0; i < MAXPROC; i++) {
         if (processes[i].awaitingDevice) {
@@ -298,8 +294,20 @@ void nullsys(USLOSS_Sysargs* args) {
     USLOSS_Halt(1);
 }
 
+void wakeupByDevice(int type, int unit, int status) {}
 
     /* ---------- Helper Functions ---------- */
+
+void setMboxID() {
+    Mailbox* temp = &mailboxes[mboxID];
+    for (int i = 0; i < MAXMBOX; i++) {
+        temp = &mailboxes[i];
+        if (!temp->inUse) { 
+            mboxID = i;
+            break;
+        }
+    }
+}
 
 void diskAndTermHandler(int intType, void* payload) {
     int devMboxID = -1; 
