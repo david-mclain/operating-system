@@ -66,6 +66,7 @@ void (*systemCallVec[MAXSYSCALLS])(USLOSS_Sysargs *args);
 int disableInterrupts();
 int validateSend(int, void*, int);
 int recvMessage(Mailbox*, char*, Message*);
+int zeroSlotHelper(Mailbox*, int, int);
 
 void checkMode(char*);
 void restoreInterrupts(int);
@@ -149,9 +150,9 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
 
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
     if (invalid) { return invalid; }
-    Mailbox* curMbox = &mailboxes[mbox_id];
-    if (curMbox->isReleased) { return -1; }
 
+    Mailbox* curMbox = &mailboxes[mbox_id];
+    // handle for 0 slot mailboxes
     if (!curMbox->slots) {
         if (curMbox->consumerHead) {
             PCB* proc = curMbox->consumerHead;
@@ -188,6 +189,7 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     Mailbox* curMbox = &mailboxes[mbox_id];
     if (curMbox->isReleased) { return -1; } // mailbox is released
 
+    // handle for 0 slot mailbox
     if (!curMbox->slots) {
         if (curMbox->producerHead) {
             PCB* proc = curMbox->producerHead;
@@ -220,10 +222,10 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
     int prevInt = disableInterrupts();
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
-    if (invalid) {
-        return invalid;
-    }
+    if (invalid) { return invalid; }
+
     Mailbox* curMbox = &mailboxes[mbox_id];
+    // handle for 0 slot mailbox
     if (!curMbox->slots) {
         if (curMbox->consumerHead) {
             PCB* proc = curMbox->consumerHead;
@@ -232,11 +234,10 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
         }
         else {
             return -2;
-            //addToQueue(curMbox, 0);
-            //blockMe(20);
         }
         return curMbox->isReleased ? -3 : 0;
     }
+
     if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
         restoreInterrupts(prevInt);
         return -2;
@@ -256,7 +257,7 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     Message* msg = curMbox->messageHead;
 
     if (curMbox->isReleased) { return -1; } // mailbox is released
-    
+    // handle for 0 slot mailbox
     if (!curMbox->slots) {
         if (curMbox->producerHead) {
             PCB* proc = curMbox->producerHead;
@@ -265,11 +266,10 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
         }
         else {
             return -2;
-            //addToQueue(curMbox, 1);
-            //blockMe(20);
         }
         return curMbox->isReleased ? -3 : 0;
     }
+
     if (!msg) { return -2; }
 
     msg = curMbox->messageHead;
