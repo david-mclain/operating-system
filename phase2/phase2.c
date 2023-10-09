@@ -151,7 +151,7 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     if (invalid) { return invalid; }
 
     Mailbox* curMbox = &mailboxes[mbox_id];
-    if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
+    if (curMbox->slotsInUse == curMbox->slots && curMbox->slots != 0) {//&& curMbox->consumerHead == NULL) {
         addToQueue(curMbox, 0);
         blockMe(20); //idk what val to put here yet
     }
@@ -188,7 +188,6 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     memcpy(msg_ptr, msg->message, msg->size);
     int ret = msg->size;
     memset(msg, 0, sizeof(Message));
-    //msg->inUse = 0;
     curMbox->slotsInUse--;
     slotsInUse--;
 
@@ -226,6 +225,8 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 
     Mailbox* curMbox = &mailboxes[mbox_id];
     Message* msg = curMbox->messageHead;
+
+    if (curMbox->isReleased) { return -1; } // mailbox is released
     
     if (!msg) { return -2; }
 
