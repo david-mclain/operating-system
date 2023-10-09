@@ -65,6 +65,7 @@ void (*systemCallVec[MAXSYSCALLS])(USLOSS_Sysargs *args);
 
 int disableInterrupts();
 int validateSend(int, void*, int);
+int recvMessage(Mailbox*, char*, Message*);
 
 void checkMode(char*);
 void restoreInterrupts(int);
@@ -103,7 +104,7 @@ int MboxCreate(int slots, int slot_size) {
     checkMode("MboxCreate");
     int prevInt = disableInterrupts();
 
-    if (slots < 0 || slot_size < 0 || slots > MAXSLOTS || mailboxes[mboxID].inUse || slot_size >= MAX_MESSAGE) {
+    if (slots < 0 || slot_size < 0 || slots > MAXSLOTS || mailboxes[mboxID].inUse || slot_size > MAX_MESSAGE) {
         return -1;
     }
     Mailbox* cur = &mailboxes[mboxID];
@@ -149,8 +150,9 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
 
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
     if (invalid) { return invalid; }
-
     Mailbox* curMbox = &mailboxes[mbox_id];
+    if (curMbox->isReleased) { return -1; }
+
     if (curMbox->slotsInUse == curMbox->slots && curMbox->slots != 0) {//&& curMbox->consumerHead == NULL) {
         addToQueue(curMbox, 0);
         blockMe(20); //idk what val to put here yet
@@ -172,7 +174,7 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     if (mbox_id < 0 || mbox_id >= MAXMBOX) { return -1; } // invalid mailbox
 
     Mailbox* curMbox = &mailboxes[mbox_id];
-    if (curMbox->isReleased) { return -3; } // mailbox is released
+    if (curMbox->isReleased) { return -1; } // mailbox is released
 
     // maybe change this? use varible or smth
     Message* msg = curMbox->messageHead;
@@ -184,18 +186,8 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     msg = curMbox->messageHead;
     if (msg->size > msg_max_size) { return -1; } // message is too large
 
-    curMbox->messageHead = curMbox->messageHead->nextSlot;
-    memcpy(msg_ptr, msg->message, msg->size);
-    int ret = msg->size;
-    memset(msg, 0, sizeof(Message));
-    curMbox->slotsInUse--;
-    slotsInUse--;
+    int ret = recvMessage(curMbox, msg_ptr, msg);
 
-    if (curMbox->producerHead) {
-        PCB* toUnblock = curMbox->producerHead;
-        curMbox->producerHead = curMbox->producerHead->nextProducer;
-        unblockProc(toUnblock->pid);
-    }
     restoreInterrupts(prevInt);
     return ret;
 }
@@ -226,6 +218,7 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     Mailbox* curMbox = &mailboxes[mbox_id];
     Message* msg = curMbox->messageHead;
 
+    // idk why it needs to return -1 here for it to work with test22
     if (curMbox->isReleased) { return -1; } // mailbox is released
     
     if (!msg) { return -2; }
@@ -233,19 +226,8 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     msg = curMbox->messageHead;
     if (msg->size > msg_max_size) { return -1; } // message is too large
 
-    curMbox->messageHead = curMbox->messageHead->nextSlot;
-    memcpy(msg_ptr, msg->message, msg->size);
-    int ret = msg->size;
-    memset(msg, 0, sizeof(Message));
-    //msg->inUse = 0;
-    curMbox->slotsInUse--;
-    slotsInUse--;
+    int ret = recvMessage(curMbox, msg_ptr, msg);
 
-    if (curMbox->producerHead) {
-        PCB* toUnblock = curMbox->producerHead;
-        curMbox->producerHead = curMbox->producerHead->nextProducer;
-        unblockProc(toUnblock->pid);
-    }
     restoreInterrupts(prevInt);
     return ret;
 }
@@ -353,6 +335,22 @@ void sendMessage(Mailbox* curMbox, char* msg_ptr, int msg_size) {
         curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
         unblockProc(toUnblock->pid);
     }
+}
+
+int recvMessage(Mailbox* curMbox, char* msg_ptr, Message* msg) {
+    curMbox->messageHead = curMbox->messageHead->nextSlot;
+    memcpy(msg_ptr, msg->message, msg->size);
+    int ret = msg->size;
+    memset(msg, 0, sizeof(Message));
+    curMbox->slotsInUse--;
+    slotsInUse--;
+
+    if (curMbox->producerHead) {
+        PCB* toUnblock = curMbox->producerHead;
+        curMbox->producerHead = curMbox->producerHead->nextProducer;
+        unblockProc(toUnblock->pid);
+    }
+    return ret;
 }
 
 int validateSend(int id, void* msg, int size) {

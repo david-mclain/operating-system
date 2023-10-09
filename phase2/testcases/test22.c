@@ -57,9 +57,8 @@ int start2(char *arg)
 
     if(result == -1)
         USLOSS_Console("failed to recv from released mailbox ... success\n");
-    else {
+    else
         USLOSS_Console("test failed result = %d\n",result);
-    }
 
     quit(0);
 }
