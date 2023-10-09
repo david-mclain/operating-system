@@ -355,7 +355,7 @@ int recvMessage(Mailbox* curMbox, char* msg_ptr, Message* msg) {
 
 int validateSend(int id, void* msg, int size) {
     if (mailboxes[id].isReleased) {
-        return -3;
+        return -1;
     }
     if (slotsInUse >= MAXSLOTS) {
         return -2;
