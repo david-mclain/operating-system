@@ -18,8 +18,12 @@
 
 typedef struct PCB {
     char awaitingDevice;
+    char hasMessage;
+    char sentMessage;
+    char message[MAX_MESSAGE];
 
     int pid;
+    int size;
 
     struct PCB* nextConsumer;
     struct PCB* nextProducer;
@@ -53,7 +57,6 @@ typedef struct Mailbox {
     PCB* producerHead;
     PCB* producerTail;
 } Mailbox;
-
 
 /* ---------- Globals ---------- */
 
@@ -223,6 +226,12 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     }
 
     if (curMbox->isReleased) { return -3; }
+    
+    PCB* temp = &processes[getpid() % MAXPROC];
+    if (temp->sentMessage) { 
+        temp->sentMessage = 0;
+        return 0;
+    }
 
     sendMessage(curMbox, msg_ptr, msg_size);
 
@@ -262,7 +271,17 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     }
     if (curMbox->isReleased) { return -3; } // mailbox is released
 
-    msg = curMbox->messageHead;
+    PCB* cur = &processes[getpid() % MAXPROC];
+    if (cur->hasMessage) {
+        if (cur->size > msg_max_size) { return -1; }
+        cur->hasMessage = 0;
+
+        memcpy(msg_ptr, cur->message, msg_max_size);
+        restoreInterrupts(prevInt);
+        return cur->size;
+    }
+
+    //msg = curMbox->messageHead;
     if (msg->size > msg_max_size) { return -1; } // message is too large
 
     int ret = recvMessage(curMbox, msg_ptr, msg);
@@ -558,6 +577,15 @@ void diskAndTermHandler(int intType, void* payload) {
  *
  */ 
 void sendMessage(Mailbox* curMbox, char* msg_ptr, int msg_size) {
+    if (curMbox->consumerHead) {
+        PCB* temp = curMbox->consumerHead;
+        temp->size = msg_size;
+        memcpy(temp->message, msg_ptr, msg_size);
+        temp->hasMessage = 1;
+        curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
+        unblockProc(temp->pid);
+        return;
+    }
     Message* msg = nextOpenSlot();
     memcpy(msg->message, msg_ptr, msg_size);
     msg->size = msg_size;
@@ -566,13 +594,14 @@ void sendMessage(Mailbox* curMbox, char* msg_ptr, int msg_size) {
     putInMailbox(curMbox, msg);
     curMbox->slotsInUse++;
     slotsInUse++;
-
+    /*
     if (curMbox->consumerHead) {
         PCB* toUnblock = curMbox->consumerHead;
         msg->processPID = toUnblock->pid;
         curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
         unblockProc(toUnblock->pid);
     }
+    */
 }
 
 /**
@@ -592,6 +621,9 @@ int recvMessage(Mailbox* curMbox, char* msg_ptr, Message* msg) {
     memset(msg, 0, sizeof(Message));
     curMbox->slotsInUse--;
     slotsInUse--;
+
+    // right here check to unblock???
+    // maybe receive message???
 
     if (curMbox->producerHead) {
         PCB* toUnblock = curMbox->producerHead;
