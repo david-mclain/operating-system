@@ -73,7 +73,7 @@ void (*systemCallVec[MAXSYSCALLS])(USLOSS_Sysargs *args);
 int disableInterrupts();
 int recvMessage(Mailbox*, char*, Message*);
 int validateSend(int, void*, int);
-int zeroSlotHelper(Mailbox*, char, char);
+int zeroSlotHelper(Mailbox*, int, int);
 
 Message* nextOpenSlot();
 
@@ -208,8 +208,19 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     if (invalid) { return invalid; }
 
     Mailbox* curMbox = &mailboxes[mbox_id];
-
-    if (!curMbox->slots) { return zeroSlotHelper(curMbox, 1, 0); }
+    // handle for 0 slot mailboxes
+    if (!curMbox->slots) {
+        if (curMbox->consumerHead) {
+            PCB* proc = curMbox->consumerHead;
+            curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
+            unblockProc(proc->pid);
+        }
+        else {
+            addToQueue(curMbox, 0);
+            blockMe(WAIT_RECV);
+        }
+        return curMbox->isReleased ? -3 : 0;
+    }
 
     if (curMbox->slotsInUse == curMbox->slots && curMbox->slots) {
         addToQueue(curMbox, 0);
@@ -243,8 +254,20 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     Mailbox* curMbox = &mailboxes[mbox_id];
     if (curMbox->isReleased) { return -1; } // mailbox is released
 
-    if (!curMbox->slots) { return zeroSlotHelper(curMbox, 0, 0); }
-
+    // handle for 0 slot mailbox
+    if (!curMbox->slots) {
+        if (curMbox->producerHead) {
+            PCB* proc = curMbox->producerHead;
+            curMbox->producerHead = curMbox->producerHead->nextProducer;
+            unblockProc(proc->pid);
+        }
+        else {
+            addToQueue(curMbox, 1);
+            blockMe(WAIT_SEND);
+        }
+        return curMbox->isReleased ? -3 : 0;
+    }
+    // maybe change this? use varible or smth
     Message* msg = curMbox->messageHead;
     if (msg == NULL) {
         addToQueue(curMbox, 1);
@@ -278,8 +301,18 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
     if (invalid) { return invalid; }
 
     Mailbox* curMbox = &mailboxes[mbox_id];
-
-    if (!curMbox->slots) { return zeroSlotHelper(curMbox, 1, 1); }
+    // handle for 0 slot mailbox
+    if (!curMbox->slots) {
+        if (curMbox->consumerHead) {
+            PCB* proc = curMbox->consumerHead;
+            curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
+            unblockProc(proc->pid);
+        }
+        else {
+            return -2;
+        }
+        return curMbox->isReleased ? -3 : 0;
+    }
 
     if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
         restoreInterrupts(prevInt);
@@ -310,11 +343,21 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     //Message* msg = curMbox->messageHead;
 
     if (curMbox->isReleased) { return -1; } // mailbox is released
-
-    if (!curMbox->slots) { return zeroSlotHelper(curMbox, 0, 1); }
+    // handle for 0 slot mailbox
+    if (!curMbox->slots) {
+        if (curMbox->producerHead) {
+            PCB* proc = curMbox->producerHead;
+            curMbox->producerHead = curMbox->producerHead->nextProducer;
+            unblockProc(proc->pid);
+        }
+        else {
+            return -2;
+        }
+        return curMbox->isReleased ? -3 : 0;
+    }
 
     Message* msg = curMbox->messageHead;
-    if (!msg) { return -2; }
+    //if (!msg) { return -2; }
     
     if (msg->size > msg_max_size) { return -1; } // message is too large
 
@@ -441,45 +484,6 @@ void nullsys(USLOSS_Sysargs* args) {
 void wakeupByDevice(int type, int unit, int status) {}
 
     /* ---------- Helper Functions ---------- */
-
-/**
- * Purpose:
- *
- * 
- * Parameters:
- *
- *
- * Return:
- *
- */ 
-int zeroSlotHelper(Mailbox* curMbox, char isSend, char isCond) {
-    if (isSend) {
-        if (curMbox->consumerHead) {
-            PCB* proc = curMbox->consumerHead;
-            curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
-            unblockProc(proc->pid);
-        }
-        else {
-            if (isCond) { return -2; }
-            addToQueue(curMbox, 0);
-            blockMe(WAIT_RECV);
-        }
-        return curMbox->isReleased ? -3 : 0;
-    }
-    else {
-        if (curMbox->producerHead) {
-            PCB* proc = curMbox->producerHead;
-            curMbox->producerHead = curMbox->producerHead->nextProducer;
-            unblockProc(proc->pid);
-        }
-        else {
-            if (isCond) { return -2; }
-            addToQueue(curMbox, 1);
-            blockMe(WAIT_SEND);
-        }
-        return curMbox->isReleased ? -3 : 0;
-    }
-}
 
 /**
  * Purpose:
