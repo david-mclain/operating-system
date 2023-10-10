@@ -23,6 +23,7 @@ typedef struct PCB {
 typedef struct Message {
     char inUse;
     char message[MAX_MESSAGE];
+    int processPID;
     int size;
     struct Message* nextSlot;
     //struct Message* prevSlot;  // I dont think this is needed
@@ -171,7 +172,15 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
         blockMe(20); //idk what val to put here yet
     }
 
-    if (curMbox->isReleased) { return -3; }
+    if (curMbox->isReleased) {
+        /*
+        PCB* cur = &processes[getpid() % MAXPROC];
+        if (cur == curMbox->producerTail || cur == curMbox->consumerTail && !curMbox->producerTail) {
+            memset(curMbox, 0, sizeof(Mailbox));
+        }
+        */
+        return -3;
+    }
 
     sendMessage(curMbox, msg_ptr, msg_size);
 
@@ -208,7 +217,15 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
         addToQueue(curMbox, 1);
         blockMe(20);
     }
-    if (curMbox->isReleased) { return -3; } // mailbox is released
+    if (curMbox->isReleased) {
+        /*
+        PCB* cur = &processes[getpid() % MAXPROC];
+        if (cur == curMbox->producerTail || cur == curMbox->consumerTail && !curMbox->producerTail) {
+            memset(curMbox, 0, sizeof(Mailbox));
+        }
+        */
+        return -3;
+    } // mailbox is released
     msg = curMbox->messageHead;
     if (msg->size > msg_max_size) { return -1; } // message is too large
 
@@ -385,12 +402,14 @@ void sendMessage(Mailbox* curMbox, char* msg_ptr, int msg_size) {
     memcpy(msg->message, msg_ptr, msg_size);
     msg->size = msg_size;
     msg->inUse = 1;
+    msg->processPID = getpid();
     putInMailbox(curMbox, msg);
     curMbox->slotsInUse++;
     slotsInUse++;
 
     if (curMbox->consumerHead) {
         PCB* toUnblock = curMbox->consumerHead;
+        msg->processPID = toUnblock->pid;
         curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
         unblockProc(toUnblock->pid);
     }
