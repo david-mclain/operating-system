@@ -85,20 +85,20 @@ void printMailboxes();
 void putInMailbox(Mailbox*, Message*);
 void restoreInterrupts(int);
 void sendMessage(Mailbox*, char*, int);
+void setMboxID();
 void syscallHandler(int, void*);
-
 
 /* ---------- Phase 2 Functions ----------*/
 
 /**
  * Purpose:
- *
+ * Initializes data structures and interrupt vector for phase 2
  * 
  * Parameters:
- *
+ * None
  *
  * Return:
- *
+ * None
  */ 
 void phase2_init(void) {
     memset(mailboxes, 0, sizeof(mailboxes));
@@ -117,25 +117,27 @@ void phase2_init(void) {
 
 /**
  * Purpose:
- *
+ * None
  * 
  * Parameters:
- *
+ * None
  *
  * Return:
- *
+ * None
  */ 
 void phase2_start_service_processes() {} // no-op, don't need any service procs here
 
 /**
  * Purpose:
- *
+ * Creates a new mailbox with the lowest possible mailbox id with a 
+ * specified amount of slots, and specified size in bytes for each slot
  * 
  * Parameters:
- *
+ * int slots        the amount of slots the mailbox will use
+ * int slot_size    the size, in bytes, each slot will use
  *
  * Return:
- *
+ * int  id of the mailbox created
  */ 
 int MboxCreate(int slots, int slot_size) {
     checkMode("MboxCreate");
@@ -158,13 +160,14 @@ int MboxCreate(int slots, int slot_size) {
 
 /**
  * Purpose:
- *
+ * Releases a mailbox and unblocks all processes that were waiting to
+ * send/recv a message through that mailbox
  * 
  * Parameters:
- *
+ * mbox_id  id of mailbox to release
  *
  * Return:
- *
+ * int  if release is successful 0, otherwise 1
  */ 
 int MboxRelease(int mbox_id) {
     if (!mailboxes[mbox_id].inUse || mailboxes[mbox_id].isReleased) {
@@ -186,19 +189,22 @@ int MboxRelease(int mbox_id) {
         unblockProc(cur->pid);
         cur = cur->nextProducer;
     }
-    //memset(mbox, 0, sizeof(Mailbox));
     return 0;
 }
 
 /**
  * Purpose:
- *
+ * Sends a message through a mailbox. Message may be delivered directly to
+ * consumer or queued in mail slot. This function may block if there are no
+ * consumers or space available to queue a message.
  * 
  * Parameters:
- *
+ * int mbox_id      id of mailbox to send message to
+ * void* msg_ptr    message to send to mailbox
+ * int msg_size     size of message being sent
  *
  * Return:
- *
+ * int  if successful 0, else returns value associated with different errors
  */ 
 int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
@@ -226,13 +232,17 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
 
 /**
  * Purpose:
- *
+ * Receives a message through a mailbox. If message is already available 
+ * will read the message and return, otherwise blocks until there is a message
+ * available.
  * 
  * Parameters:
- *
+ * int mbox_id          id of mailbox to receive message from
+ * void* msg_ptr        out pointer to store message received
+ * int msg_max_size     max size message is allowed to receive
  *
  * Return:
- *
+ * int  if successful returns size of message, else specific error code
  */ 
 int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     checkMode("MboxRecv");
@@ -263,13 +273,18 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 
 /**
  * Purpose:
- *
+ * Sends a message through a mailbox. Message may be delivered directly to
+ * consumer or queued in mail slot. This function may not block, instead if
+ * there are no consumers available and no slots to queue message the function
+ * returns an error value
  * 
  * Parameters:
- *
+ * int mbox_id      id of mailbox to send message to
+ * void* msg_ptr    message to send to mailbox
+ * int msg_size     size of message being sent
  *
  * Return:
- *
+ * int  if successful 0, else returns value associated with different errors
  */ 
 int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
@@ -294,13 +309,16 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
 
 /**
  * Purpose:
- *
+ * Receives a message through a mailbox. If message is already available 
+ * will read the message and return, otherwise returns error value
  * 
  * Parameters:
- *
+ * int mbox_id          id of mailbox to receive message from
+ * void* msg_ptr        out pointer to store message received
+ * int msg_max_size     max size message is allowed to receive
  *
  * Return:
- *
+ * int  if successful returns size of message, else specific error code
  */ 
 int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     checkMode("MboxRecv");
@@ -335,6 +353,8 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
  *
  */ 
 void waitDevice(int type, int unit, int *status) {
+    checkMode("MboxRecv");
+    int prevInt = disableInterrupts();
     // find the correct mailbox
     int devMboxID = -1; 
     int devUnitErr = 0;
@@ -373,6 +393,8 @@ void waitDevice(int type, int unit, int *status) {
 
     // message is recieved, store it into status
     *status = msg;
+
+    restoreInterrupts(prevInt);
 }
 
 /**
@@ -429,15 +451,8 @@ void nullsys(USLOSS_Sysargs* args) {
 }
 
 /**
- * Purpose:
- *
- * 
- * Parameters:
- *
- *
- * Return:
- *
- */ 
+ * Not implemented in our version of phase 2
+ */
 void wakeupByDevice(int type, int unit, int status) {}
 
     /* ---------- Helper Functions ---------- */
