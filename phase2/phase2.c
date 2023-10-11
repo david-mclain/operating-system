@@ -1,3 +1,16 @@
+/**
+ * File: phase2.c
+ * Authors: David McLain, Miles Gendreau
+ *
+ * Purpose: phase2 enables IPC by implementing mailboxes.
+ * Supports mailboxes of both zero and nonzero size, and 
+ * implements interrupt handlers for disk and terminal.
+ * Handles sending and receiving messages by either directly
+ * sending them to the process waiting or enqueueing messages
+ * if nothing is waiting to receive yet, along with setting up
+ * basis for syscalls. For now all syscalls are unimplemented 
+ * and call nullsys.
+ */
 #include <phase1.h>
 #include <phase2.h>
 #include <stdio.h>
@@ -59,13 +72,13 @@ typedef struct Mailbox {
 
 /* ---------- Globals ---------- */
 
-Mailbox mailboxes[MAXMBOX];
-Message messageSlots[MAXSLOTS];
-PCB processes[MAXPROC];
+Mailbox mailboxes[MAXMBOX];     // all available mailboxes for IPC
+Message messageSlots[MAXSLOTS]; // all available message slots for all mailboxes
+PCB processes[MAXPROC];         // phantom process table, useful for queues
 
-int mboxID = 0;
-int prevClockMsgTime = 0; // last time a message was sent to the clock mailbox
-int slotsInUse = 0;
+int mboxID = 0;             // id of current open mailbox
+int prevClockMsgTime = 0;   // last time a message was sent to the clock mailbox
+int slotsInUse = 0;         // counter for how many message slots are being used
 
 void (*systemCallVec[MAXSYSCALLS])(USLOSS_Sysargs *args);
 
