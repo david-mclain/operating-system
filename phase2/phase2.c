@@ -33,7 +33,6 @@ typedef struct Message {
     char inUse;
     char message[MAX_MESSAGE];
     
-    int processPID;
     int size;
 
     struct Message* nextSlot;
@@ -147,6 +146,7 @@ int MboxCreate(int slots, int slot_size) {
     int prevInt = disableInterrupts();
 
     if (slots < 0 || slot_size < 0 || slots > MAXSLOTS || mailboxes[mboxID].inUse || slot_size > MAX_MESSAGE) {
+        restoreInterrupts(prevInt);
         return -1;
     }
     Mailbox* cur = &mailboxes[mboxID];
@@ -173,7 +173,11 @@ int MboxCreate(int slots, int slot_size) {
  * int  if release is successful 0, otherwise 1
  */ 
 int MboxRelease(int mbox_id) {
+    checkMode("MboxRelease");
+    int prevInt = disableInterrupts();
+
     if (!mailboxes[mbox_id].inUse || mailboxes[mbox_id].isReleased) {
+        restoreInterrupts(prevInt);
         return -1;
     }
     Mailbox* mbox = &mailboxes[mbox_id];
@@ -192,6 +196,8 @@ int MboxRelease(int mbox_id) {
         unblockProc(cur->pid);
         cur = cur->nextProducer;
     }
+
+    restoreInterrupts(prevInt);
     return 0;
 }
 
@@ -213,13 +219,23 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     checkMode("MboxSend");
     int prevInt = disableInterrupts();
 
+    // validate arguments for send
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
-    if (invalid) { return invalid; }
+    if (invalid) {
+        restoreInterrupts(prevInt);
+        return invalid;
+    }
 
     Mailbox* curMbox = &mailboxes[mbox_id];
 
-    if (!curMbox->slots) { return zeroSlotHelper(curMbox, 1, 0); }
+    // handle zero slot mailbox
+    if (!curMbox->slots) {
+        int ret = zeroSlotHelper(curMbox, 1, 0);
+        restoreInterrupts(prevInt);
+        return ret;
+    }
 
+    // add process to queue if queue is full
     if (curMbox->slotsInUse == curMbox->slots && curMbox->slots) {
         PCB* temp = &processes[getpid() % MAXPROC];
         memcpy(temp->message, msg_ptr, msg_size);
@@ -228,14 +244,21 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
         blockMe(WAIT_RECV);
     }
 
-    if (curMbox->isReleased) { return -3; }
+    // if mailbox released while blocked
+    if (curMbox->isReleased) {
+        restoreInterrupts(prevInt);
+        return -3;
+    }
     
+    // if message was sent while blocked
     PCB* temp = &processes[getpid() % MAXPROC];
     if (temp->sentMessage) { 
         temp->sentMessage = 0;
+        restoreInterrupts(prevInt);
         return 0;
     }
 
+    // send message as normal
     sendMessage(curMbox, msg_ptr, msg_size);
 
     restoreInterrupts(prevInt);
@@ -260,23 +283,44 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
     checkMode("MboxRecv");
     int prevInt = disableInterrupts();
 
-    if (mbox_id < 0 || mbox_id >= MAXMBOX) { return -1; } // invalid mailbox
+    // validate arguments for recv
+    if (mbox_id < 0 || mbox_id >= MAXMBOX) {
+        restoreInterrupts(prevInt);
+        return -1;
+    }
 
     Mailbox* curMbox = &mailboxes[mbox_id];
-    if (curMbox->isReleased) { return -1; } // mailbox is released
+    if (curMbox->isReleased) {
+        restoreInterrupts(prevInt);
+        return -1;
+    }
 
-    if (!curMbox->slots) { return zeroSlotHelper(curMbox, 0, 0); }
+    // handle zero slot mailbox
+    if (!curMbox->slots) {
+        restoreInterrupts(prevInt);
+        return zeroSlotHelper(curMbox, 0, 0);
+    }
 
+    // handle if no messages are available to recv
     Message* msg = curMbox->messageHead;
     if (msg == NULL) {
         addToQueue(curMbox, 1);
         blockMe(WAIT_SEND);
     }
-    if (curMbox->isReleased) { return -3; } // mailbox is released
 
+    // if mailbox was released while blocked
+    if (curMbox->isReleased) {
+        restoreInterrupts(prevInt);
+        return -3;
+    }
+
+    // if message was recv'd directly while blocked
     PCB* cur = &processes[getpid() % MAXPROC];
     if (cur->hasMessage) {
-        if (cur->size > msg_max_size) { return -1; }
+        if (cur->size > msg_max_size) {
+            restoreInterrupts(prevInt);
+            return -1;
+        }
         cur->hasMessage = 0;
 
         memcpy(msg_ptr, cur->message, msg_max_size);
@@ -284,9 +328,12 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
         return cur->size;
     }
 
-    //msg = curMbox->messageHead;
-    if (msg->size > msg_max_size) { return -1; } // message is too large
+    if (msg->size > msg_max_size) {
+        restoreInterrupts(prevInt);
+        return -1;
+    }
 
+    // recv as normal
     int ret = recvMessage(curMbox, msg_ptr, msg);
 
     restoreInterrupts(prevInt);
@@ -309,16 +356,23 @@ int MboxRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
  * int  if successful 0, else returns value associated with different errors
  */ 
 int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
-    checkMode("MboxSend");
+    checkMode("MboxCondSend");
     int prevInt = disableInterrupts();
     int invalid = validateSend(mbox_id, msg_ptr, msg_size);
-    if (invalid) { return invalid; }
+    if (invalid) {
+        restoreInterrupts(prevInt);
+        return invalid;
+    }
 
     Mailbox* curMbox = &mailboxes[mbox_id];
 
-    if (!curMbox->slots) { return zeroSlotHelper(curMbox, 1, 1); }
+    if (!curMbox->slots) {
+        int ret = zeroSlotHelper(curMbox, 1, 1);
+        restoreInterrupts(prevInt);
+        return ret;
+    }
 
-    if (curMbox->slotsInUse == curMbox->slots) {//&& curMbox->consumerHead == NULL) {
+    if (curMbox->slotsInUse == curMbox->slots) {
         restoreInterrupts(prevInt);
         return -2;
     }
@@ -343,20 +397,31 @@ int MboxCondSend(int mbox_id, void *msg_ptr, int msg_size) {
  * int  if successful returns size of message, else specific error code
  */ 
 int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
-    checkMode("MboxRecv");
+    checkMode("MboxCondRecv");
     int prevInt = disableInterrupts();
 
     Mailbox* curMbox = &mailboxes[mbox_id];
-    //Message* msg = curMbox->messageHead;
 
-    if (curMbox->isReleased) { return -1; } // mailbox is released
+    if (curMbox->isReleased) {
+        restoreInterrupts(prevInt);
+        return -1;
+    }
 
-    if (!curMbox->slots) { return zeroSlotHelper(curMbox, 0, 1); }
+    if (!curMbox->slots) {
+        restoreInterrupts(prevInt);
+        return zeroSlotHelper(curMbox, 0, 1);
+    }
 
     Message* msg = curMbox->messageHead;
-    if (!msg) { return -2; }
+    if (!msg) {
+        restoreInterrupts(prevInt);
+        return -2;
+    }
     
-    if (msg->size > msg_max_size) { return -1; } // message is too large
+    if (msg->size > msg_max_size) {
+        restoreInterrupts(prevInt);
+        return -1;
+    }
 
     int ret = recvMessage(curMbox, msg_ptr, msg);
 
@@ -433,11 +498,17 @@ void waitDevice(int type, int unit, int *status) {
  * int  if no process is awaiting a device 0, else AWAITING_DEVICE
  */ 
 int phase2_check_io() {
+    checkMode("phase2_check_io");
+    int prevInt = disableInterrupts();
+
     for (int i = 0; i < MAXPROC; i++) {
         if (processes[i].awaitingDevice) {
+            restoreInterrupts(prevInt);
             return AWAITING_DEVICE;
         }
     }
+
+    restoreInterrupts(prevInt);
     return 0;
 }
 
@@ -485,15 +556,18 @@ void wakeupByDevice(int type, int unit, int status) {}
 
 /**
  * Purpose:
- *
+ * Helper function for sending and receiving with a zero slot mailbox
  * 
  * Parameters:
- *
+ * Mailbox* curMbox     current mailbox we are handling
+ * char isSend          whether we are sending to the mailbox or receiving (0 or 1)
+ * char isCond          whether or not we are doing a conditional send/recv (0 or 1)
  *
  * Return:
- *
+ * int  return status of send/recv operation
  */ 
 int zeroSlotHelper(Mailbox* curMbox, char isSend, char isCond) {
+    // handle if we are performing a send on zero slot mailbox
     if (isSend) {
         if (curMbox->consumerHead) {
             PCB* proc = curMbox->consumerHead;
@@ -507,6 +581,7 @@ int zeroSlotHelper(Mailbox* curMbox, char isSend, char isCond) {
         }
         return curMbox->isReleased ? -3 : 0;
     }
+    // handle if we are performing a recv on zero slot mailbox
     else {
         if (curMbox->producerHead) {
             PCB* proc = curMbox->producerHead;
@@ -524,13 +599,14 @@ int zeroSlotHelper(Mailbox* curMbox, char isSend, char isCond) {
 
 /**
  * Purpose:
- *
+ * Sets mboxID to be the mailbox slot with the lowest value 
+ * that is not in use
  * 
  * Parameters:
- *
+ * None
  *
  * Return:
- *
+ * None
  */ 
 void setMboxID() {
     Mailbox* temp = &mailboxes[mboxID];
@@ -545,13 +621,14 @@ void setMboxID() {
 
 /**
  * Purpose:
- *
+ * Handles interrupt from disk and terminal
  * 
  * Parameters:
- *
+ * int intType      type of interrupt received  
+ * void* payload    payload of interrupt (?)
  *
  * Return:
- *
+ * None
  */ 
 void diskAndTermHandler(int intType, void* payload) {
     int devMboxID = -1; 
@@ -570,20 +647,25 @@ void diskAndTermHandler(int intType, void* payload) {
 
     int status;
     USLOSS_DeviceInput(intType, unit, &status);
-    MboxSend(devMboxID + unit, &status, sizeof(int)); // TODO change to condSend
+    MboxCondSend(devMboxID + unit, &status, sizeof(int));
 }
 
 /**
  * Purpose:
- *
+ * Helper function to actually send a message either directly to
+ * a process, or queue it into the mailbox if there is no process
+ * in the consumer queue
  * 
  * Parameters:
- *
+ * Mailbox* curMbox     mailbox we are sending a message to
+ * char* msg_ptr        message we are sending to the mailbox
+ * int msg_size         size of message we are sending
  *
  * Return:
- *
+ * None
  */ 
 void sendMessage(Mailbox* curMbox, char* msg_ptr, int msg_size) {
+    // directly deliver message to consumer waiting if there is one
     if (curMbox->consumerHead) {
         PCB* temp = curMbox->consumerHead;
         temp->size = msg_size;
@@ -593,11 +675,11 @@ void sendMessage(Mailbox* curMbox, char* msg_ptr, int msg_size) {
         unblockProc(temp->pid);
         return;
     }
+    // queue message into slot if no consumer is waiting
     Message* msg = nextOpenSlot();
     memcpy(msg->message, msg_ptr, msg_size);
     msg->size = msg_size;
     msg->inUse = 1;
-    //msg->processPID = getpid();
     putInMailbox(curMbox, msg);
     curMbox->slotsInUse++;
     slotsInUse++;
@@ -605,15 +687,21 @@ void sendMessage(Mailbox* curMbox, char* msg_ptr, int msg_size) {
 
 /**
  * Purpose:
- *
+ * Helper function to actually receive a message from a mailbox,
+ * if there is a process in the consumer queue, manually adds to
+ * message queue in order to have messages receive and send in
+ * proper order
  * 
  * Parameters:
- *
+ * Mailbox* curMbox     mailbox we are receiving a message from
+ * char* msg_ptr        out pointer for message to receive
+ * Message* msg         current message to read
  *
  * Return:
- *
+ * int  length of message received
  */ 
 int recvMessage(Mailbox* curMbox, char* msg_ptr, Message* msg) {
+    // recv a message through queue
     curMbox->messageHead = curMbox->messageHead->nextSlot;
     memcpy(msg_ptr, msg->message, msg->size);
     int ret = msg->size;
@@ -621,9 +709,7 @@ int recvMessage(Mailbox* curMbox, char* msg_ptr, Message* msg) {
     curMbox->slotsInUse--;
     slotsInUse--;
 
-    // right here check to unblock???
-    // maybe receive message???
-
+    // directly enqueue messages from senders if space opens
     if (curMbox->producerHead) {
         PCB* toUnblock = curMbox->producerHead;
         curMbox->producerHead = curMbox->producerHead->nextProducer;
@@ -635,7 +721,6 @@ int recvMessage(Mailbox* curMbox, char* msg_ptr, Message* msg) {
         toUnblock->sentMessage = 1;
         curMbox->slotsInUse++;
         slotsInUse++;
-        //printMailboxes();
         unblockProc(toUnblock->pid);
     }
     return ret;
@@ -643,13 +728,15 @@ int recvMessage(Mailbox* curMbox, char* msg_ptr, Message* msg) {
 
 /**
  * Purpose:
- *
+ * Validates information passed into send
  * 
  * Parameters:
- *
+ * int id       id of mailbox to send to
+ * void* msg    message being sent to the mailbox
+ * int size     size of message being sent
  *
  * Return:
- *
+ * int  if arguments are valid 0, else error code associated with issue
  */ 
 int validateSend(int id, void* msg, int size) {
     if (mailboxes[id].isReleased || id >= MAXMBOX || !mailboxes[id].inUse ||
@@ -664,13 +751,13 @@ int validateSend(int id, void* msg, int size) {
 
 /**
  * Purpose:
- *
+ * Finds next open message slot and returns pointer to it
  * 
  * Parameters:
- *
+ * None
  *
  * Return:
- *
+ * Message*     pointer to next message slot that is available
  */ 
 Message* nextOpenSlot() {
     for (int i = 0; i < MAXSLOTS; i++) {
@@ -683,13 +770,14 @@ Message* nextOpenSlot() {
 
 /**
  * Purpose:
- *
+ * Puts a message into a mailbox
  * 
  * Parameters:
- *
+ * Mailbox* mbox    mailbox to put message in
+ * Message* msg     message to put in mailbox
  *
  * Return:
- *
+ * None
  */ 
 void putInMailbox(Mailbox* mbox, Message* msg) {
     if (!mbox->messageHead) {
@@ -704,17 +792,20 @@ void putInMailbox(Mailbox* mbox, Message* msg) {
 
 /**
  * Purpose:
- *
+ * Adds a process to either consumer or producer queue, depending 
+ * on if it is sending or receiving the message
  * 
  * Parameters:
- *
+ * Mailbox* mbox    mailbox we want process to enter queues for
+ * char isConsumer  whether process we want to add to queue is consumer or not
  *
  * Return:
- *
+ * None
  */ 
 void addToQueue(Mailbox* mbox, char isConsumer) {
     PCB* proc = &processes[getpid() % MAXPROC];
     proc->pid = getpid();
+    // handle if we are adding to consumer queue
     if (isConsumer) {
         if (!mbox->consumerHead) {
             mbox->consumerHead = proc;
@@ -725,6 +816,7 @@ void addToQueue(Mailbox* mbox, char isConsumer) {
             mbox->consumerTail = proc;
         }
     }
+    // handler if we are adding to producer queue
     else {
         if (!mbox->producerHead) {
             mbox->producerHead = proc;
@@ -733,50 +825,6 @@ void addToQueue(Mailbox* mbox, char isConsumer) {
         else {
             mbox->producerTail->nextProducer = proc;
             mbox->producerTail = proc;
-        }
-    }
-}
-
-/**
- * Purpose:
- *
- * 
- * Parameters:
- *
- *
- * Return:
- *
- */ 
-void printMailboxes() {
-    Mailbox* mbox;
-    for (int i = 0; i < MAXMBOX; i++) {
-        mbox = &mailboxes[i];
-        if (mbox->inUse) {
-            printf("mbox id: %d\n", i);
-            
-            printf("Message List: ");
-            Message* curMsg = mbox->messageHead;
-            while (curMsg) {
-                printf("%s -> ", curMsg->message);
-                curMsg = curMsg->nextSlot;
-            }
-            printf("NULL\n");
-
-            PCB* cur = mbox->consumerHead;
-            printf("Consumer Queue: ");
-            while (cur) {
-                printf("%d -> ", cur->pid);
-                cur = cur->nextConsumer;
-            }
-            printf("NULL\n");
-            
-            cur = mbox->producerHead;
-            printf("Producer Queue: ");
-            while (cur) {
-                printf("%d -> ", cur->pid);
-                cur = cur->nextProducer;
-            }
-            printf("NULL\n");
         }
     }
 }
