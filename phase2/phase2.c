@@ -221,6 +221,9 @@ int MboxSend(int mbox_id, void *msg_ptr, int msg_size) {
     if (!curMbox->slots) { return zeroSlotHelper(curMbox, 1, 0); }
 
     if (curMbox->slotsInUse == curMbox->slots && curMbox->slots) {
+        PCB* temp = &processes[getpid() % MAXPROC];
+        memcpy(temp->message, msg_ptr, msg_size);
+        temp->size = msg_size;
         addToQueue(curMbox, 0);
         blockMe(WAIT_RECV);
     }
@@ -363,16 +366,18 @@ int MboxCondRecv(int mbox_id, void *msg_ptr, int msg_max_size) {
 
 /**
  * Purpose:
- *
+ * Waits for an interrupt to fire on a specific device
  * 
  * Parameters:
- *
+ * int type     type of device we are waiting for
+ * int unit     which unit of device we are waiting for
+ * int* status  out parameter to store status in
  *
  * Return:
- *
+ * None
  */ 
 void waitDevice(int type, int unit, int *status) {
-    checkMode("MboxRecv");
+    checkMode("waitDevice");
     int prevInt = disableInterrupts();
     // find the correct mailbox
     int devMboxID = -1; 
@@ -418,13 +423,14 @@ void waitDevice(int type, int unit, int *status) {
 
 /**
  * Purpose:
- *
+ * Checks to see if any processes are awaiting a device if 
+ * all processes are blocked
  * 
  * Parameters:
- *
+ * None
  *
  * Return:
- *
+ * int  if no process is awaiting a device 0, else AWAITING_DEVICE
  */ 
 int phase2_check_io() {
     for (int i = 0; i < MAXPROC; i++) {
@@ -437,32 +443,33 @@ int phase2_check_io() {
 
 /**
  * Purpose:
- *
+ * Sends a message to the mailbox for clock interrupts if more than 
+ * 100 ms have passed
  * 
  * Parameters:
- *
+ * None
  *
  * Return:
- *
+ * None
  */ 
 void phase2_clockHandler() {
     // only send a new message if 100 ms have passed since the last was sent
     int curTime = currentTime();
     if (curTime < prevClockMsgTime + 100000) { return; }
 
-    MboxCondSend(CLOCK_INDEX, &curTime, sizeof(int)); // TODO use condSend
+    MboxCondSend(CLOCK_INDEX, &curTime, sizeof(int));
     prevClockMsgTime = curTime;
 }
 
 /**
  * Purpose:
- *
+ * Handles unimplemented syscalls
  * 
  * Parameters:
- *
+ * USLOSS_Sysargs* args     args for syscall called
  *
  * Return:
- *
+ * None
  */ 
 void nullsys(USLOSS_Sysargs* args) {
     USLOSS_Console("nullsys(): Program called an unimplemented syscall.  syscall no: %d   PSR: 0x%02x\n", args->number, USLOSS_PsrGet());
@@ -590,18 +597,10 @@ void sendMessage(Mailbox* curMbox, char* msg_ptr, int msg_size) {
     memcpy(msg->message, msg_ptr, msg_size);
     msg->size = msg_size;
     msg->inUse = 1;
-    msg->processPID = getpid();
+    //msg->processPID = getpid();
     putInMailbox(curMbox, msg);
     curMbox->slotsInUse++;
     slotsInUse++;
-    /*
-    if (curMbox->consumerHead) {
-        PCB* toUnblock = curMbox->consumerHead;
-        msg->processPID = toUnblock->pid;
-        curMbox->consumerHead = curMbox->consumerHead->nextConsumer;
-        unblockProc(toUnblock->pid);
-    }
-    */
 }
 
 /**
@@ -628,6 +627,15 @@ int recvMessage(Mailbox* curMbox, char* msg_ptr, Message* msg) {
     if (curMbox->producerHead) {
         PCB* toUnblock = curMbox->producerHead;
         curMbox->producerHead = curMbox->producerHead->nextProducer;
+        Message* msg = nextOpenSlot();
+        msg->size = toUnblock->size;
+        msg->inUse = 1;
+        memcpy(msg->message, toUnblock->message, toUnblock->size);
+        putInMailbox(curMbox, msg);
+        toUnblock->sentMessage = 1;
+        curMbox->slotsInUse++;
+        slotsInUse++;
+        //printMailboxes();
         unblockProc(toUnblock->pid);
     }
     return ret;
