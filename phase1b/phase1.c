@@ -654,8 +654,6 @@ void trampoline() {
     // enable interrupts
     USLOSS_PsrSet(USLOSS_PsrGet() | USLOSS_PSR_CURRENT_INT);
     int status = (*currentProc->processMain)(currentProc->arg);
-    //USLOSS_Console("Process %d's main function returned %d\n", currentProc->pid,
-    //        status);
     quit(status);
 }
 
