@@ -29,12 +29,22 @@ void phase3_init(void) {
     systemCallVec[SYS_GETPID] = &kernelGetPid;
 }
 
-void phase3_start_service_processes() {
+void phase3_start_service_processes() {}
 
-}
-
+// figure out what function to pass in and how to trampoline properly
+// what if we keep track of current main off the start, and then call that in trampoline,
+// but if it doesnt context switch then we use the process table main?
+//
+// so like
+//
+// if no good idea just use mailboxes to block (lame idea)
+// pass param as mbox id? idk change params as necessary ig
+// what if we found way to get pc, then just have it jump back to the pc?
+int (*func)(char*);
 void kernelSpawn(USLOSS_Sysargs* args) {
-    int pid = fork1(args->arg5, &trampoline, args->arg2, args->arg3, args->arg4);
+    func = args->1;
+    int pid = fork1(args->arg5, &args->arg1, args->arg2, args->arg3, args->arg4);
+
     USLOSS_PsrSet(0x6);
     args->arg1 = (long)pid;
     args->arg4 = pid < 0 ? -1 : 0;
@@ -70,9 +80,11 @@ void kernelGetTimeOfDay(USLOSS_Sysargs* args) {
 }
 
 void kernelCPUTime(USLOSS_Sysargs* args) {
-
+    args->arg1 = readtime();
+    USLOSS_PsrSet(0x06);
 }
 
 void kernelGetPid(USLOSS_Sysargs* args) {
-
+    args->arg1 = getpid();
+    USLOSS_PsrSet(0x06);
 }
