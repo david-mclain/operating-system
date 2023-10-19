@@ -50,6 +50,7 @@ int start3(char *arg)
 
     for (int i=0; i<NUM_PRIMES; i++)
     {
+        printf("ehrehere\n");
         char *arg = (char*)(long)i;
         Spawn("Worker", WorkerThread, arg, USLOSS_MIN_STACK, 4, &pid);
         USLOSS_Console("start3(): spawned process %2d : i=%2d PRIMES[i]=%2d\n", pid, i, PRIMES[i]);
