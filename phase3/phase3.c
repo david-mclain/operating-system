@@ -59,10 +59,11 @@ void kernelSpawn(USLOSS_Sysargs* args) {
         USLOSS_PsrSet(USER_MODE);
         return;
     }
+
     PCB* cur = &processes[pid % MAXPROC];
     cur->main = args->arg1;
-    args->arg1 = (long)pid;
-    args->arg4 = 0;
+    args->arg1 = (void*)(long)pid;
+    args->arg4 = (void*)(long)0;
     MboxSend(mbox, args->arg2, len);
 }
 
@@ -87,7 +88,7 @@ void kernelWait(USLOSS_Sysargs* args) {
     pid = join(&status);
     args->arg1 = (void*)(long)pid;
     args->arg2 = (void*)(long)status;
-    args->arg4 = status = -2 ? -2 : 0;
+    args->arg4 = status = -2 ? (void*)(long)-2 : (void*)(long)0;
     USLOSS_PsrSet(USER_MODE);
 }
 
@@ -97,8 +98,8 @@ void kernelTerminate(USLOSS_Sysargs* args) {
     while (childPid != -2) {
         childPid = join(&status);
     }
-    args->arg2 = status;
-    quit(args->arg1);
+    args->arg2 = (void*)(long)status;
+    quit((int)(long)args->arg1);
 }
 
 void kernelSemCreate(USLOSS_Sysargs* args) {
@@ -115,7 +116,8 @@ void kernelSemV(USLOSS_Sysargs* args) {
 
 
 void kernelGetTimeOfDay(USLOSS_Sysargs* args) {
-
+    args->arg1 = currentTime();
+    USLOSS_PsrSet(USER_MODE);
 }
 
 void kernelCPUTime(USLOSS_Sysargs* args) {
