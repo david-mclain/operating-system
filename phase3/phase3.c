@@ -26,8 +26,12 @@ int trampoline(char*);
 
 PCB processes[MAXPROC];
 int totalSems = 0;
+int semaphoreTable[MAXSEMS];
 
 void phase3_init(void) {
+    memset(processes, 0, sizeof(processes));
+    memset(semaphoreTable, 0, sizeof(semaphoreTable));
+
     systemCallVec[SYS_SPAWN] = kernelSpawn;
     systemCallVec[SYS_WAIT] = kernelWait;
     systemCallVec[SYS_TERMINATE] = kernelTerminate;
@@ -55,7 +59,7 @@ void kernelSpawn(USLOSS_Sysargs* args) {
     cur->main = args->arg1;
     args->arg1 = (void*)(long)pid;
     args->arg4 = (void*)(long)0;
-    printf("ereererere\n");
+    //printf("ereererere\n");
     MboxSend(mbox, args->arg2, len);
 }
 
@@ -101,18 +105,56 @@ void kernelSemCreate(USLOSS_Sysargs* args) {
         USLOSS_PsrSet(USER_MODE);
         return;
     }
-    args->arg4 = (void*)(long)0;
+
+    // create mailbox for semaphore
+    semaphoreTable[totalSems] = MboxCreate(1, sizeof(int));
+    MboxSend(semaphoreTable[totalSems], &initialValue, sizeof(int));
+    args->arg1 = (void*)(long)totalSems++;
+    args->arg4 = 0;
+
     USLOSS_PsrSet(USER_MODE);
 }
 
 // your mom <3
+// shaking n crying rn
 
 void kernelSemP(USLOSS_Sysargs* args) {
+    int semId = (int)(long)args->arg1;
+    if (!semaphoreTable[semId]) {
+        args->arg4 = (void*)(long)-1;
+        return;
+    }
 
+    int semVal;
+    MboxRecv(semaphoreTable[semId], &semVal, sizeof(int));
+    if (--semVal > 0) {
+        MboxSend(semaphoreTable[semId], &semVal, sizeof(int));
+    }
+
+    args->arg4 = (void*)(long)0;
 }
 
 void kernelSemV(USLOSS_Sysargs* args) {
+    int semId = (int)(long)args->arg1;
+    if (!semaphoreTable[semId]) {
+        args->arg4 = (void*)(long)-1;
+        return;
+    }
 
+    int semVal;
+    int recvSuccess = MboxCondRecv(semaphoreTable[semId], &semVal, sizeof(int));
+    // there could be issues with this. error handling or smth
+    // might not have to worry abt it tho
+    if (recvSuccess > 0) {
+        semVal++;
+        MboxSend(semaphoreTable[semId], &semVal, sizeof(int));
+    }
+    else {
+        semVal = 1;
+        MboxSend(semaphoreTable[semId], &semVal, sizeof(int));
+    }
+    
+    args->arg4 = (void*)(long)0;
 }
 
 
