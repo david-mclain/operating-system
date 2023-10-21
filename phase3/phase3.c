@@ -45,7 +45,9 @@ void phase3_init(void) {
 void phase3_start_service_processes() {}
 
 void kernelSpawn(USLOSS_Sysargs* args) {
+    // seg faults here, when arg isnt supposed to actually be a string?
     int len = args->arg2 == NULL ? 0 : strlen((char*)args->arg2) + 1;
+
     int mbox = MboxCreate(1, sizeof(Process));
     
     Process cur;
