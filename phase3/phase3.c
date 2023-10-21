@@ -120,6 +120,7 @@ void kernelSemCreate(USLOSS_Sysargs* args) {
 // your mom <3
 // shaking n crying rn
 // maya typed that LOL
+// funny
 
 void kernelSemP(USLOSS_Sysargs* args) {
     int semId = (int)(long)args->arg1;
