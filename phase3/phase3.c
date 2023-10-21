@@ -8,9 +8,10 @@
 
 #define USER_MODE 0x02
 
-typedef struct PCB {
+typedef struct Process {
     int (*main)(char*);
-} PCB;
+    char args[MAXARG]
+} Process;
 
 void kernelCPUTime(USLOSS_Sysargs*);
 void kernelGetPid(USLOSS_Sysargs*);
@@ -24,12 +25,10 @@ void kernelWait(USLOSS_Sysargs*);
 
 int trampoline(char*);
 
-PCB processes[MAXPROC];
 int totalSems = 0;
 int semaphoreTable[MAXSEMS];
 
 void phase3_init(void) {
-    memset(processes, 0, sizeof(processes));
     memset(semaphoreTable, 0, sizeof(semaphoreTable));
 
     systemCallVec[SYS_SPAWN] = kernelSpawn;
@@ -47,33 +46,36 @@ void phase3_start_service_processes() {}
 
 void kernelSpawn(USLOSS_Sysargs* args) {
     int len = args->arg2 == NULL ? 0 : strlen((char*)args->arg2) + 1;
-    int mbox = MboxCreate(1, len);
+    int mbox = MboxCreate(1, sizeof(Process));
+    
+    Process cur;
+    memset(&cur, 0, sizeof(Process));
+    memcpy(cur.args, args->arg2, len);
+    cur.main = args->arg1;
+    MboxSend(mbox, (void*)&cur, sizeof(Process));
+    
     int pid = fork1((char*)args->arg5, trampoline, (char*)(long)mbox, (int)(long)args->arg3, (int)(long)args->arg4);
     if (pid < 0) {
-        args->arg4 = -1;
+        args->arg4 = (void*)(long)-1;
         USLOSS_PsrSet(USER_MODE);
         return;
     }
 
-    PCB* cur = &processes[pid % MAXPROC];
-    cur->main = args->arg1;
     args->arg1 = (void*)(long)pid;
     args->arg4 = (void*)(long)0;
-    //printf("ereererere\n");
-    MboxSend(mbox, args->arg2, len);
 }
 
 int trampoline(char* args) {
     int mbox = (int)(long)(void*)args;
-    char funcArgs[MAX_MESSAGE];
-    MboxRecv(mbox, funcArgs, MAX_MESSAGE);
-    int pid = getpid();
+    char funcArgs[MAXARG];
+    Process cur = {funcArgs, NULL};
+    MboxRecv(mbox, &cur, sizeof(Process));
 
-    int (*func)(char*) = processes[pid % MAXPROC].main;
+    int (*func)(char*) = cur.main;
 
     USLOSS_PsrSet(USER_MODE);
 
-    int ret = (*func)(funcArgs);
+    int ret = (*func)(cur.args);
     Terminate(ret);
     return 0; // shouldnt ever get here
 }
@@ -117,6 +119,7 @@ void kernelSemCreate(USLOSS_Sysargs* args) {
 
 // your mom <3
 // shaking n crying rn
+// maya typed that LOL
 
 void kernelSemP(USLOSS_Sysargs* args) {
     int semId = (int)(long)args->arg1;
