@@ -107,7 +107,9 @@ void kernelSemCreate(USLOSS_Sysargs* args) {
 
     // create mailbox and send initial value
     semaphoreTable[totalSems] = MboxCreate(1, sizeof(int));
-    MboxSend(semaphoreTable[totalSems], &initialValue, sizeof(int));
+    if (initialValue > 0) {
+        MboxSend(semaphoreTable[totalSems], &initialValue, sizeof(int));
+    }
 
     args->arg1 = (void*)(long)totalSems++;
     args->arg4 = 0;
@@ -123,6 +125,7 @@ void kernelSemP(USLOSS_Sysargs* args) {
     int semId = (int)(long)args->arg1;
     if (!semaphoreTable[semId]) {
         args->arg4 = (void*)(long)-1;
+        USLOSS_PsrSet(USER_MODE);
         return;
     }
 
@@ -140,6 +143,7 @@ void kernelSemV(USLOSS_Sysargs* args) {
     int semId = (int)(long)args->arg1;
     if (!semaphoreTable[semId]) {
         args->arg4 = (void*)(long)-1;
+        USLOSS_PsrSet(USER_MODE);
         return;
     }
 
@@ -157,6 +161,7 @@ void kernelSemV(USLOSS_Sysargs* args) {
     }
     
     args->arg4 = (void*)(long)0;
+    USLOSS_PsrSet(USER_MODE);
 }
 
 
