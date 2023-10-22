@@ -11,7 +11,6 @@
 #include <phase2.h>
 #include <phase3.h>
 #include <phase3_usermode.h>
-#include <stdio.h>
 #include <string.h>
 #include <usloss.h>
 
@@ -126,6 +125,7 @@ int trampoline(char* args) {
     int mbox = (int)(long)(void*)args;
     Process cur;
     MboxRecv(mbox, &cur, sizeof(Process));
+    MboxRelease(mbox);
 
     int (*func)(char*) = cur.main;
 
@@ -258,7 +258,7 @@ void kernelSemV(USLOSS_Sysargs* args) {
     int semVal;
     int recvSuccess = MboxCondRecv(semaphoreTable[semId], &semVal, sizeof(int));
 
-    semVal = semVal*(recvSuccess > 0) + 1;
+    semVal = semVal * (recvSuccess > 0) + 1;
     MboxSend(semaphoreTable[semId], &semVal, sizeof(int));
     
     args->arg4 = (void*)(long)0;
