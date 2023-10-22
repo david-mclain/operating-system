@@ -43,4 +43,3 @@ libphase2-${ARCH}.a: phase2_messages_no_debug_symbols-${ARCH}.o phase2_devices_n
 
 clean:
 	-rm *.o ${TESTS} term[0-3].out
-	-rm ${VPATH}/*.student_out

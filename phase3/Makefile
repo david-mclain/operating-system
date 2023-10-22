@@ -40,5 +40,3 @@ libphase3-${ARCH}.a: phase3_no_debug_symbols-${ARCH}.o phase3_usermode_no_debug_
 
 clean:
 	-rm *.o ${TESTS} term[0-3].out
-	-rm ${VPATH}/*.student_out
-
