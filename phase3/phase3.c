@@ -10,7 +10,7 @@
 
 typedef struct Process {
     int (*main)(char*);
-    char args[MAXARG]
+    char* args;
 } Process;
 
 void kernelCPUTime(USLOSS_Sysargs*);
@@ -45,15 +45,11 @@ void phase3_init(void) {
 void phase3_start_service_processes() {}
 
 void kernelSpawn(USLOSS_Sysargs* args) {
-    // seg faults here, when arg isnt supposed to actually be a string?
-    int len = args->arg2 == NULL ? 0 : strlen((char*)args->arg2) + 1;
-
     int mbox = MboxCreate(1, sizeof(Process));
     
     Process cur;
-    memset(&cur, 0, sizeof(Process));
-    memcpy(cur.args, args->arg2, len);
     cur.main = args->arg1;
+    cur.args = args->arg2;
     MboxSend(mbox, (void*)&cur, sizeof(Process));
     
     int pid = fork1((char*)args->arg5, trampoline, (char*)(long)mbox, (int)(long)args->arg3, (int)(long)args->arg4);
@@ -69,8 +65,7 @@ void kernelSpawn(USLOSS_Sysargs* args) {
 
 int trampoline(char* args) {
     int mbox = (int)(long)(void*)args;
-    char funcArgs[MAXARG];
-    Process cur = {funcArgs, NULL};
+    Process cur;
     MboxRecv(mbox, &cur, sizeof(Process));
 
     int (*func)(char*) = cur.main;
