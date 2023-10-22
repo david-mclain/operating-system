@@ -83,7 +83,7 @@ void kernelWait(USLOSS_Sysargs* args) {
     pid = join(&status);
     args->arg1 = (void*)(long)pid;
     args->arg2 = (void*)(long)status;
-    args->arg4 = status = -2 ? (void*)(long)-2 : (void*)(long)0;
+    args->arg4 = status == -2 ? (void*)(long)-2 : (void*)(long)0;
     USLOSS_PsrSet(USER_MODE);
 }
 
@@ -149,11 +149,11 @@ void kernelSemV(USLOSS_Sysargs* args) {
     // might not have to worry abt it tho
     if (recvSuccess > 0) {
         semVal++;
-        MboxSend(semaphoreTable[semId], &semVal, sizeof(int));
+        MboxCondSend(semaphoreTable[semId], &semVal, sizeof(int));
     }
     else {
         semVal = 1;
-        MboxSend(semaphoreTable[semId], &semVal, sizeof(int));
+        MboxCondSend(semaphoreTable[semId], &semVal, sizeof(int));
     }
     
     args->arg4 = (void*)(long)0;
@@ -161,16 +161,16 @@ void kernelSemV(USLOSS_Sysargs* args) {
 
 
 void kernelGetTimeOfDay(USLOSS_Sysargs* args) {
-    args->arg1 = currentTime();
+    args->arg1 = (void*)(long)currentTime();
     USLOSS_PsrSet(USER_MODE);
 }
 
 void kernelCPUTime(USLOSS_Sysargs* args) {
-    args->arg1 = readtime();
+    args->arg1 = (void*)(long)readtime();
     USLOSS_PsrSet(USER_MODE);
 }
 
 void kernelGetPid(USLOSS_Sysargs* args) {
-    args->arg1 = getpid();
+    args->arg1 = (void*)(long)getpid();
     USLOSS_PsrSet(USER_MODE);
 }
