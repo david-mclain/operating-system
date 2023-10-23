@@ -1,3 +1,12 @@
+#include <phase1.h>
+#include <phase2.h>
+#include <phase3.h>
+#include <phase3_usermode.h>
+#include <phase4.h>
+#include <phase4_usermode.h>
+#include <string.h>
+#include <usloss.h>
+
 void phase4_init(void) {
 
 }

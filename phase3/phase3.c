@@ -104,7 +104,6 @@ void kernelSpawn(USLOSS_Sysargs* args) {
     int pid = fork1((char*)args->arg5, trampoline, (char*)(long)mbox, (int)(long)args->arg3, (int)(long)args->arg4);
     if (pid < 0) {
         args->arg4 = (void*)(long)-1;
-        USLOSS_PsrSet(USER_MODE);
         return;
     }
 
@@ -155,7 +154,6 @@ void kernelWait(USLOSS_Sysargs* args) {
     args->arg1 = (void*)(long)pid;
     args->arg2 = (void*)(long)status;
     args->arg4 = status == -2 ? (void*)(long)-2 : (void*)(long)0;
-    USLOSS_PsrSet(USER_MODE);
 }
 
 /**
@@ -175,7 +173,6 @@ void kernelTerminate(USLOSS_Sysargs* args) {
     while (childPid != -2) {
         childPid = join(&status);
     }
-    args->arg2 = (void*)(long)status;
     quit((int)(long)args->arg1);
 }
 
@@ -194,7 +191,6 @@ void kernelSemCreate(USLOSS_Sysargs* args) {
     int initialValue = (int)(long)args->arg1;
     if (totalSems == MAXSEMS || initialValue < 0) {
         args->arg4 = (void*)(long)-1;
-        USLOSS_PsrSet(USER_MODE);
         return;
     }
 
@@ -205,7 +201,6 @@ void kernelSemCreate(USLOSS_Sysargs* args) {
 
     args->arg1 = (void*)(long)totalSems++;
     args->arg4 = 0;
-    USLOSS_PsrSet(USER_MODE);
 }
 
 /**
@@ -223,7 +218,6 @@ void kernelSemP(USLOSS_Sysargs* args) {
     int semId = (int)(long)args->arg1;
     if (!semaphoreTable[semId]) {
         args->arg4 = (void*)(long)-1;
-        USLOSS_PsrSet(USER_MODE);
         return;
     }
 
@@ -234,7 +228,6 @@ void kernelSemP(USLOSS_Sysargs* args) {
     }
 
     args->arg4 = (void*)(long)0;
-    USLOSS_PsrSet(USER_MODE);
 }
 
 /**
@@ -251,7 +244,6 @@ void kernelSemV(USLOSS_Sysargs* args) {
     int semId = (int)(long)args->arg1;
     if (!semaphoreTable[semId]) {
         args->arg4 = (void*)(long)-1;
-        USLOSS_PsrSet(USER_MODE);
         return;
     }
 
@@ -262,7 +254,6 @@ void kernelSemV(USLOSS_Sysargs* args) {
     MboxSend(semaphoreTable[semId], &semVal, sizeof(int));
     
     args->arg4 = (void*)(long)0;
-    USLOSS_PsrSet(USER_MODE);
 }
 
 
@@ -278,7 +269,6 @@ void kernelSemV(USLOSS_Sysargs* args) {
  */
 void kernelGetTimeOfDay(USLOSS_Sysargs* args) {
     args->arg1 = (void*)(long)currentTime();
-    USLOSS_PsrSet(USER_MODE);
 }
 
 /**
@@ -293,7 +283,6 @@ void kernelGetTimeOfDay(USLOSS_Sysargs* args) {
  */
 void kernelCPUTime(USLOSS_Sysargs* args) {
     args->arg1 = (void*)(long)readtime();
-    USLOSS_PsrSet(USER_MODE);
 }
 
 /**
@@ -308,5 +297,4 @@ void kernelCPUTime(USLOSS_Sysargs* args) {
  */
 void kernelGetPid(USLOSS_Sysargs* args) {
     args->arg1 = (void*)(long)getpid();
-    USLOSS_PsrSet(USER_MODE);
 }
