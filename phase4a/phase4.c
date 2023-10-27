@@ -7,6 +7,10 @@
 #include <string.h>
 #include <usloss.h>
 
+#define LEFT(x) 2 * x + 1
+#define RIGHT(x) 2 * x + 2
+#define PARENT(x) x / 2
+
 typedef struct PCB {
     int pid;
     int sleepCyclesRemaining;
@@ -16,9 +20,6 @@ typedef struct PCB {
 void swap(PCB*, PCB*);
 void sink(int);
 void swim(int);
-int parent(int);
-int left(int);
-int right(int);
 
 PCB sleepHeap[MAXPROC];
 int elementsInHeap = 0;
@@ -74,12 +75,12 @@ void insert(PCB* proc) {
 }
 
 void swim(int index) {
-    int i = index, j = parent(index);
+    int i = index, j = PARENT(index);
     while (j > 0) {
         if (sleepHeap[i].sleepCyclesRemaining < sleepHeap[j].sleepCyclesRemaining) {
             swap(&sleepHeap[i], &sleepHeap[j]);
             i = j;
-            j = parent(j);
+            j = PARENT(j);
         }
         else { break; }
     }
@@ -87,13 +88,13 @@ void swim(int index) {
 
 void sink(int index) {
     int small = index;
-    int leftIndex = left(index);
-    int rightIndex = right(index);
-    if (leftIndex < elementsInHeap && sleepHeap[leftIndex].sleepCyclesRemaining < sleepHeap[small].sleepCyclesRemaining) {
-        small = leftIndex;
+    int left = LEFT(index);
+    int right = RIGHT(index);
+    if (left < elementsInHeap && sleepHeap[left].sleepCyclesRemaining < sleepHeap[small].sleepCyclesRemaining) {
+        small = left;
     }
-    if (rightIndex < elementsInHeap && sleepHeap[rightIndex].sleepCyclesRemaining < sleepHeap[small].sleepCyclesRemaining) {
-        small = rightIndex;
+    if (right < elementsInHeap && sleepHeap[right].sleepCyclesRemaining < sleepHeap[small].sleepCyclesRemaining) {
+        small = right;
     }
     if (small != index) {
         swap(&sleepHeap[index], &sleepHeap[small]);
@@ -108,14 +109,3 @@ void swap(PCB* proc1, PCB* proc2) {
     memcpy(proc2, &temp, sizeof(PCB));
 }
 
-int parent(int x) {
-    return x / 2;
-}
-
-int left(int x) {
-    return 2 * x + 1;
-}
-
-int right(int x) {
-    return 2 * x + 2;
-}
