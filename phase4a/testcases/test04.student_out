@@ -1,0 +1,5 @@
+phase5_start_service_processes() called -- currently a NOP
+start4(): 3 tests of invalid requests from terminals
+start4(): Read negative number of chars from term 1
+nullsys(): Program called an unimplemented syscall.  syscall no: 1   PSR: 0x09
+finish(): The simulation is now terminating.

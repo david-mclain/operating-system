@@ -108,7 +108,7 @@ void kernelSpawn(USLOSS_Sysargs* args) {
     }
 
     args->arg1 = (void*)(long)pid;
-    args->arg4 = (void*)(long)0;
+    args->arg4 = NULL;
 }
 
 /**
@@ -153,7 +153,7 @@ void kernelWait(USLOSS_Sysargs* args) {
     pid = join(&status);
     args->arg1 = (void*)(long)pid;
     args->arg2 = (void*)(long)status;
-    args->arg4 = status == -2 ? (void*)(long)-2 : (void*)(long)0;
+    args->arg4 = status == -2 ? (void*)(long)-2 : NULL;
 }
 
 /**
@@ -200,7 +200,7 @@ void kernelSemCreate(USLOSS_Sysargs* args) {
     }
 
     args->arg1 = (void*)(long)totalSems++;
-    args->arg4 = 0;
+    args->arg4 = NULL;
 }
 
 /**
@@ -227,7 +227,7 @@ void kernelSemP(USLOSS_Sysargs* args) {
         MboxSend(semaphoreTable[semId], &semVal, sizeof(int));
     }
 
-    args->arg4 = (void*)(long)0;
+    args->arg4 = NULL;
 }
 
 /**
@@ -253,7 +253,7 @@ void kernelSemV(USLOSS_Sysargs* args) {
     semVal = semVal * (recvSuccess > 0) + 1;
     MboxSend(semaphoreTable[semId], &semVal, sizeof(int));
     
-    args->arg4 = (void*)(long)0;
+    args->arg4 = NULL;
 }
 
 

@@ -1,0 +1,4 @@
+phase5_start_service_processes() called -- currently a NOP
+start4(): Spawn two children. Child1 writes one line to terminal 1. Child2 reads one line from terminal 1.
+nullsys(): Program called an unimplemented syscall.  syscall no: 2   PSR: 0x09
+finish(): The simulation is now terminating.
