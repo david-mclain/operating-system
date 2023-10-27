@@ -13,6 +13,8 @@
 
 #define SEC_TO_SLEEP_CYCLE(x) x * 10;
 
+#define SLEEPING 30
+
 typedef struct PCB {
     int pid;
     int sleepCyclesRemaining;
@@ -57,6 +59,8 @@ void phase4_init(void) {
 
 void phase4_start_service_processes() {
     sleepDaemon = fork1("Sleep Daemon", daemonMain, NULL, USLOSS_MIN_STACK, 1);
+    PCB* cur = &processes[sleepDaemon % MAXPROC];
+    cur->pid = sleepDaemon;
 }
 
 void kernelSleep(USLOSS_Sysargs* args) {
@@ -71,7 +75,7 @@ int kernSleep(int seconds) {
     cur->pid = pid;
     cur->sleepCyclesRemaining = SEC_TO_SLEEP_CYCLE(seconds);
     insert(cur);
-    blockMe(pid);
+    blockMe(SLEEPING);
     return 0;
 }
 
