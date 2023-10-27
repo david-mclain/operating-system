@@ -11,6 +11,8 @@
 #define RIGHT(x) 2 * x + 2
 #define PARENT(x) x / 2
 
+#define SEC_TO_SLEEP_CYCLE(x) x * 10;
+
 typedef struct PCB {
     int pid;
     int sleepCyclesRemaining;
@@ -20,9 +22,20 @@ typedef struct PCB {
 void swap(PCB*, PCB*);
 void sink(int);
 void swim(int);
+void cleanHeap();
+void remove();
+void insert(PCB*);
 
+void kernelSleep(USLOSS_Sysargs*);
+
+int daemonMain(char*);
+
+
+PCB processes[MAXPROC];
 PCB sleepHeap[MAXPROC];
 int elementsInHeap = 0;
+
+int sleepDaemon;
 
 // implement elevator algorithm for disk
 //
@@ -37,14 +50,29 @@ int elementsInHeap = 0;
 
 void phase4_init(void) {
     memset(sleepHeap, 0, sizeof(sleepHeap));
+    memset(processes, 0, sizeof(processes));
+
+    systemCallVec[SYS_SLEEP] = kernelSleep;
 }
 
 void phase4_start_service_processes() {
+    sleepDaemon = fork1("Sleep Daemon", daemonMain, NULL, USLOSS_MIN_STACK, 1);
+}
 
+void kernelSleep(USLOSS_Sysargs* args) {
+    args->arg4 = (void*)(long)kernSleep((int)(long)args->arg1);
 }
 
 int kernSleep(int seconds) {
-
+    if (seconds < 0) { return -1; }
+    if (seconds == 0) { return 0; }
+    int pid = getpid();
+    PCB* cur = &processes[pid % MAXPROC];
+    cur->pid = pid;
+    cur->sleepCyclesRemaining = SEC_TO_SLEEP_CYCLE(seconds);
+    insert(cur);
+    blockMe(pid);
+    return 0;
 }
 
 int kernDiskRead(void *diskBuffer, int unit, int track, int first, int sectors, int *status) {
@@ -67,11 +95,39 @@ int kernTermWrite(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
 
 }
 
+int daemonMain(char* args) {
+    int status;
+    while (1) {
+        waitDevice(USLOSS_CLOCK_INT, 0, &status);
+        cleanHeap();
+    }
+    return 0; // shouldn't get here?
+}
+
+// decrement all sleepCyclesRemaining in heap, remove if needed
+// while sleepHeap[0].cycles = 0 remove and unblock
+void cleanHeap() {
+    for (int i = 0; i < elementsInHeap; i++) {
+        sleepHeap[i].sleepCyclesRemaining--;
+    }
+    while (elementsInHeap > 0 && sleepHeap[0].sleepCyclesRemaining == 0) {
+        remove();
+    }
+}
+
 void insert(PCB* proc) {
     int curIndex = elementsInHeap++;
     PCB* cur = &sleepHeap[curIndex];
     memcpy(cur, proc, sizeof(PCB));
     swim(curIndex);
+}
+
+void remove() {
+    PCB cur = sleepHeap[0];
+    elementsInHeap--;
+    memcpy(&sleepHeap[0], &sleepHeap[elementsInHeap], sizeof(PCB));
+    sink(0);
+    unblockProc(cur.pid);
 }
 
 void swim(int index) {
