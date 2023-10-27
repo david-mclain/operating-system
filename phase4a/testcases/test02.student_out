@@ -11,5 +11,42 @@ start4(): Spawning Child(8)
 start4(): Spawning Child(9)
 start4(): Waiting on Child
 Child9(): Sleeping for 3 seconds
-nullsys(): Program called an unimplemented syscall.  syscall no: 12   PSR: 0x09
+Child9(): Sleeping for 3 seconds
+Child9(): Sleeping for 3 seconds
+Child9(): Sleeping for 3 seconds
+Child9(): Sleeping for 3 seconds
+Child9(): Sleeping for 3 seconds
+Child9(): Sleeping for 3 seconds
+Child9(): Sleeping for 3 seconds
+Child9(): Sleeping for 3 seconds
+Child9(): Sleeping for 3 seconds
+Child9(): After sleeping 3 seconds, difference in system clock is 3149977
+Child9(): After sleeping 3 seconds, difference in system clock is 3149805
+Child9(): After sleeping 3 seconds, difference in system clock is 3149846
+Child9(): After sleeping 3 seconds, difference in system clock is 3149884
+Child9(): After sleeping 3 seconds, difference in system clock is 3149928
+Child9(): After sleeping 3 seconds, difference in system clock is 3150036
+Child9(): After sleeping 3 seconds, difference in system clock is 3150013
+Child9(): After sleeping 3 seconds, difference in system clock is 3150052
+Child9(): After sleeping 3 seconds, difference in system clock is 3150118
+Child9(): After sleeping 3 seconds, difference in system clock is 3150048
+start4(): Wait returned 0, pid:16, status 19
+start4(): Waiting on Child
+start4(): Wait returned 0, pid:15, status 19
+start4(): Waiting on Child
+start4(): Wait returned 0, pid:14, status 19
+start4(): Waiting on Child
+start4(): Wait returned 0, pid:13, status 19
+start4(): Waiting on Child
+start4(): Wait returned 0, pid:12, status 19
+start4(): Waiting on Child
+start4(): Wait returned 0, pid:11, status 19
+start4(): Waiting on Child
+start4(): Wait returned 0, pid:10, status 19
+start4(): Waiting on Child
+start4(): Wait returned 0, pid:9, status 19
+start4(): Waiting on Child
+start4(): Wait returned 0, pid:8, status 19
+start4(): Waiting on Child
+start4(): Wait returned 0, pid:7, status 19
 finish(): The simulation is now terminating.

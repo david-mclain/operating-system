@@ -28,6 +28,7 @@ void cleanHeap();
 void remove();
 void insert(PCB*);
 
+void printHeap(int);
 void kernelSleep(USLOSS_Sysargs*);
 
 int daemonMain(char*);
@@ -114,7 +115,7 @@ void cleanHeap() {
     for (int i = 0; i < elementsInHeap; i++) {
         sleepHeap[i].sleepCyclesRemaining--;
     }
-    while (elementsInHeap > 0 && sleepHeap[0].sleepCyclesRemaining == 0) {
+    while (elementsInHeap > 0 && sleepHeap[0].sleepCyclesRemaining <= 0) {
         remove();
     }
 }
@@ -132,6 +133,16 @@ void remove() {
     memcpy(&sleepHeap[0], &sleepHeap[elementsInHeap], sizeof(PCB));
     sink(0);
     unblockProc(cur.pid);
+}
+
+void printHeap(int index) {
+    if (index >= elementsInHeap) { return; }
+    for (int i = 0; i < index / 2 + 2 && index != 0; i++) {
+        printf(" ");
+    }
+    printHeap(LEFT(index));
+    printf("pid: %d; sleepRemaining: %d\n", sleepHeap[index].pid, sleepHeap[index].sleepCyclesRemaining);
+    printHeap(RIGHT(index));
 }
 
 void swim(int index) {
