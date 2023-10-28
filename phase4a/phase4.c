@@ -11,7 +11,7 @@
 #define RIGHT(x) 2 * x + 2
 #define PARENT(x) x / 2
 
-#define SEC_TO_SLEEP_CYCLE(x) x * 10;
+#define SEC_TO_SLEEP_CYCLE(x) x * 10
 
 #define SLEEPING 30
 
@@ -28,7 +28,7 @@ void cleanHeap();
 void remove();
 void insert(PCB*);
 
-void printHeap(int);
+void printHeap();
 void kernelSleep(USLOSS_Sysargs*);
 
 int daemonMain(char*);
@@ -135,19 +135,15 @@ void remove() {
     unblockProc(cur.pid);
 }
 
-void printHeap(int index) {
-    if (index >= elementsInHeap) { return; }
-    for (int i = 0; i < index / 2 + 2 && index != 0; i++) {
-        printf(" ");
+void printHeap() {
+    for (int i = 0; i < elementsInHeap; i++) {
+        printf("proc: %d; cycles remaining: %d\n", sleepHeap[i].pid, sleepHeap[i].sleepCyclesRemaining);
     }
-    printHeap(LEFT(index));
-    printf("pid: %d; sleepRemaining: %d\n", sleepHeap[index].pid, sleepHeap[index].sleepCyclesRemaining);
-    printHeap(RIGHT(index));
 }
 
 void swim(int index) {
     int i = index, j = PARENT(index);
-    while (j > 0) {
+    while (j >= 0) {
         if (sleepHeap[i].sleepCyclesRemaining < sleepHeap[j].sleepCyclesRemaining) {
             swap(&sleepHeap[i], &sleepHeap[j]);
             i = j;
