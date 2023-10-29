@@ -4,16 +4,21 @@
 #include <phase3_usermode.h>
 #include <phase4.h>
 #include <phase4_usermode.h>
-#include <string.h>
 #include <usloss.h>
 
-#define LEFT(x) 2 * x + 1
-#define RIGHT(x) 2 * x + 2
-#define PARENT(x) x / 2
+#include <string.h>
+#include <stdio.h>
+
+#define LEFT(x)     2 * x + 1
+#define RIGHT(x)    2 * x + 2
+#define PARENT(x)   x / 2
 
 #define SEC_TO_SLEEP_CYCLE(x) x * 10
-
 #define SLEEPING 30
+
+#define MAX_READ_BUFFERS 10
+
+/* ---------- Data Structures ---------- */
 
 typedef struct PCB {
     int pid;
@@ -21,11 +26,13 @@ typedef struct PCB {
     // idk something something blah blah
 } PCB;
 
+/* ---------- Prototypes ---------- */
+
 void swap(PCB*, PCB*);
 void sink(int);
 void swim(int);
 void cleanHeap();
-void remove();
+void heapRemove();
 void insert(PCB*);
 
 void printHeap();
@@ -33,12 +40,18 @@ void kernelSleep(USLOSS_Sysargs*);
 
 int daemonMain(char*);
 
+/* ---------- Globals ---------- */
 
 PCB processes[MAXPROC];
 PCB sleepHeap[MAXPROC];
 int elementsInHeap = 0;
-
 int sleepDaemon;
+
+int termWriteMutex[USLOSS_TERM_UNITS];
+int termWriteMbox[USLOSS_TERM_UNITS];
+int termReadMbox[USLOSS_TERM_UNITS];
+
+/* ---------- Phase 4 Functions ---------- */
 
 // implement elevator algorithm for disk
 //
@@ -55,6 +68,20 @@ void phase4_init(void) {
     memset(sleepHeap, 0, sizeof(sleepHeap));
     memset(processes, 0, sizeof(processes));
 
+    // setup ipc stuff for the terminal driver
+    int termCtrl = 0;
+    for (int i = 0; i < USLOSS_TERM_UNITS; i++) {
+        termWriteMutex[i] = MboxCreate(1,0);
+        MboxSend(termWriteMutex[i], NULL, 0);
+        termWriteMbox[i] = MboxCreate(1,sizeof(char));
+        termReadMbox[i] = MboxCreate(1, MAXLINE); // +1 for null term? or don't need to do that?
+
+        // unmask interrupts for reading & writing
+        USLOSS_TERM_CTRL_XMIT_INT(termCtrl);
+        USLOSS_TERM_CTRL_RECV_INT(termCtrl);
+        USLOSS_DeviceOutput(USLOSS_TERM_DEV, i, &termCtrl);
+    }
+
     systemCallVec[SYS_SLEEP] = kernelSleep;
 }
 
@@ -63,6 +90,8 @@ void phase4_start_service_processes() {
     PCB* cur = &processes[sleepDaemon % MAXPROC];
     cur->pid = sleepDaemon;
 }
+
+/* ---------- Syscall Handlers ---------- */
 
 void kernelSleep(USLOSS_Sysargs* args) {
     args->arg4 = (void*)(long)kernSleep((int)(long)args->arg1);
@@ -85,7 +114,6 @@ int kernDiskRead(void *diskBuffer, int unit, int track, int first, int sectors, 
 }
 
 int kernDiskWrite(void *diskBuffer, int unit, int track, int first, int sectors, int *status) {
-
 }
 
 int kernDiskSize(int unit, int *sector, int *track, int *disk) {
@@ -97,8 +125,22 @@ int kernTermRead(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
 }
 
 int kernTermWrite(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
+    // check input
+    
+    MboxRecv(termWriteMutex[unitID], NULL, 0); // gain mutex
+    
+    // send characters one-by-one to the driver using a mailbox
+    /*
+    for (int i = 0; i < bufferSize; i++) {
+        MboxSend(
+    }
+    */
 
+    MboxSend(termWriteMutex[unitID], NULL, 0); // release mutex
+    return 0;
 }
+
+/* ---------- Device Drivers ---------- */
 
 int daemonMain(char* args) {
     int status;
@@ -109,6 +151,30 @@ int daemonMain(char* args) {
     return 0; // shouldn't get here?
 }
 
+int termDaemonMain(char* args) {
+    int id = (int)(long) args;
+    int termReadBuffers = MboxCreate(MAX_READ_BUFFERS, MAXLINE);
+
+    int status, statXmit, statRecv;
+    while (1) {
+        waitDevice(USLOSS_TERM_DEV, id, &status);
+        statXmit = USLOSS_TERM_STAT_XMIT(status);
+        statRecv = USLOSS_TERM_STAT_RECV(status);
+
+        if (statXmit == USLOSS_DEV_READY) {
+            // ready to send next character
+        }
+
+        if (statRecv == USLOSS_DEV_BUSY) {
+            // just recieved a character, do something w it
+        }
+    }
+
+    return 0;
+}
+
+/* ---------- Helper Functions ---------- */
+
 // decrement all sleepCyclesRemaining in heap, remove if needed
 // while sleepHeap[0].cycles = 0 remove and unblock
 void cleanHeap() {
@@ -116,7 +182,7 @@ void cleanHeap() {
         sleepHeap[i].sleepCyclesRemaining--;
     }
     while (elementsInHeap > 0 && sleepHeap[0].sleepCyclesRemaining <= 0) {
-        remove();
+        heapRemove();
     }
 }
 
@@ -127,7 +193,7 @@ void insert(PCB* proc) {
     swim(curIndex);
 }
 
-void remove() {
+void heapRemove() {
     PCB cur = sleepHeap[0];
     elementsInHeap--;
     memcpy(&sleepHeap[0], &sleepHeap[elementsInHeap], sizeof(PCB));
