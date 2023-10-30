@@ -38,7 +38,9 @@ void insert(PCB*);
 void printHeap();
 void kernelSleep(USLOSS_Sysargs*);
 
-int daemonMain(char*);
+int sleepDaemonMain(char*);
+int termDaemonMain(char*);
+
 
 /* ---------- Globals ---------- */
 
@@ -86,7 +88,7 @@ void phase4_init(void) {
 }
 
 void phase4_start_service_processes() {
-    sleepDaemon = fork1("Sleep Daemon", daemonMain, NULL, USLOSS_MIN_STACK, 1);
+    sleepDaemon = fork1("Sleep Daemon", sleepDaemonMain, NULL, USLOSS_MIN_STACK, 1);
     PCB* cur = &processes[sleepDaemon % MAXPROC];
     cur->pid = sleepDaemon;
 }
@@ -142,13 +144,14 @@ int kernTermWrite(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
 
 /* ---------- Device Drivers ---------- */
 
-int daemonMain(char* args) {
+int sleepDaemonMain(char* args) {
     int status;
     while (1) {
         waitDevice(USLOSS_CLOCK_INT, 0, &status);
+        // do something with status? idt so but idk
         cleanHeap();
     }
-    return 0; // shouldn't get here?
+    return 0;
 }
 
 int termDaemonMain(char* args) {
@@ -175,8 +178,6 @@ int termDaemonMain(char* args) {
 
 /* ---------- Helper Functions ---------- */
 
-// decrement all sleepCyclesRemaining in heap, remove if needed
-// while sleepHeap[0].cycles = 0 remove and unblock
 void cleanHeap() {
     for (int i = 0; i < elementsInHeap; i++) {
         sleepHeap[i].sleepCyclesRemaining--;
