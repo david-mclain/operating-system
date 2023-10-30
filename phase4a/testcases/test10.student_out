@@ -1,4 +1,0 @@
-phase5_start_service_processes() called -- currently a NOP
-start4(): started
-nullsys(): Program called an unimplemented syscall.  syscall no: 15   PSR: 0x09
-finish(): The simulation is now terminating.

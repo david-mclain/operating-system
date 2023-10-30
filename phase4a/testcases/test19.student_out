@@ -5,5 +5,16 @@ start4(): Spawn four children.  Each child reads fm a different
 start4(): Spawn four children.  Each child writes to a different
           terminal.
 Child0(): start
-nullsys(): Program called an unimplemented syscall.  syscall no: 1   PSR: 0x09
+Child1(): start
+Child2(): start
+Child3(): start
+Child1(): read 'one: first line   (shortest first line)
+'
+Child2(): read 'two: first line   (third longest line of the set)
+'
+Child0(): read 'zero: first line   (second longest first line in the inputs)
+'
+Child3(): read 'three: first line   (definitely the longest first line of all the files)
+'
+start4(): done.
 finish(): The simulation is now terminating.

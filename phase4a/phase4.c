@@ -34,13 +34,16 @@ void swim(int);
 void cleanHeap();
 void heapRemove();
 void insert(PCB*);
-
 void printHeap();
+
 void kernelSleep(USLOSS_Sysargs*);
+void kernelTermWrite(USLOSS_Sysargs*);
+void kernelTermRead(USLOSS_Sysargs*);
 
 int sleepDaemonMain(char*);
 int termDaemonMain(char*);
 
+int validateTermArgs(char*, int, int);
 
 /* ---------- Globals ---------- */
 
@@ -71,26 +74,27 @@ void phase4_init(void) {
     memset(processes, 0, sizeof(processes));
 
     // setup ipc stuff for the terminal driver
-    int termCtrl = 0;
     for (int i = 0; i < USLOSS_TERM_UNITS; i++) {
         termWriteMutex[i] = MboxCreate(1,0);
         MboxSend(termWriteMutex[i], NULL, 0);
-        termWriteMbox[i] = MboxCreate(1,sizeof(char));
-        termReadMbox[i] = MboxCreate(1, MAXLINE); // +1 for null term? or don't need to do that?
-
-        // unmask interrupts for reading & writing
-        USLOSS_TERM_CTRL_XMIT_INT(termCtrl);
-        USLOSS_TERM_CTRL_RECV_INT(termCtrl);
-        USLOSS_DeviceOutput(USLOSS_TERM_DEV, i, &termCtrl);
+        termWriteMbox[i] = MboxCreate(1, sizeof(char));
+        termReadMbox[i] = MboxCreate(MAX_READ_BUFFERS, MAXLINE);
     }
 
     systemCallVec[SYS_SLEEP] = kernelSleep;
+    systemCallVec[SYS_TERMREAD] = kernelTermRead;
+    systemCallVec[SYS_TERMWRITE] = kernelTermWrite;
 }
 
 void phase4_start_service_processes() {
     sleepDaemon = fork1("Sleep Daemon", sleepDaemonMain, NULL, USLOSS_MIN_STACK, 1);
     PCB* cur = &processes[sleepDaemon % MAXPROC];
     cur->pid = sleepDaemon;
+
+    // terminal daemons
+    for (int i = 0; i < USLOSS_TERM_UNITS; i++) {
+        fork1("Term Daemon", termDaemonMain, (char*)(long)i, USLOSS_MIN_STACK, 1);
+    }
 }
 
 /* ---------- Syscall Handlers ---------- */
@@ -122,22 +126,38 @@ int kernDiskSize(int unit, int *sector, int *track, int *disk) {
 
 }
 
-int kernTermRead(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
+void kernelTermRead(USLOSS_Sysargs* args) {
+    int numCharsRead;
+    args->arg4 = (void*)(long)kernTermRead(args->arg1, (int)(long)args->arg2, \
+            (int)(long)args->arg3, &numCharsRead);
+    args->arg2 = (void*)(long)numCharsRead;
+}
 
+int kernTermRead(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
+    if (!validateTermArgs(buffer, bufferSize, unitID)) { return -1; }
+
+    *numCharsRead = MboxRecv(termReadMbox[unitID], buffer, bufferSize);
+    return 0;
+}
+
+void kernelTermWrite(USLOSS_Sysargs* args) {
+    int numCharsWritten;
+    args->arg4 = (void*)(long)kernTermWrite(args->arg1, (int)(long)args->arg2, \
+            (int)(long)args->arg3, &numCharsWritten);
+    args->arg2 = (void*)(long)numCharsWritten;
 }
 
 int kernTermWrite(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
-    // check input
-    
+    if (!validateTermArgs(buffer, bufferSize, unitID)) { return -1; }
+
     MboxRecv(termWriteMutex[unitID], NULL, 0); // gain mutex
     
     // send characters one-by-one to the driver using a mailbox
-    /*
     for (int i = 0; i < bufferSize; i++) {
-        MboxSend(
+        MboxSend(termWriteMbox[unitID], &buffer[i], sizeof(char));
     }
-    */
 
+    *numCharsRead = bufferSize; // why less than all of the buffer would be written??
     MboxSend(termWriteMutex[unitID], NULL, 0); // release mutex
     return 0;
 }
@@ -156,27 +176,57 @@ int sleepDaemonMain(char* args) {
 
 int termDaemonMain(char* args) {
     int id = (int)(long) args;
-    int termReadBuffers = MboxCreate(MAX_READ_BUFFERS, MAXLINE);
 
-    int status, statXmit, statRecv;
+    // unmask interrupts for reading & writing
+    int termCtrl = 0;
+    termCtrl = USLOSS_TERM_CTRL_XMIT_INT(termCtrl);
+    termCtrl = USLOSS_TERM_CTRL_RECV_INT(termCtrl);
+    USLOSS_DeviceOutput(USLOSS_TERM_DEV, id, (void*)(long)termCtrl);
+
+    int status, statXmit, statRecv; // status stuff
+
+    // read stuff
+    char curRecvBuf[MAXLINE]; int curRecvBufInd;
+    char curRecvChar;
+
+    // write stuff
+    int xmitCtrl;
+    char curXmitChar;
+
     while (1) {
         waitDevice(USLOSS_TERM_DEV, id, &status);
         statXmit = USLOSS_TERM_STAT_XMIT(status);
         statRecv = USLOSS_TERM_STAT_RECV(status);
 
-        if (statXmit == USLOSS_DEV_READY) {
-            // ready to send next character
+        // handle reading
+        if (statRecv == USLOSS_DEV_BUSY) {
+            curRecvChar = USLOSS_TERM_STAT_CHAR(status);
+            curRecvBuf[curRecvBufInd++] = curRecvChar;
+            if (curRecvChar == '\n' || curRecvBufInd >= MAXLINE) {
+                MboxCondSend(termReadMbox[id], curRecvBuf, curRecvBufInd);
+                memset(curRecvBuf, 0, sizeof(curRecvBuf));
+                curRecvBufInd = 0;
+            }
         }
 
-        if (statRecv == USLOSS_DEV_BUSY) {
-            // just recieved a character, do something w it
+        // handle writing
+        if (statXmit == USLOSS_DEV_READY) {
+            if (MboxCondRecv(termWriteMbox[id], &curXmitChar, sizeof(char)) >= 0) {
+                xmitCtrl = USLOSS_TERM_CTRL_CHAR(termCtrl, curXmitChar) | 0x1;
+                USLOSS_DeviceOutput(USLOSS_TERM_DEV, id, (void*)(long)xmitCtrl);
+            }
         }
     }
-
     return 0;
 }
 
 /* ---------- Helper Functions ---------- */
+
+int validateTermArgs(char* buffer, int bufferSize, int unitID) {
+    int validBufSize = bufferSize > 0;
+    int validUnit = unitID >= 0 && unitID < USLOSS_TERM_UNITS;
+    return (validBufSize && validUnit);
+}
 
 void cleanHeap() {
     for (int i = 0; i < elementsInHeap; i++) {
