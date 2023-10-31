@@ -23,18 +23,17 @@
 typedef struct PCB {
     int pid;
     int sleepCyclesRemaining;
-    // idk something something blah blah
 } PCB;
 
 /* ---------- Prototypes ---------- */
 
-void swap(PCB*, PCB*);
-void sink(int);
-void swim(int);
 void cleanHeap();
 void heapRemove();
 void insert(PCB*);
 void printHeap();
+void swap(PCB*, PCB*);
+void sink(int);
+void swim(int);
 
 void kernelSleep(USLOSS_Sysargs*);
 void kernelTermWrite(USLOSS_Sysargs*);
@@ -47,10 +46,8 @@ int validateTermArgs(char*, int, int);
 
 /* ---------- Globals ---------- */
 
-PCB processes[MAXPROC];
 PCB sleepHeap[MAXPROC];
 int elementsInHeap = 0;
-int sleepDaemon;
 
 int termWriteMutex[USLOSS_TERM_UNITS];
 int termWriteMbox[USLOSS_TERM_UNITS];
@@ -71,7 +68,6 @@ int termReadMbox[USLOSS_TERM_UNITS];
 
 void phase4_init(void) {
     memset(sleepHeap, 0, sizeof(sleepHeap));
-    memset(processes, 0, sizeof(processes));
 
     // setup ipc stuff for the terminal driver
     for (int i = 0; i < USLOSS_TERM_UNITS; i++) {
@@ -87,9 +83,7 @@ void phase4_init(void) {
 }
 
 void phase4_start_service_processes() {
-    sleepDaemon = fork1("Sleep Daemon", sleepDaemonMain, NULL, USLOSS_MIN_STACK, 1);
-    PCB* cur = &processes[sleepDaemon % MAXPROC];
-    cur->pid = sleepDaemon;
+    fork1("Sleep Daemon", sleepDaemonMain, NULL, USLOSS_MIN_STACK, 1);
 
     // terminal daemons
     for (int i = 0; i < USLOSS_TERM_UNITS; i++) {
@@ -107,10 +101,10 @@ int kernSleep(int seconds) {
     if (seconds < 0) { return -1; }
     if (seconds == 0) { return 0; }
     int pid = getpid();
-    PCB* cur = &processes[pid % MAXPROC];
-    cur->pid = pid;
-    cur->sleepCyclesRemaining = SEC_TO_SLEEP_CYCLE(seconds);
-    insert(cur);
+    PCB cur;
+    cur.pid = pid;
+    cur.sleepCyclesRemaining = SEC_TO_SLEEP_CYCLE(seconds);
+    insert(&cur);
     blockMe(SLEEPING);
     return 0;
 }
@@ -120,6 +114,7 @@ int kernDiskRead(void *diskBuffer, int unit, int track, int first, int sectors, 
 }
 
 int kernDiskWrite(void *diskBuffer, int unit, int track, int first, int sectors, int *status) {
+
 }
 
 int kernDiskSize(int unit, int *sector, int *track, int *disk) {
@@ -168,7 +163,6 @@ int sleepDaemonMain(char* args) {
     int status;
     while (1) {
         waitDevice(USLOSS_CLOCK_INT, 0, &status);
-        // do something with status? idt so but idk
         cleanHeap();
     }
     return 0;
