@@ -115,16 +115,9 @@ int kernSleep(int seconds) {
     return 0;
 }
 
-int kernDiskRead(void *diskBuffer, int unit, int track, int first, int sectors, int *status) {
-
-}
-
-int kernDiskWrite(void *diskBuffer, int unit, int track, int first, int sectors, int *status) {
-}
-
-int kernDiskSize(int unit, int *sector, int *track, int *disk) {
-
-}
+int kernDiskRead(void *diskBuffer, int unit, int track, int first, int sectors, int *status) {}
+int kernDiskWrite(void *diskBuffer, int unit, int track, int first, int sectors, int *status) {}
+int kernDiskSize(int unit, int *sector, int *track, int *disk) {}
 
 void kernelTermRead(USLOSS_Sysargs* args) {
     int numCharsRead;
