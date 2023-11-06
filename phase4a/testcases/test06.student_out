@@ -7,3 +7,5 @@ Child2(): Terminating
 Child1(): Terminating
 start4(): done.
 finish(): The simulation is now terminating.
+----- term1.out -----
+A Something interesting to print here...
