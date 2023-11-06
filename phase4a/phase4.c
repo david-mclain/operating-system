@@ -17,6 +17,7 @@
 #define SLEEPING 30
 
 #define MAX_READ_BUFFERS 10
+#define RW_MASK_ON  ((0 | 0x4) | 0x2)
 
 /* ---------- Data Structures ---------- */
 
@@ -24,6 +25,11 @@ typedef struct PCB {
     int pid;
     int sleepCyclesRemaining;
 } PCB;
+
+typedef struct LineBuffer {
+    char buffer[MAXLINE];
+    int size;
+} LineBuffer;
 
 /* ---------- Prototypes ---------- */
 
@@ -51,6 +57,8 @@ int elementsInHeap = 0;
 
 int termWriteMutex[USLOSS_TERM_UNITS];
 int termWriteMbox[USLOSS_TERM_UNITS];
+
+int termReadRequestMbox[USLOSS_TERM_UNITS];
 int termReadMbox[USLOSS_TERM_UNITS];
 
 /* ---------- Phase 4 Functions ---------- */
@@ -73,8 +81,9 @@ void phase4_init(void) {
     for (int i = 0; i < USLOSS_TERM_UNITS; i++) {
         termWriteMutex[i] = MboxCreate(1,0);
         MboxSend(termWriteMutex[i], NULL, 0);
-        termWriteMbox[i] = MboxCreate(1, sizeof(char));
-        termReadMbox[i] = MboxCreate(MAX_READ_BUFFERS, MAXLINE);
+        termWriteMbox[i] = MboxCreate(1, 0);
+        termReadRequestMbox[i] = MboxCreate(1, sizeof(int));
+        termReadMbox[i] = MboxCreate(1, MAXLINE);
     }
 
     systemCallVec[SYS_SLEEP] = kernelSleep;
@@ -123,6 +132,7 @@ void kernelTermRead(USLOSS_Sysargs* args) {
 int kernTermRead(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
     if (!validateTermArgs(buffer, bufferSize, unitID)) { return -1; }
 
+    MboxSend(termReadRequestMbox[unitID], &bufferSize, sizeof(int));
     *numCharsRead = MboxRecv(termReadMbox[unitID], buffer, bufferSize);
     return 0;
 }
@@ -136,15 +146,16 @@ void kernelTermWrite(USLOSS_Sysargs* args) {
 
 int kernTermWrite(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
     if (!validateTermArgs(buffer, bufferSize, unitID)) { return -1; }
-
     MboxRecv(termWriteMutex[unitID], NULL, 0); // gain mutex
-    
-    // send characters one-by-one to the driver using a mailbox
-    for (int i = 0; i < bufferSize; i++) {
-        MboxSend(termWriteMbox[unitID], &buffer[i], sizeof(char));
-    }
 
-    *numCharsRead = bufferSize; // why less than all of the buffer would be written??
+    int xmitCtrl; // device control register
+    for (int i = 0; i < bufferSize; i++) {
+        MboxRecv(termWriteMbox[unitID], NULL, 0);
+        xmitCtrl = USLOSS_TERM_CTRL_CHAR(RW_MASK_ON, buffer[i]) | 0x1;
+        USLOSS_DeviceOutput(USLOSS_TERM_DEV, unitID, (void*)(long)xmitCtrl);
+    }
+    *numCharsRead = bufferSize;
+                                
     MboxSend(termWriteMutex[unitID], NULL, 0); // release mutex
     return 0;
 }
@@ -162,22 +173,22 @@ int sleepDaemonMain(char* args) {
 
 int termDaemonMain(char* args) {
     int id = (int)(long) args;
-
-    // unmask interrupts for reading & writing
-    int termCtrl = 0;
-    termCtrl = USLOSS_TERM_CTRL_XMIT_INT(termCtrl);
-    termCtrl = USLOSS_TERM_CTRL_RECV_INT(termCtrl);
-    USLOSS_DeviceOutput(USLOSS_TERM_DEV, id, (void*)(long)termCtrl);
+    USLOSS_DeviceOutput(USLOSS_TERM_DEV, id, (void*)(long)RW_MASK_ON); // unmask interrupts
 
     int status, statXmit, statRecv; // status stuff
 
     // read stuff
-    char curRecvBuf[MAXLINE]; int curRecvBufInd;
-    char curRecvChar;
-
-    // write stuff
-    int xmitCtrl;
-    char curXmitChar;
+    int readBuffers = MboxCreate(MAX_READ_BUFFERS, sizeof(LineBuffer)); // stored lines
+    int fullBuffers = 0;                // num of lines currenty stored
+                                        
+    LineBuffer curRecvBuf;              // line currently being read
+    char curRecvChar;                   // char currently being read
+    curRecvBuf.size = 0;
+                                        
+    LineBuffer curRequestedBuf;         // used to temp. store a requested line
+    int curReqLen;                      // max length requested
+    int curSendLen;                     // length of the actually sent line; <= curReqLen
+    curRequestedBuf.size = 0;
 
     while (1) {
         waitDevice(USLOSS_TERM_DEV, id, &status);
@@ -187,20 +198,26 @@ int termDaemonMain(char* args) {
         // handle reading
         if (statRecv == USLOSS_DEV_BUSY) {
             curRecvChar = USLOSS_TERM_STAT_CHAR(status);
-            curRecvBuf[curRecvBufInd++] = curRecvChar;
-            if (curRecvChar == '\n' || curRecvBufInd >= MAXLINE) {
-                MboxCondSend(termReadMbox[id], curRecvBuf, curRecvBufInd);
-                memset(curRecvBuf, 0, sizeof(curRecvBuf));
-                curRecvBufInd = 0;
+            curRecvBuf.buffer[curRecvBuf.size++] = curRecvChar;
+            if (curRecvChar == '\n' || curRecvBuf.size >= MAXLINE) {
+                if (MboxCondSend(readBuffers, &curRecvBuf, sizeof(curRecvBuf)) >= 0) {
+                    fullBuffers++;
+                }
+                memset(&curRecvBuf, 0, sizeof(curRecvBuf));
             }
+        }
+        if (fullBuffers>0 && MboxCondRecv(termReadRequestMbox[id], &curReqLen, sizeof(int))>=0) {
+            MboxCondRecv(readBuffers, &curRequestedBuf, sizeof(LineBuffer));
+            fullBuffers--;
+            if (curReqLen < curRequestedBuf.size) { curSendLen = curReqLen; }
+            else { curSendLen = curRequestedBuf.size; }
+            MboxCondSend(termReadMbox[id], &curRequestedBuf.buffer, curSendLen);
+            memset(&curRequestedBuf, 0, sizeof(curRequestedBuf));
         }
 
         // handle writing
         if (statXmit == USLOSS_DEV_READY) {
-            if (MboxCondRecv(termWriteMbox[id], &curXmitChar, sizeof(char)) >= 0) {
-                xmitCtrl = USLOSS_TERM_CTRL_CHAR(termCtrl, curXmitChar) | 0x1;
-                USLOSS_DeviceOutput(USLOSS_TERM_DEV, id, (void*)(long)xmitCtrl);
-            }
+            MboxCondSend(termWriteMbox[id], NULL, 0);
         }
     }
     return 0;
@@ -278,4 +295,3 @@ void swap(PCB* proc1, PCB* proc2) {
     memcpy(proc1, proc2, sizeof(PCB));
     memcpy(proc2, &temp, sizeof(PCB));
 }
-
