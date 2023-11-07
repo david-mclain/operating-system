@@ -45,6 +45,7 @@ void kernelSleep(USLOSS_Sysargs*);
 void kernelTermWrite(USLOSS_Sysargs*);
 void kernelTermRead(USLOSS_Sysargs*);
 
+int diskDaemonMain(char*);
 int sleepDaemonMain(char*);
 int termDaemonMain(char*);
 
@@ -73,6 +74,15 @@ int termReadMbox[USLOSS_TERM_UNITS];
 //
 // cpu writes to device a pointer to request struct we want device to run
 // have daemon have queue of requests to send to disk
+//
+// first wakeup problem
+// careful with very first read request
+// wait for interrupt to occur, daemon handles it
+// if device idle then
+//     strat 1: special way to wake up daemon without interrupt
+//     strat 2: handle something special in syscall itself
+//
+// have helper function that you call when you want to send a message to disk
 
 void phase4_init(void) {
     memset(sleepHeap, 0, sizeof(sleepHeap));
@@ -97,6 +107,10 @@ void phase4_start_service_processes() {
     // terminal daemons
     for (int i = 0; i < USLOSS_TERM_UNITS; i++) {
         fork1("Term Daemon", termDaemonMain, (char*)(long)i, USLOSS_MIN_STACK, 1);
+    }
+
+    for (int i = 0; i < USLOSS_DISK_UNITS; i++) {
+        fork1("Disk Daemon", diskDaemonMain, (char*)(long)i, USLOSS_MIN_STAKC, 1);
     }
 }
 
@@ -160,7 +174,18 @@ int kernTermWrite(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
     return 0;
 }
 
-/* ---------- Device Drivers ---------- */
+/* ---------- Device Drivers (Daemons) ---------- */
+
+int diskDaemonMain(char* args) {
+    int status;
+    int unit = (int)(long)args;
+
+    while (1) {
+        waitDevice(USLOSS_DISK_DEV, unit, &status);
+    }
+
+    return 0;
+}
 
 int sleepDaemonMain(char* args) {
     int status;
@@ -206,7 +231,8 @@ int termDaemonMain(char* args) {
                 memset(&curRecvBuf, 0, sizeof(curRecvBuf));
             }
         }
-        if (fullBuffers>0 && MboxCondRecv(termReadRequestMbox[id], &curReqLen, sizeof(int))>=0) {
+
+        if (fullBuffers > 0 && MboxCondRecv(termReadRequestMbox[id], &curReqLen, sizeof(int)) >= 0) {
             MboxCondRecv(readBuffers, &curRequestedBuf, sizeof(LineBuffer));
             fullBuffers--;
             if (curReqLen < curRequestedBuf.size) { curSendLen = curReqLen; }

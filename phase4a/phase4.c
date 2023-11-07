@@ -206,7 +206,7 @@ int termDaemonMain(char* args) {
                 memset(&curRecvBuf, 0, sizeof(curRecvBuf));
             }
         }
-        if (fullBuffers>0 && MboxCondRecv(termReadRequestMbox[id], &curReqLen, sizeof(int))>=0) {
+        if (fullBuffers > 0 && MboxCondRecv(termReadRequestMbox[id], &curReqLen, sizeof(int)) >= 0) {
             MboxCondRecv(readBuffers, &curRequestedBuf, sizeof(LineBuffer));
             fullBuffers--;
             if (curReqLen < curRequestedBuf.size) { curSendLen = curReqLen; }
