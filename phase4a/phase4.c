@@ -1,3 +1,13 @@
+/**
+ * File: phase3.c
+ * Authors: David McLain, Miles Gendreau
+ *
+ * Purpose: Implements Terminal Device driver, with read and
+ * write syscalls implemented for the terminal, along with a 
+ * syscall to allow processes to sleep for a desired amount
+ * of time
+ */
+
 #include <phase1.h>
 #include <phase2.h>
 #include <phase3.h>
@@ -63,17 +73,17 @@ int termReadMbox[USLOSS_TERM_UNITS];
 
 /* ---------- Phase 4 Functions ---------- */
 
-// implement elevator algorithm for disk
-//
-// create global clock based on ticks remaining for wait device
-// use daemon for sleep stuff blah blah
-//
-// use dma to communicate with disk
-// make req struct in memory, includes pointer to buffer + fields for op
-//
-// cpu writes to device a pointer to request struct we want device to run
-// have daemon have queue of requests to send to disk
-
+/**
+ * Purpose:
+ * Initializes data structures used for terminal device drivers,
+ * sleep syscall, and syscall function pointers
+ *
+ * Parameters:
+ * None
+ *
+ * Return:
+ * None
+ */
 void phase4_init(void) {
     memset(sleepHeap, 0, sizeof(sleepHeap));
 
@@ -91,6 +101,16 @@ void phase4_init(void) {
     systemCallVec[SYS_TERMWRITE] = kernelTermWrite;
 }
 
+/**
+ * Purpose:
+ * Spawns daemon processes used in device drivers
+ *
+ * Parameters:
+ * None
+ *
+ * Return:
+ * None
+ */
 void phase4_start_service_processes() {
     fork1("Sleep Daemon", sleepDaemonMain, NULL, USLOSS_MIN_STACK, 1);
 
@@ -102,10 +122,30 @@ void phase4_start_service_processes() {
 
 /* ---------- Syscall Handlers ---------- */
 
+/**
+ * Purpose:
+ * Function called from syscall vector for sleeping
+ *
+ * Parameters:
+ * USLOSS_Sysargs* args     arguments passed into syscall for how long to sleep
+ *
+ * Return:
+ * None
+ */
 void kernelSleep(USLOSS_Sysargs* args) {
     args->arg4 = (void*)(long)kernSleep((int)(long)args->arg1);
 }
 
+/**
+ * Purpose:
+ * Handles making process block if it needs to go to sleep and adds it to heap
+ *
+ * Parameters:
+ * int seconds  time we want the process to go to sleep for
+ *
+ * Return:
+ * int  if process went to sleep successfully, 0; else -1
+ */
 int kernSleep(int seconds) {
     if (seconds < 0) { return -1; }
     if (seconds == 0) { return 0; }
@@ -118,10 +158,24 @@ int kernSleep(int seconds) {
     return 0;
 }
 
+/**
+ * Not implemented in milestone 1
+ */
 int kernDiskRead(void *diskBuffer, int unit, int track, int first, int sectors, int *status) {}
 int kernDiskWrite(void *diskBuffer, int unit, int track, int first, int sectors, int *status) {}
 int kernDiskSize(int unit, int *sector, int *track, int *disk) {}
 
+/**
+ * Purpose:
+ * Function that is called when syscall for term read is called, handles calling proper
+ * function to read terminal and setting proper out pointers
+ *
+ * Parameters:
+ * USLOSS_Sysargs* args     arguments to use for term read syscall
+ *
+ * Return:
+ * None
+ */
 void kernelTermRead(USLOSS_Sysargs* args) {
     int numCharsRead;
     args->arg4 = (void*)(long)kernTermRead(args->arg1, (int)(long)args->arg2, \
@@ -129,6 +183,20 @@ void kernelTermRead(USLOSS_Sysargs* args) {
     args->arg2 = (void*)(long)numCharsRead;
 }
 
+/**
+ * Purpose:
+ * Handles reading terminal and getting output from terminal, recieves message
+ * from proper mailbox containing string to read
+ *
+ * Parameters:
+ * char* buffer         out pointer to fill up with message from terminal
+ * int bufferSize       size of buffer to read from terminal
+ * int unitID           terminal device we are reading from
+ * int *numCharsRead    out pointer for how many characters are read from terminal
+ *
+ * Return:
+ * int  if terminal read is successful, 0; else -1
+ */
 int kernTermRead(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
     if (!validateTermArgs(buffer, bufferSize, unitID)) { return -1; }
 
@@ -137,6 +205,17 @@ int kernTermRead(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
     return 0;
 }
 
+/**
+ * Purpose:
+ * Function that is called when syscall for term write is called, handles calling proper
+ * function to write terminal and setting proper out pointers
+ *
+ * Parameters:
+ * USLOSS_Sysargs* args     arguments to use for term write syscall
+ *
+ * Return:
+ * None
+ */
 void kernelTermWrite(USLOSS_Sysargs* args) {
     int numCharsWritten;
     args->arg4 = (void*)(long)kernTermWrite(args->arg1, (int)(long)args->arg2, \
@@ -144,6 +223,20 @@ void kernelTermWrite(USLOSS_Sysargs* args) {
     args->arg2 = (void*)(long)numCharsWritten;
 }
 
+/**
+ * Purpose:
+ * Handles writing to terminal and getting sending input to terminal, sends message
+ * to proper mailbox, with string to write to term
+ *
+ * Parameters:
+ * char* buffer         string to write to terminal
+ * int bufferSize       size of buffer to write to terminal
+ * int unitID           terminal device we are writing to
+ * int *numCharsRead    out pointer for how many characters are written to terminal
+ *
+ * Return:
+ * int  if terminal write is successful, 0; else -1
+ */
 int kernTermWrite(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
     if (!validateTermArgs(buffer, bufferSize, unitID)) { return -1; }
     MboxRecv(termWriteMutex[unitID], NULL, 0); // gain mutex
@@ -162,6 +255,16 @@ int kernTermWrite(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
 
 /* ---------- Device Drivers ---------- */
 
+/**
+ * Purpose:
+ * Main function for daemon process that handles any sleeping processes
+ *
+ * Parameters:
+ * char* args   args for function, should be NULL
+ *
+ * Return:
+ * int  if end is ever reached, 0; shouldn't ever return
+ */
 int sleepDaemonMain(char* args) {
     int status;
     while (1) {
@@ -171,6 +274,16 @@ int sleepDaemonMain(char* args) {
     return 0;
 }
 
+/**
+ * Purpose:
+ * Main function for daemon process that handles any terminal interrupts
+ *
+ * Parameters:
+ * char* args   which terminal device the process is handling
+ *
+ * Return:
+ * int  if end is ever reached, 0; shouldn't ever return
+ */
 int termDaemonMain(char* args) {
     int id = (int)(long) args;
     USLOSS_DeviceOutput(USLOSS_TERM_DEV, id, (void*)(long)RW_MASK_ON); // unmask interrupts
@@ -225,12 +338,36 @@ int termDaemonMain(char* args) {
 
 /* ---------- Helper Functions ---------- */
 
+/**
+ * Purpose:
+ * Validates input for terminal syscalls
+ *
+ * Parameters:
+ * char* buffer     string for buffer to read/write
+ * int bufferSize   size of buffer to read/write
+ * int unitID       which terminal device to read/write
+ *
+ * Return:
+ * int  if arguments are valid, 1; else 0
+ */
 int validateTermArgs(char* buffer, int bufferSize, int unitID) {
     int validBufSize = bufferSize > 0;
     int validUnit = unitID >= 0 && unitID < USLOSS_TERM_UNITS;
     return (validBufSize && validUnit);
 }
 
+/**
+ * Purpose:
+ * Goes through heap of sleeping processes and decrements how many more cycles
+ * are remaining for each one sleeping. Then goes through and cleans any process
+ * with no time remaining on sleep
+ *
+ * Parameters:
+ * None
+ *
+ * Return:
+ * None
+ */
 void cleanHeap() {
     for (int i = 0; i < elementsInHeap; i++) {
         sleepHeap[i].sleepCyclesRemaining--;
@@ -240,6 +377,16 @@ void cleanHeap() {
     }
 }
 
+/**
+ * Purpose:
+ * Inserts a new process into the sleep heap
+ *
+ * Parameters:
+ * PCB* proc    process to add to sleep heap
+ *
+ * Return:
+ * None
+ */
 void insert(PCB* proc) {
     int curIndex = elementsInHeap++;
     PCB* cur = &sleepHeap[curIndex];
@@ -247,6 +394,16 @@ void insert(PCB* proc) {
     swim(curIndex);
 }
 
+/**
+ * Purpose:
+ * Removes a process from the root of the heap and wakes it up
+ *
+ * Parameters:
+ * None
+ *
+ * Return:
+ * None
+ */
 void heapRemove() {
     PCB cur = sleepHeap[0];
     elementsInHeap--;
@@ -255,12 +412,16 @@ void heapRemove() {
     unblockProc(cur.pid);
 }
 
-void printHeap() {
-    for (int i = 0; i < elementsInHeap; i++) {
-        printf("proc: %d; cycles remaining: %d\n", sleepHeap[i].pid, sleepHeap[i].sleepCyclesRemaining);
-    }
-}
-
+/**
+ * Purpose:
+ * Performs swim in heap, to have process go to proper location in heap
+ *
+ * Parameters:
+ * int index    index we are swimming from
+ *
+ * Return:
+ * None
+ */
 void swim(int index) {
     int i = index, j = PARENT(index);
     while (j >= 0) {
@@ -273,6 +434,16 @@ void swim(int index) {
     }
 }
 
+/**
+ * Purpose:
+ * Performs sink in heap, to have process go to proper location in heap
+ *
+ * Parameters:
+ * int index    index we are sinking from
+ *
+ * Return:
+ * None
+ */
 void sink(int index) {
     int small = index;
     int left = LEFT(index);
@@ -289,6 +460,17 @@ void sink(int index) {
     }
 }
 
+/**
+ * Purpose:
+ * Swaps two processes in heap
+ *
+ * Parameters:
+ * PCB* proc1   first process to swap in heap
+ * PCB* proc2   seconds process to swap in heap
+ *
+ * Return:
+ * None
+ */
 void swap(PCB* proc1, PCB* proc2) {
     PCB temp;
     memcpy(&temp, proc1, sizeof(PCB));
