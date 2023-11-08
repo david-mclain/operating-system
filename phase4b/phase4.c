@@ -18,7 +18,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <sys/stat.h>
 
 #define LEFT(x)     2 * x + 1
 #define RIGHT(x)    2 * x + 2
@@ -70,6 +69,8 @@ int sleepDaemonMain(char*);
 int termDaemonMain(char*);
 
 int validateTermArgs(char*, int, int);
+
+// your mom lol <3 miles dont delete this bestie thx
 
 /* ---------- Globals ---------- */
 
@@ -205,11 +206,11 @@ void kernelDiskSize(USLOSS_Sysargs* args) {
     }
     args->arg1 = SECTOR_SIZE;
     args->arg2 = BLOCKS_PER_TRACK;
-    FILE* fp = fopen(sprintf("unit%d", unit), "r");
-    struct stat st;
-    fstat(fileno(fp), &st);
-    printf("here3\n");
-    args->arg3 = st.st_size / TRACK_SIZE;
+    disks[unit].request.opr = USLOSS_DISK_TRACKS;
+    int tracks = 0;
+    disks[unit].request.reg1 = (void*)&tracks;
+    USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disks[unit].request));
+    args->arg3 = tracks;
 }
 /**
  * Not implemented in milestone 1
