@@ -47,6 +47,7 @@ typedef struct LineBuffer {
 
 typedef struct DiskState {
     USLOSS_DeviceRequest request;
+    int tracks;
 } DiskState;
 
 /* ---------- Prototypes ---------- */
@@ -83,7 +84,10 @@ int termWriteMbox[USLOSS_TERM_UNITS];
 int termReadRequestMbox[USLOSS_TERM_UNITS];
 int termReadMbox[USLOSS_TERM_UNITS];
 
+int diskMbox[USLOSS_DISK_UNITS];
+
 DiskState disks[2];
+// just use mailboxes lol
 
 /* ---------- Phase 4 Functions ---------- */
 
@@ -120,6 +124,7 @@ DiskState disks[2];
  */
 void phase4_init(void) {
     memset(sleepHeap, 0, sizeof(sleepHeap));
+    memset(disks, 0, sizeof(disks));
 
     // setup ipc stuff for the terminal driver
     for (int i = 0; i < USLOSS_TERM_UNITS; i++) {
@@ -128,6 +133,10 @@ void phase4_init(void) {
         termWriteMbox[i] = MboxCreate(1, 0);
         termReadRequestMbox[i] = MboxCreate(1, sizeof(int));
         termReadMbox[i] = MboxCreate(1, MAXLINE);
+    }
+
+    for (int i = 0; i < USLOSS_DISK_UNITS; i++) {
+        diskMbox[i] = MboxCreate(0, 0);
     }
 
     systemCallVec[SYS_SLEEP] = kernelSleep;
@@ -158,6 +167,7 @@ void phase4_start_service_processes() {
     for (int i = 0; i < USLOSS_DISK_UNITS; i++) {
         fork1("Disk Daemon", diskDaemonMain, (char*)(long)i, USLOSS_MIN_STACK, 1);
     }
+
 }
 
 /* ---------- Syscall Handlers ---------- */
@@ -204,14 +214,24 @@ void kernelDiskSize(USLOSS_Sysargs* args) {
         args->arg4 = -1;
         return;
     }
+    DiskState* disk = &disks[unit];
+    disk->request.opr = USLOSS_DISK_TRACKS;
+    disk->request.reg1 = (void*)&disk->tracks;
+    USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
+    MboxRecv(diskMbox[unit], NULL, 0);
     args->arg1 = SECTOR_SIZE;
     args->arg2 = BLOCKS_PER_TRACK;
-    disks[unit].request.opr = USLOSS_DISK_TRACKS;
-    int tracks = 0;
-    disks[unit].request.reg1 = (void*)&tracks;
-    USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disks[unit].request));
-    args->arg3 = tracks;
+    args->arg3 = disk->tracks;
 }
+
+void kernelDiskRead(USLOSS_Sysargs* args) {
+
+}
+
+void kernelDiskWrite(USLOSS_Sysargs* args) {
+
+}
+
 /**
  * Not implemented in milestone 1
  */
@@ -315,6 +335,12 @@ int diskDaemonMain(char* args) {
 
     while (1) {
         waitDevice(USLOSS_DISK_DEV, unit, &status);
+        if (status == USLOSS_DEV_READY) {
+            MboxCondSend(diskMbox[unit], NULL, 0);
+        }
+        else if (status == USLOSS_DEV_BUSY) {
+            printf("budyysysys\n");
+        }
     }
 
     return 0;

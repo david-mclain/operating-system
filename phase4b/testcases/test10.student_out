@@ -1,0 +1,8 @@
+phase5_start_service_processes() called -- currently a NOP
+start4(): started
+start4(): unit 0, sector size 512, track size 16, disk size 16
+start4(): unit 1, sector size 512, track size 16, disk size 32
+
+start4(): writing to disk 0, track 5, sector 0
+nullsys(): Program called an unimplemented syscall.  syscall no: 14   PSR: 0x09
+finish(): The simulation is now terminating.
