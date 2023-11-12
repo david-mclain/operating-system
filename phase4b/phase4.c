@@ -78,6 +78,7 @@ int validateTermArgs(char*, int, int);
 
 long calculateLocation(int, int);
 
+void fillRequest(DiskRequest*, int, int, int, int, int);
 void cleanHeap();
 void heapRemove();
 void insert(PCB*);
@@ -258,7 +259,7 @@ void kernelDiskSize(USLOSS_Sysargs* args) {
     args->arg4 = 0;
     int pid = getpid();
     DiskRequest* curRequest = &diskRequests[pid % MAXPROC];
-    fillRequest(curRequest, USLOSS_DISK_READ, track, block, pid, sectors);
+    fillRequest(curRequest, USLOSS_DISK_TRACKS, 0, 0, pid, 0);
     addToRequestQueue(curRequest);
     
 
