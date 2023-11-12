@@ -1,0 +1,13 @@
+start5(): Running:    simple3
+start5(): Pagers:     1
+          Pages:      3
+          Frames:     3
+          Children:   1
+          Iterations: 1
+          Priority:   5
+
+Child(13): starting
+Child(13): terminating
+
+start5(): done
+finish(): The simulation is now terminating.

@@ -38,6 +38,7 @@
 typedef struct PCB {
     int pid;
     int sleepCyclesRemaining;
+    long diskLocation;
 } PCB;
 
 typedef struct LineBuffer {
@@ -48,6 +49,7 @@ typedef struct LineBuffer {
 typedef struct DiskState {
     USLOSS_DeviceRequest request;
     int tracks;
+    int status;
 } DiskState;
 
 /* ---------- Prototypes ---------- */
@@ -64,6 +66,8 @@ void kernelSleep(USLOSS_Sysargs*);
 void kernelTermWrite(USLOSS_Sysargs*);
 void kernelTermRead(USLOSS_Sysargs*);
 void kernelDiskSize(USLOSS_Sysargs*);
+void kernelDiskRead(USLOSS_Sysargs*);
+void kernelDiskWrite(USLOSS_Sysargs*);
 
 int diskDaemonMain(char*);
 int sleepDaemonMain(char*);
@@ -76,6 +80,7 @@ int validateTermArgs(char*, int, int);
 /* ---------- Globals ---------- */
 
 PCB sleepHeap[MAXPROC];
+PCB diskRequests[MAXPROC];
 int elementsInHeap = 0;
 
 int termWriteMutex[USLOSS_TERM_UNITS];
@@ -143,6 +148,8 @@ void phase4_init(void) {
     systemCallVec[SYS_TERMREAD] = kernelTermRead;
     systemCallVec[SYS_TERMWRITE] = kernelTermWrite;
     systemCallVec[SYS_DISKSIZE] = kernelDiskSize;
+    systemCallVec[SYS_DISKREAD] = kernelDiskRead;
+    systemCallVec[SYS_DISKWRITE] = kernelDiskWrite;
 }
 
 /**
@@ -225,11 +232,53 @@ void kernelDiskSize(USLOSS_Sysargs* args) {
 }
 
 void kernelDiskRead(USLOSS_Sysargs* args) {
+    void* buffer = args->arg1;
+    int sectors = (int)(long)args->arg2;
+    int track = (int)(long)args->arg3;
+    int block = (int)(long)args->arg4;
+    int unit = (int)(long)args->arg5;
+    if (unit < 0 || unit > 1) {
+        args->arg4 = -1;
+        return;
+    }
+    args->arg4 = 0;
 
+    DiskState* disk = &disks[unit];
+    disk->request.opr = USLOSS_DISK_SEEK;
+    disk->request.reg1 = (void*)(long)track;
+    USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
+    MboxRecv(diskMbox[unit], NULL, 0);
+    disk->request.opr = USLOSS_DISK_READ;
+    disk->request.reg1 = (void*)(long)block;
+    disk->request.reg2 = buffer;
+    USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
+    MboxRecv(diskMbox[unit], NULL, 0);
+    args->arg1 = 0;
 }
 
 void kernelDiskWrite(USLOSS_Sysargs* args) {
+    void* buffer = args->arg1;
+    int sectors = (int)(long)args->arg2;
+    int track = (int)(long)args->arg3;
+    int block = (int)(long)args->arg4;
+    int unit = (int)(long)args->arg5;
+    if (unit < 0 || unit > 1) {
+        args->arg4 = -1;
+        return;
+    }
+    args->arg4 = 0;
 
+    DiskState* disk = &disks[unit];
+    disk->request.opr = USLOSS_DISK_SEEK;
+    disk->request.reg1 = (void*)(long)track;
+    USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
+    MboxRecv(diskMbox[unit], NULL, 0);
+    disk->request.opr = USLOSS_DISK_WRITE;
+    disk->request.reg1 = (void*)(long)block;
+    disk->request.reg2 = buffer;
+    USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
+    MboxRecv(diskMbox[unit], NULL, 0);
+    args->arg1 = 0;
 }
 
 /**
@@ -332,9 +381,11 @@ int kernTermWrite(char *buffer, int bufferSize, int unitID, int *numCharsRead) {
 int diskDaemonMain(char* args) {
     int status;
     int unit = (int)(long)args;
+    DiskState* disk = &disks[unit];
 
     while (1) {
         waitDevice(USLOSS_DISK_DEV, unit, &status);
+        disk->status = status;
         if (status == USLOSS_DEV_READY) {
             MboxCondSend(diskMbox[unit], NULL, 0);
         }

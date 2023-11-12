@@ -1,0 +1,19 @@
+start5(): Running:    simple1
+start5(): Pagers:     1
+          Pages:      1
+          Frames:     1
+          Children:   1
+          Iterations: 1
+          Priority:   5
+
+Child(13): starting
+Child(13): str = This is the first page
+Child(13): strlen(str) = 22
+Child(13): after memcpy
+Child(13): strcmp first attempt worked!
+Child(13): strcmp second attempt worked!
+Child(13): checking various vmStats
+Child(13): terminating
+
+start5(): done
+finish(): The simulation is now terminating.

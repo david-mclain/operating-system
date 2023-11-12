@@ -1,0 +1,39 @@
+start5(): Running:    simple7
+start5(): Pagers:     1
+          Pages:      1
+          Frames:     2
+          Children:   3
+          Iterations: 1
+          Priority:   5
+
+Child(13): starting
+Child(13): str = This is the first page
+Child(13): strlen(str) = 22
+
+Child(14): starting
+Child(14): str = This is the first page
+Child(14): strlen(str) = 22
+
+Child(15): starting
+Child(15): str = This is the first page
+Child(15): strlen(str) = 22
+Child(13): after memcpy
+Child(13): strcmp first attempt worked!
+Child(14): after memcpy
+Child(14): strcmp first attempt worked!
+Child(14): strcmp second attempt worked!
+Child(14): checking various vmStats
+Child(14): terminating
+
+Child(15): after memcpy
+Child(15): strcmp first attempt worked!
+Child(15): strcmp second attempt worked!
+Child(15): checking various vmStats
+Child(15): terminating
+
+Child(13): strcmp second attempt worked!
+Child(13): checking various vmStats
+Child(13): terminating
+
+start5(): done
+finish(): The simulation is now terminating.

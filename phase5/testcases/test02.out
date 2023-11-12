@@ -1,0 +1,14 @@
+start5(): Running:    simple2
+start5(): Pagers:     1
+          Pages:      1
+          Frames:     1
+          Children:   1
+          Iterations: 1
+          Priority:   5
+
+Child(13): starting
+Child(13): vmRegion is filled with 0's
+Child(13): terminating
+
+start5 done
+finish(): The simulation is now terminating.

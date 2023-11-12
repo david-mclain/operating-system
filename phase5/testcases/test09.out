@@ -1,0 +1,31 @@
+start5(): Running:    simple9
+start5(): Pagers:     1
+          Pages:      2
+          Frames:     2
+          Children:   2
+          Iterations: 1
+          Priority:   5
+
+Child(13): starting
+Child(13): str = This is the first page for pid 13
+
+Child(13): strlen(str) = 34
+
+Child(14): starting
+Child(14): str = This is the first page for pid 14
+
+Child(14): strlen(str) = 34
+Child(13): after memcpy
+Child(13): strcmp first attempt to read worked!
+Child(14): after memcpy
+Child(14): strcmp first attempt to read worked!
+Child(13): strcmp second attempt to read worked!
+Child(13): checking various vmStats
+Child(13): terminating
+
+Child(14): strcmp second attempt to read worked!
+Child(14): checking various vmStats
+Child(14): terminating
+
+start5(): done
+finish(): The simulation is now terminating.
