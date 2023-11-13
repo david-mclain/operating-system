@@ -78,6 +78,7 @@ int validateTermArgs(char*, int, int);
 
 long calculateLocation(int, int);
 
+void addToRequestQueue(DiskRequest*, int);
 void fillRequest(DiskRequest*, int, int, int, int, int);
 void cleanHeap();
 void heapRemove();
@@ -258,13 +259,13 @@ void kernelDiskSize(USLOSS_Sysargs* args) {
         args->arg4 = -1;
         return;
     }
-    //change
     args->arg4 = 0;
     int pid = getpid();
     DiskRequest* curRequest = &diskRequests[pid % MAXPROC];
     fillRequest(curRequest, USLOSS_DISK_TRACKS, 0, 0, pid, 0);
-    addToRequestQueue(curRequest);
-    
+    addToRequestQueue(curRequest, unit);
+    printf("size\n");
+    printf("disk requests to perform: %d\n", curRequest->requestsRemaining);
 
     // old implementation
     DiskState* disk = &disks[unit];
@@ -300,7 +301,9 @@ void kernelDiskRead(USLOSS_Sysargs* args) {
     int pid = getpid();
     DiskRequest* curRequest = &diskRequests[unit][pid % MAXPROC];
     fillRequest(curRequest, USLOSS_DISK_READ, track, block, pid, sectors);
-    addToRequestQueue(curRequest);
+    addToRequestQueue(curRequest, unit);
+    printf("reading\n");
+    printf("disk requests to perform: %d\n", curRequest->requestsRemaining);
     
     DiskState* disk = &disks[unit];
     args->arg1 = disk->status == USLOSS_DEV_ERROR ? disk->status : 0;
@@ -327,6 +330,8 @@ void kernelDiskWrite(USLOSS_Sysargs* args) {
     DiskRequest* curRequest = &diskRequests[unit][pid % MAXPROC];
     fillRequest(curRequest, USLOSS_DISK_WRITE, track, block, pid, sectors);
     addToRequestQueue(curRequest, unit);
+    printf("writing\n");
+    printf("disk requests to perform: %d\n", curRequest->requestsRemaining);
     // block process since in queue
     // loop through every request it needs to complete after since itll be woken up when turn
     // sleep everytime it needs to make new request and daemon handles waking up
@@ -372,7 +377,7 @@ int calculateRequests(int task, int track, int block, int sectors) {
     return track ? 1 + sectors + ((block + sectors) / BLOCKS_PER_TRACK) : 1;
 }
 
-void addToRequestQueue(DiskRequest* curRequest) {
+void addToRequestQueue(DiskRequest* curRequest, int unit) {
     
 }
 /**
