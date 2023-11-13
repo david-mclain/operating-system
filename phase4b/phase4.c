@@ -116,9 +116,9 @@ int termReadMbox[USLOSS_TERM_UNITS];
 int diskMbox[USLOSS_DISK_UNITS];
 
 DiskState disks[2];
-DiskRequest diskRequests[MAXPROC];
+DiskRequest diskRequests[2][MAXPROC];
 
-DiskRequest* diskQueue;
+DiskRequest diskQueues[2];
 DiskRequest* curReq;
 // just use mailboxes lol
 
@@ -128,6 +128,8 @@ DiskRequest* curReq;
 // maybe work
 // daemon only maintain queue
 // processes wait for dev on own
+// wait no just use daemon to keep track of who goes next
+// then have each call waitDevice on its own
 
 // implement elevator algorithm for disk
 //
@@ -163,7 +165,7 @@ DiskRequest* curReq;
 void phase4_init(void) {
     memset(sleepHeap, 0, sizeof(sleepHeap));
     memset(disks, 0, sizeof(disks));
-    memset(&diskQueue, 0, sizeof(diskQueue));
+    memset(diskQueues, 0, sizeof(diskQueues));
 
     // setup ipc stuff for the terminal driver
     for (int i = 0; i < USLOSS_TERM_UNITS; i++) {
@@ -295,7 +297,7 @@ void kernelDiskRead(USLOSS_Sysargs* args) {
     //
     // have queue keeping track of which process to move to next
     int pid = getpid();
-    DiskRequest* curRequest = &diskRequests[pid % MAXPROC];
+    DiskRequest* curRequest = &diskRequests[unit][pid % MAXPROC];
     fillRequest(curRequest, USLOSS_DISK_READ, track, block, pid, sectors);
     addToRequestQueue(curRequest);
     
@@ -321,9 +323,12 @@ void kernelDiskWrite(USLOSS_Sysargs* args) {
     }
     args->arg4 = 0;
     int pid = getpid();
-    DiskRequest* curRequest = &diskRequests[pid % MAXPROC];
+    DiskRequest* curRequest = &diskRequests[unit][pid % MAXPROC];
     fillRequest(curRequest, USLOSS_DISK_WRITE, track, block, pid, sectors);
-    addToRequestQueue(curRequest);
+    addToRequestQueue(curRequest, unit);
+    // block process since in queue
+    // loop through every request it needs to complete after since itll be woken up when turn
+    // sleep everytime it needs to make new request and daemon handles waking up
 
     DiskState* disk = &disks[unit];
     args->arg1 = disk->status == USLOSS_DEV_ERROR ? disk->status : 0;
@@ -367,13 +372,7 @@ int calculateRequests(int task, int track, int block, int sectors) {
 }
 
 void addToRequestQueue(DiskRequest* curRequest) {
-    if (!diskQueue) {
-        diskQueue = curRequest;
-    }
-    else {
-        DiskRequest* temp = diskQueue;
-
-    }
+    
 }
 /**
  * Not implemented in milestone 1
