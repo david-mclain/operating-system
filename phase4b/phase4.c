@@ -258,6 +258,7 @@ void kernelDiskSize(USLOSS_Sysargs* args) {
         args->arg4 = -1;
         return;
     }
+    //change
     args->arg4 = 0;
     int pid = getpid();
     DiskRequest* curRequest = &diskRequests[pid % MAXPROC];
