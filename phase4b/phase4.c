@@ -32,6 +32,7 @@
 #define SECTOR_SIZE 512
 #define BLOCKS_PER_TRACK 16
 #define TRACK_SIZE SECTOR_SIZE * BLOCKS_PER_TRACK
+#define AWAITING_DISK 40
 
 /* ---------- Data Structures ---------- */
 
@@ -65,8 +66,8 @@ typedef struct DiskRequest {
     long startLocation;
     long endLocation;
 
-    struct DiskRequest* nextDiskOperation;
-    struct DiskRequest* prevDiskOperation;
+    struct DiskRequest* nextRequest;
+    struct DiskRequest* prevRequest;
 
     void* buffer;
 } DiskRequest;
@@ -119,7 +120,7 @@ int diskMbox[USLOSS_DISK_UNITS];
 DiskState disks[2];
 DiskRequest diskRequests[2][MAXPROC];
 
-DiskRequest diskQueues[2];
+DiskRequest* diskQueues[2];
 DiskRequest* curReq;
 // just use mailboxes lol
 
@@ -264,15 +265,21 @@ void kernelDiskSize(USLOSS_Sysargs* args) {
     DiskRequest* curRequest = &diskRequests[pid % MAXPROC];
     fillRequest(curRequest, USLOSS_DISK_TRACKS, 0, 0, pid, 0);
     addToRequestQueue(curRequest, unit);
-    printf("size\n");
-    printf("disk requests to perform: %d\n", curRequest->requestsRemaining);
 
-    // old implementation
+    if (diskQueues[unit] != curRequest) {
+        blockMe(AWAITING_DISK);
+    }
+
+    // THE COOKING BEGINS
     DiskState* disk = &disks[unit];
     disk->request.opr = USLOSS_DISK_TRACKS;
     disk->request.reg1 = (void*)&disk->tracks;
-    USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
-    MboxRecv(diskMbox[unit], NULL, 0);
+    for (int i = 0; i < curRequest->requestsRemaining; i++) {
+        USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
+        blockMe(AWAITING_DISK);
+    }
+    diskQueues[unit] = diskQueues[unit]->nextRequest;
+
     args->arg1 = SECTOR_SIZE;
     args->arg2 = BLOCKS_PER_TRACK;
     args->arg3 = disk->tracks;
@@ -302,11 +309,15 @@ void kernelDiskRead(USLOSS_Sysargs* args) {
     DiskRequest* curRequest = &diskRequests[unit][pid % MAXPROC];
     fillRequest(curRequest, USLOSS_DISK_READ, track, block, pid, sectors);
     addToRequestQueue(curRequest, unit);
-    printf("reading\n");
-    printf("track to read:        %d\n", track);
-    printf("blocks:               %d\n", block);
-    printf("total bytes to write: %d\n", curRequest->endLocation - curRequest->startLocation);
     
+    DiskRequest* queue = diskQueues[unit];
+    if (diskQueues[unit] != curRequest) {
+        blockMe(AWAITING_DISK);
+    }
+    else {
+        USLOSS_Console("current task to run\n");
+    }
+
     DiskState* disk = &disks[unit];
     args->arg1 = disk->status == USLOSS_DEV_ERROR ? disk->status : 0;
 }
@@ -328,14 +339,19 @@ void kernelDiskWrite(USLOSS_Sysargs* args) {
         return;
     }
     args->arg4 = 0;
+
     int pid = getpid();
     DiskRequest* curRequest = &diskRequests[unit][pid % MAXPROC];
     fillRequest(curRequest, USLOSS_DISK_WRITE, track, block, pid, sectors);
     addToRequestQueue(curRequest, unit);
-    printf("writing\n");
-    printf("track to write:       %d\n", track);
-    printf("blocks:               %d\n", block);
-    printf("total bytes to write: %d\n", curRequest->endLocation - curRequest->startLocation);
+
+    DiskRequest* queue = diskQueues[unit];
+    if (diskQueues[unit] != curRequest) {
+        blockMe(AWAITING_DISK);
+    }
+    else {
+        USLOSS_Console("current task to run\n");
+    }
     // block process since in queue
     // loop through every request it needs to complete after since itll be woken up when turn
     // sleep everytime it needs to make new request and daemon handles waking up
@@ -366,14 +382,45 @@ int calculateRequests(int task, int track, int block, int sectors) {
 }
 
 void addToRequestQueue(DiskRequest* curRequest, int unit) {
-    DiskRequest* queue = &diskQueues[unit];
-    if (!queue) {
-        queue = curRequest;
+    //DiskRequest* queue = diskQueues[unit];
+    if (!diskQueues[unit]) {
+        printf("adding to head\n");
+        diskQueues[unit] = curRequest;
+        printf("queue = %p\n", diskQueues[unit]);
+        printf("cur req = %p\n", curRequest);
     }
     else {
+        printf("not adding to head\n");
+        DiskRequest* cur = diskQueues[unit];
+        while (cur->nextRequest && cur->currentTrack < curRequest->currentTrack) {
+            cur = cur->nextRequest;
+        }
+        cur->nextRequest = curRequest;
         // its onyl track based thats actually so much easier
     }
+    printQueues();
 }
+
+void printQueues() {
+    for (int i = 0; i < USLOSS_DISK_UNITS; i++) {
+        DiskRequest* cur = diskQueues[i];
+        printf("\n\n");
+        printf("disk %d\n", i);
+        printf("cur = %p\n", cur);
+        while (cur) {
+            printf("current task:             %d\n", cur->currentTask);
+            printf("current track:            %d\n", cur->currentTask);
+            printf("current sector:           %d\n", cur->currentTask);
+            printf("current process:          %d\n", cur->currentTask);
+            printf("current requestRemaining: %d\n", cur->currentTask);
+            printf("current sectorOffset:     %d\n", cur->currentTask);
+            printf("->");
+            cur = cur->nextRequest;
+        }
+        printf("\n\n");
+    }
+}
+
 /**
  * Not implemented in milestone 1
  */
@@ -482,7 +529,7 @@ int diskDaemonMain(char* args) {
         USLOSS_Console("received interrupt\n");
         disk->status = status;
         if (status == USLOSS_DEV_READY) {
-            MboxCondSend(diskMbox[unit], NULL, 0);
+            unblockProc(diskQueues[unit]->process);
         }
         else if (status == USLOSS_DEV_BUSY) {
             printf("budyysysys\n");
