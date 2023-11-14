@@ -314,11 +314,16 @@ void kernelDiskRead(USLOSS_Sysargs* args) {
     if (diskQueues[unit] != curRequest) {
         blockMe(AWAITING_DISK);
     }
-    else {
-        USLOSS_Console("current task to run\n");
-    }
 
     DiskState* disk = &disks[unit];
+    disk->request.opr = USLOSS_DISK_TRACKS;
+    disk->request.reg1 = (void*)&disk->tracks;
+    for (int i = 0; i < curRequest->requestsRemaining; i++) {
+        USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
+        blockMe(AWAITING_DISK);
+    }
+    diskQueues[unit] = diskQueues[unit]->nextRequest;
+
     args->arg1 = disk->status == USLOSS_DEV_ERROR ? disk->status : 0;
 }
 
@@ -349,14 +354,19 @@ void kernelDiskWrite(USLOSS_Sysargs* args) {
     if (diskQueues[unit] != curRequest) {
         blockMe(AWAITING_DISK);
     }
-    else {
-        USLOSS_Console("current task to run\n");
+
+    DiskState* disk = &disks[unit];
+    disk->request.opr = USLOSS_DISK_TRACKS;
+    disk->request.reg1 = (void*)&disk->tracks;
+    for (int i = 0; i < curRequest->requestsRemaining; i++) {
+        USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
+        blockMe(AWAITING_DISK);
     }
+    diskQueues[unit] = diskQueues[unit]->nextRequest;
     // block process since in queue
     // loop through every request it needs to complete after since itll be woken up when turn
     // sleep everytime it needs to make new request and daemon handles waking up
 
-    DiskState* disk = &disks[unit];
     args->arg1 = disk->status == USLOSS_DEV_ERROR ? disk->status : 0;
 }
 
@@ -384,10 +394,7 @@ int calculateRequests(int task, int track, int block, int sectors) {
 void addToRequestQueue(DiskRequest* curRequest, int unit) {
     //DiskRequest* queue = diskQueues[unit];
     if (!diskQueues[unit]) {
-        printf("adding to head\n");
         diskQueues[unit] = curRequest;
-        printf("queue = %p\n", diskQueues[unit]);
-        printf("cur req = %p\n", curRequest);
     }
     else {
         printf("not adding to head\n");
