@@ -9,5 +9,12 @@ start4(): Spawning 2 children to termfuncs
 ChildTR(): start
 start4(): Spawning 4 children to diskfuncs
 ChildDW0(): writing to disk 0, track 5, sector 0
-nullsys(): Program called an unimplemented syscall.  syscall no: 14   PSR: 0x09
-finish(): The simulation is now terminating.
+ChildDW1(): writing to disk 1, track 5, sector 0
+ChildR0(): reading from disk 0, track 5, sector 0
+ChildR1(): reading from disk 1, track 5, sector 0
+ChildDW0(): DiskWrite0 returned status = 0
+ChildDW1(): DiskWrite1 returned status = 0
+ChildR0(): DiskRead returned status = 0
+ChildR0(): disk_buf_B contains: 'ChildDW0(): A wonderful message to put on the disk...'
+----- term0.out -----
+C
