@@ -95,6 +95,7 @@ void kernelDiskSize(USLOSS_Sysargs*);
 void kernelDiskRead(USLOSS_Sysargs*);
 void kernelDiskWrite(USLOSS_Sysargs*);
 
+void printQueues(int);
 /* ---------- Daemon Prototypes ---------- */
 
 int diskDaemonMain(char*);
@@ -119,6 +120,9 @@ int diskMbox[USLOSS_DISK_UNITS];
 
 DiskState disks[USLOSS_DISK_UNITS];
 DiskRequest diskRequests[USLOSS_DISK_UNITS][MAXPROC];
+
+DiskRequest* curRequests[USLOSS_DISK_UNITS];
+DiskRequest* nextRequests[USLOSS_DISK_UNITS];
 
 DiskRequest* diskQueues[USLOSS_DISK_UNITS];
 DiskRequest* curReqs[USLOSS_DISK_UNITS];
@@ -168,6 +172,8 @@ void phase4_init(void) {
     memset(sleepHeap, 0, sizeof(sleepHeap));
     memset(disks, 0, sizeof(disks));
     memset(diskQueues, 0, sizeof(diskQueues));
+    memset(curRequests, 0, sizeof(diskQueues));
+    memset(nextRequests, 0, sizeof(diskQueues));
 
     // setup ipc stuff for the terminal driver
     for (int i = 0; i < USLOSS_TERM_UNITS; i++) {
@@ -280,7 +286,7 @@ void kernelDiskSize(USLOSS_Sysargs* args) {
         DiskRequest* curRequest = &diskRequests[pid % MAXPROC];
         fillRequest(curRequest, USLOSS_DISK_TRACKS, 0, 0, pid, 0);
         addToRequestQueue(curRequest, unit);
-        if (curReqs[unit]->process != pid) {
+        if (curRequests[unit] != curRequest) {
             blockMe(AWAITING_DISK);
         }
 
@@ -289,18 +295,20 @@ void kernelDiskSize(USLOSS_Sysargs* args) {
         disk->request.reg1 = (void*)&disk->tracks;
         USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
         blockMe(AWAITING_DISK);
-        removeFromRequestQueue(curRequest, unit);
-        if (!curReqs[unit]->nextRequest && diskQueues[unit] && diskQueues[unit] != curReqs[unit]) {
-            curReqs[unit] = diskQueues[unit];
-        }
-        else { curReqs[unit] = curReqs[unit]->nextRequest; }
 
-        if (curReqs[unit]) { unblockProc(curReqs[unit]->process); }
     }
     args->arg1 = SECTOR_SIZE;
     args->arg2 = BLOCKS_PER_TRACK;
     args->arg3 = disk->tracks;
-    //USLOSS_Console("finished size\n");
+    
+    if (curRequests[unit]->nextRequest) {
+        curRequests[unit] = curRequests[unit]->nextRequest;
+    }
+    else {
+        curRequests[unit] = nextRequests[unit];
+        nextRequests[unit] = NULL;
+    }
+    if (curRequests[unit]) { unblockProc(curRequests[unit]->process); }
 }
 
 void kernelDiskRead(USLOSS_Sysargs* args) {
@@ -321,43 +329,44 @@ void kernelDiskRead(USLOSS_Sysargs* args) {
         return;
     }
     args->arg4 = 0;
-    // just block and unblock manually and have processes keep track of what disk task they need to do
-    //
-    // have queue keeping track of which process to move to next
+
     DiskRequest* curRequest = &diskRequests[unit][pid % MAXPROC];
     fillRequest(curRequest, USLOSS_DISK_READ, track, block, pid, sectors);
     addToRequestQueue(curRequest, unit);
     
-    if (curReqs[unit]->process != pid) { blockMe(AWAITING_DISK); }
-
+    if (curRequests[unit]->process != pid) { blockMe(AWAITING_DISK); }
+    
     DiskState* disk = &disks[unit];
-    while (curReqs[unit]->requestsFulfilled < curReqs[unit]->requests) {
-        if (disk->currentTrack != curReqs[unit]->currentTrack) {
+    DiskRequest* cur = curRequests[unit];
+
+    while (cur->requestsFulfilled < cur->requests) {
+        if (disk->currentTrack != cur->currentTrack) {
             disk->request.opr = USLOSS_DISK_SEEK;
-            disk->request.reg1 = curReqs[unit]->currentTrack;
-            disk->currentTrack = curReqs[unit]->currentTrack;
+            disk->request.reg1 = cur->currentTrack;
+            disk->currentTrack = cur->currentTrack;
         }
         else {
             disk->request.opr = USLOSS_DISK_READ;
-            disk->request.reg1 = (void*)(long)curReqs[unit]->currentSector;
-            disk->request.reg2 = buffer + curReqs[unit]->sectorOffset++ * SECTOR_SIZE;
-            curReqs[unit]->currentSector = (curReqs[unit]->currentSector + 1) % BLOCKS_PER_TRACK;
-            curReqs[unit]->requestsFulfilled++;
+            disk->request.reg1 = (void*)(long)cur->currentSector;
+            disk->request.reg2 = buffer + cur->sectorOffset++ * SECTOR_SIZE;
+            cur->currentSector = (cur->currentSector + 1) % BLOCKS_PER_TRACK;
+            cur->requestsFulfilled++;
         }
         USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
         blockMe(AWAITING_DISK);
         if (disk->status == USLOSS_DEV_ERROR) { break; }
     }
 
-    removeFromRequestQueue(curRequest, unit);
-    if (!curReqs[unit]->nextRequest && diskQueues[unit] && diskQueues[unit] != curReqs[unit]) { 
-        curReqs[unit] = diskQueues[unit];
+    if (cur->nextRequest) {
+        curRequests[unit] = cur->nextRequest;
     }
-    else { curReqs[unit] = curReqs[unit]->nextRequest; }
+    else {
+        curRequests[unit] = nextRequests[unit];
+        nextRequests[unit] = NULL;
+    }
 
-    if (curReqs[unit]) { unblockProc(curReqs[unit]->process); }
-    //USLOSS_Console("finished read\n");
     args->arg1 = disk->status == USLOSS_DEV_ERROR ? disk->status : 0;
+    if (curRequests[unit]) { unblockProc(curRequests[unit]->process); }
 }
 
 void kernelDiskWrite(USLOSS_Sysargs* args) {
@@ -366,6 +375,7 @@ void kernelDiskWrite(USLOSS_Sysargs* args) {
     int track = (int)(long)args->arg3;
     int block = (int)(long)args->arg4;
     int unit = (int)(long)args->arg5;
+    int pid = getpid();
     if (!disks[unit].tracks) {
         USLOSS_Sysargs temp;
         temp.arg1 = unit;
@@ -378,46 +388,43 @@ void kernelDiskWrite(USLOSS_Sysargs* args) {
     }
     args->arg4 = 0;
 
-    int pid = getpid();
     DiskRequest* curRequest = &diskRequests[unit][pid % MAXPROC];
-    fillRequest(curRequest, USLOSS_DISK_WRITE, track, block, pid, sectors);
+    fillRequest(curRequest, USLOSS_DISK_READ, track, block, pid, sectors);
     addToRequestQueue(curRequest, unit);
-    curRequest->buffer = buffer;
-
-    DiskRequest* queue = diskQueues[unit];
-    // change to curRequest
-    if (diskQueues[unit] != curRequest) { blockMe(AWAITING_DISK); }
-
+    
+    if (curRequests[unit]->process != pid) { blockMe(AWAITING_DISK); }
+    
     DiskState* disk = &disks[unit];
-    while (curReqs[unit]->requestsFulfilled < curReqs[unit]->requests) {
-        if (disk->currentTrack != curReqs[unit]->currentTrack) {
+    DiskRequest* cur = curRequests[unit];
+
+    while (cur->requestsFulfilled < cur->requests) {
+        if (disk->currentTrack != cur->currentTrack) {
             disk->request.opr = USLOSS_DISK_SEEK;
-            disk->request.reg1 = curReqs[unit]->currentTrack;
-            disk->currentTrack = curReqs[unit]->currentTrack;
+            disk->request.reg1 = cur->currentTrack;
+            disk->currentTrack = cur->currentTrack;
         }
         else {
             disk->request.opr = USLOSS_DISK_WRITE;
-            disk->request.reg1 = (void*)(long)curReqs[unit]->currentSector;
-            disk->request.reg2 = buffer + curReqs[unit]->sectorOffset++ * SECTOR_SIZE;
-            curReqs[unit]->currentSector = (curReqs[unit]->currentSector + 1) % BLOCKS_PER_TRACK;
-            curReqs[unit]->requestsFulfilled++;
+            disk->request.reg1 = (void*)(long)cur->currentSector;
+            disk->request.reg2 = buffer + cur->sectorOffset++ * SECTOR_SIZE;
+            cur->currentSector = (cur->currentSector + 1) % BLOCKS_PER_TRACK;
+            cur->requestsFulfilled++;
         }
         USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
         blockMe(AWAITING_DISK);
         if (disk->status == USLOSS_DEV_ERROR) { break; }
     }
-    removeFromRequestQueue(curRequest, unit);
-    if (!curReqs[unit]->nextRequest && diskQueues[unit] && diskQueues[unit] != curReqs[unit]) {
-        curReqs[unit] = diskQueues[unit];
-    }
-    else { curReqs[unit] = curReqs[unit]->nextRequest; }
 
-    if (curReqs[unit]) { unblockProc(curReqs[unit]->process); }
-    // block process since in queue
-    // loop through every request it needs to complete after since itll be woken up when turn
-    // sleep everytime it needs to make new request and daemon handles waking up
-    //USLOSS_Console("finished write\n");
+    if (cur->nextRequest) {
+        curRequests[unit] = cur->nextRequest;
+    }
+    else {
+        curRequests[unit] = nextRequests[unit];
+        nextRequests[unit] = NULL;
+    }
+
     args->arg1 = disk->status == USLOSS_DEV_ERROR ? disk->status : 0;
+    if (curRequests[unit]) { unblockProc(curRequests[unit]->process); }
 }
 
 void fillRequest(DiskRequest* curRequest, int task, int track, int block, int pid, int sectors) {
@@ -437,39 +444,75 @@ int calculateRequests(int task, int track, int block, int sectors) {
 }
 
 void addToRequestQueue(DiskRequest* curRequest, int unit) {
-    //DiskRequest* queue = diskQueues[unit];
-    if (!diskQueues[unit]) {
-        diskQueues[unit] = curRequest;
-        curReqs[unit] = curRequest;
+    if (!curRequests[unit]) { 
+        curRequests[unit] = curRequest;
+    }
+    else if (curRequest->currentTask == USLOSS_DISK_TRACKS) {
+        curRequest->nextRequest = curRequests[unit]->nextRequest;
+        curRequests[unit]->nextRequest = curRequest;
+    }
+    else if (curRequest->currentTrack < curRequests[unit]->currentTrack) {
+        if (!nextRequests[unit]) { 
+            nextRequests[unit] = curRequest; 
+        }
+        else {
+            if (curRequest->currentTrack <= nextRequests[unit]->currentTrack) {
+                curRequest->nextRequest = nextRequests[unit]->currentTrack;
+                nextRequests[unit] = curRequest;
+            }
+            else {
+                DiskRequest* temp = nextRequests[unit];
+                DiskRequest* prev = NULL;
+                while (temp && curRequest->currentTrack > temp->currentTrack) {
+                    prev = temp;
+                    temp = temp->nextRequest;
+                }
+                prev->nextRequest = curRequest;
+                curRequest->nextRequest = temp;
+            }
+        }
     }
     else {
-        DiskRequest* cur = diskQueues[unit];
-        while (cur->nextRequest && cur->currentTrack < curRequest->currentTrack) {
-            cur = cur->nextRequest;
+        if (curRequest->currentTrack == curRequests[unit]->currentTrack) {
+            curRequest->nextRequest = curRequests[unit]->nextRequest;
+            curRequests[unit]->nextRequest = curRequest;
         }
-        cur->nextRequest = curRequest;
-        // its onyl track based thats actually so much easier
+        else {
+            DiskRequest* temp = curRequests[unit];
+            DiskRequest* prev = NULL;
+            while (temp && curRequest->currentTrack > temp->currentTrack) {
+                prev = temp;
+                temp = temp->nextRequest;
+            }
+            prev->nextRequest = curRequest;
+            curRequest->nextRequest = temp;
+        }
     }
-    //printQueues();
+    //printQueues(unit);
 }
 
-void printQueues() {
-    for (int i = 0; i < USLOSS_DISK_UNITS; i++) {
-        DiskRequest* cur = diskQueues[i];
-        printf("\n");
-        printf("disk %d\n", i);
-        printf("cur = %p\n", cur);
-        while (cur) {
-            printf("current task:             %d\n", cur->currentTask);
-            printf("current track:            %d\n", cur->currentTrack);
-            printf("current sector:           %d\n", cur->currentSector);
-            printf("current process:          %d\n", cur->process);
-            printf("current requestRemaining: %d\n", cur->requests);
-            printf("current sectorOffset:     %d\n", cur->sectorOffset);
-            printf("->");
-            cur = cur->nextRequest;
-        }
-        printf("\n");
+void printQueues(int unit) {
+    print("current queues for %d\n", unit);
+    DiskRequest* cur = curRequests[unit];
+    while (cur) {
+        print("this one\n");
+        print("cur task: %d\n", cur->currentTask);
+        print("cur proc: %d\n", cur->process);
+        print("sectors : %d\n", cur->requests);
+        print("%p\n", cur->nextRequest);
+        cur = cur->nextRequest;
+    }
+
+    print("AFTER THIS\n");
+
+    print("next queues for %d\n", unit);
+    cur = nextRequests[unit];
+    while (cur) {
+        print("that one\n");
+        print("cur task: %d\n", cur->currentTask);
+        print("cur proc: %d\n", cur->process);
+        print("sectors : %d\n", cur->requests);
+        cur = cur->nextRequest;
     }
 }
 /*
@@ -598,13 +641,11 @@ int diskDaemonMain(char* args) {
         waitDevice(USLOSS_DISK_DEV, unit, &status);
         disk->status = status;
         if (status == USLOSS_DEV_READY) {
-            unblockProc(curReqs[unit]->process);
+            unblockProc(curRequests[unit]->process);
         }
-        else if (status == USLOSS_DEV_BUSY) {
-            unblockProc(curReqs[unit]->process);
-        }
+        else if (status == USLOSS_DEV_BUSY) {}
         else if (status == USLOSS_DEV_ERROR) {
-            unblockProc(curReqs[unit]->process);
+            unblockProc(curRequests[unit]->process);
             // wake up process and return the status
         }
     }

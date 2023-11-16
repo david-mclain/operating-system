@@ -10,9 +10,21 @@ going to write track 7
 going to write track 2
 going to write track 1
 going to write track 6
+after writing track 0
+process 16 quit with status 5
+after writing track 1
+process 19 quit with status 8
+after writing track 2
+process 18 quit with status 7
+after writing track 3
+process 14 quit with status 3
 after writing track 5
 process 13 quit with status 2
 after writing track 6
 process 20 quit with status 9
-TESTCASE TIMED OUT!!!
+after writing track 7
+process 17 quit with status 6
+after writing track 9
+process 15 quit with status 4
+start4(): done 33
 finish(): The simulation is now terminating.
