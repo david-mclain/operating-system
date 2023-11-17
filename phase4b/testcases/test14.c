@@ -27,6 +27,7 @@ int k1(char *arg)
     ubiq(0);
     ubiq(5);
     ubiq(0); 
+    USLOSS_Console("************************k1\n");
     Terminate(2);
 }
 
@@ -39,6 +40,7 @@ int k2(char *arg)
     ubiq(1);
     ubiq(6);
     ubiq(1);
+    USLOSS_Console("************************k2\n");
     Terminate(3);
 }
 
@@ -51,6 +53,7 @@ int k3(char *arg)
     ubiq(2);
     ubiq(7);
     ubiq(2);
+    USLOSS_Console("************************k3\n");
     Terminate(4);
 }
 
@@ -63,6 +66,7 @@ int k4(char *arg)
     ubiq(3);
     ubiq(8);
     ubiq(3);
+    USLOSS_Console("************************k4\n");
     Terminate(5);
 }
 

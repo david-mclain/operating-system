@@ -124,8 +124,6 @@ DiskRequest diskRequests[USLOSS_DISK_UNITS][MAXPROC];
 DiskRequest* curRequests[USLOSS_DISK_UNITS];
 DiskRequest* nextRequests[USLOSS_DISK_UNITS];
 
-DiskRequest* diskQueues[USLOSS_DISK_UNITS];
-DiskRequest* curReqs[USLOSS_DISK_UNITS];
 // just use mailboxes lol
 // kate was here :)
 
@@ -171,9 +169,8 @@ DiskRequest* curReqs[USLOSS_DISK_UNITS];
 void phase4_init(void) {
     memset(sleepHeap, 0, sizeof(sleepHeap));
     memset(disks, 0, sizeof(disks));
-    memset(diskQueues, 0, sizeof(diskQueues));
-    memset(curRequests, 0, sizeof(diskQueues));
-    memset(nextRequests, 0, sizeof(diskQueues));
+    memset(curRequests, 0, sizeof(curRequests));
+    memset(nextRequests, 0, sizeof(nextRequests));
 
     // setup ipc stuff for the terminal driver
     for (int i = 0; i < USLOSS_TERM_UNITS; i++) {
@@ -260,18 +257,6 @@ int kernSleep(int seconds) {
     return 0;
 }
 
-void removeFromRequestQueue(DiskRequest* curRequest, int unit) {
-    if (curRequest->nextRequest) { 
-        curRequest->nextRequest->prevRequest = curRequest->prevRequest;
-    }
-    if (curRequest->prevRequest) { 
-        curRequest->prevRequest->nextRequest = curRequest->nextRequest;
-    }
-    if (curRequest == diskQueues[unit]) { 
-        diskQueues[unit] = curRequest->nextRequest;
-    }
-}
-
 void kernelDiskSize(USLOSS_Sysargs* args) {
     int unit = (int)(long)args->arg1;
     if (unit < 0 || unit > 1) {
@@ -284,18 +269,17 @@ void kernelDiskSize(USLOSS_Sysargs* args) {
     if (!disk->tracks) {
         int pid = getpid();
         DiskRequest* curRequest = &diskRequests[pid % MAXPROC];
-        fillRequest(curRequest, USLOSS_DISK_TRACKS, 0, 0, pid, 0);
+        fillRequest(curRequest, USLOSS_DISK_TRACKS, -1, 0, pid, 0);
         addToRequestQueue(curRequest, unit);
         if (curRequests[unit] != curRequest) {
             blockMe(AWAITING_DISK);
         }
-
-        // THE COOKING BEGINS
-        disk->request.opr = USLOSS_DISK_TRACKS;
-        disk->request.reg1 = (void*)&disk->tracks;
-        USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
-        blockMe(AWAITING_DISK);
-
+        if (!disk->tracks) {
+            disk->request.opr = USLOSS_DISK_TRACKS;
+            disk->request.reg1 = (void*)&disk->tracks;
+            USLOSS_DeviceOutput(USLOSS_DISK_DEV, unit, &(disk->request));
+            blockMe(AWAITING_DISK);
+        }
     }
     args->arg1 = SECTOR_SIZE;
     args->arg2 = BLOCKS_PER_TRACK;
@@ -448,22 +432,31 @@ void addToRequestQueue(DiskRequest* curRequest, int unit) {
         curRequests[unit] = curRequest;
     }
     else if (curRequest->currentTask == USLOSS_DISK_TRACKS) {
-        curRequest->nextRequest = curRequests[unit]->nextRequest;
-        curRequests[unit]->nextRequest = curRequest;
+        DiskRequest* temp = curRequests[unit];
+        DiskRequest* prev = NULL;
+        while (temp && curRequest->currentTrack >= temp->currentTrack) {
+            prev = temp;
+            temp = temp->nextRequest;
+        }
+        prev->nextRequest = curRequest;
+        curRequest->nextRequest = temp;
+        
+        //curRequest->nextRequest = curRequests[unit]->nextRequest;
+        //curRequests[unit]->nextRequest = curRequest;
     }
     else if (curRequest->currentTrack < curRequests[unit]->currentTrack) {
         if (!nextRequests[unit]) { 
             nextRequests[unit] = curRequest; 
         }
         else {
-            if (curRequest->currentTrack <= nextRequests[unit]->currentTrack) {
+            if (curRequest->currentTrack < nextRequests[unit]->currentTrack) {
                 curRequest->nextRequest = nextRequests[unit]->currentTrack;
                 nextRequests[unit] = curRequest;
             }
             else {
                 DiskRequest* temp = nextRequests[unit];
                 DiskRequest* prev = NULL;
-                while (temp && curRequest->currentTrack > temp->currentTrack) {
+                while (temp && curRequest->currentTrack >= temp->currentTrack) {
                     prev = temp;
                     temp = temp->nextRequest;
                 }
@@ -473,47 +466,33 @@ void addToRequestQueue(DiskRequest* curRequest, int unit) {
         }
     }
     else {
-        if (curRequest->currentTrack == curRequests[unit]->currentTrack) {
-            curRequest->nextRequest = curRequests[unit]->nextRequest;
-            curRequests[unit]->nextRequest = curRequest;
+        DiskRequest* temp = curRequests[unit];
+        DiskRequest* prev = NULL;
+        while (temp && curRequest->currentTrack >= temp->currentTrack) {
+            prev = temp;
+            temp = temp->nextRequest;
         }
-        else {
-            DiskRequest* temp = curRequests[unit];
-            DiskRequest* prev = NULL;
-            while (temp && curRequest->currentTrack > temp->currentTrack) {
-                prev = temp;
-                temp = temp->nextRequest;
-            }
-            prev->nextRequest = curRequest;
-            curRequest->nextRequest = temp;
-        }
+        prev->nextRequest = curRequest;
+        curRequest->nextRequest = temp;
     }
-    //printQueues(unit);
 }
 
 void printQueues(int unit) {
     print("current queues for %d\n", unit);
     DiskRequest* cur = curRequests[unit];
     while (cur) {
-        print("this one\n");
-        print("cur task: %d\n", cur->currentTask);
-        print("cur proc: %d\n", cur->process);
-        print("sectors : %d\n", cur->requests);
-        print("%p\n", cur->nextRequest);
+        print("task: %d; track: %d; process: %d ->", cur->currentTask, cur->currentTrack, cur->process);
         cur = cur->nextRequest;
     }
-
-    print("AFTER THIS\n");
+    print("NULL\n");
 
     print("next queues for %d\n", unit);
     cur = nextRequests[unit];
     while (cur) {
-        print("that one\n");
-        print("cur task: %d\n", cur->currentTask);
-        print("cur proc: %d\n", cur->process);
-        print("sectors : %d\n", cur->requests);
+        print("task: %d; track: %d; process: %d ->", cur->currentTask, cur->currentTrack, cur->process);
         cur = cur->nextRequest;
     }
+    print("NULL\n");
 }
 /*
 typedef struct DiskRequest {
